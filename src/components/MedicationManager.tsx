@@ -1,44 +1,14 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Pill, Clock, AlertTriangle, Camera, Plus, Bell, CheckCircle, XCircle, Scan, Phone, ShoppingCart, Heart, Video, Mic } from 'lucide-react';
+import { Pill, AlertTriangle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-
-interface Allergy {
-  id: string;
-  allergen: string;
-  severity: 'mild' | 'moderate' | 'severe';
-  symptoms: string[];
-  medications: string[];
-}
-
-interface Medication {
-  id: string;
-  name: string;
-  dosage: string;
-  frequency: string;
-  times: string[];
-  maxDaily: number;
-  currentDaily: number;
-  instructions: string;
-  sideEffects: string[];
-  ingredients: string[];
-  prescribedBy: string;
-  startDate: Date;
-  endDate?: Date;
-  nextDue: Date;
-  isActive: boolean;
-  isGPApproved: boolean;
-  canReorder: boolean;
-  pharmacy: string;
-  stockLevel: number;
-}
+import { Medication, Allergy } from './medication/types';
+import { checkAllergyConflict } from './medication/utils';
+import AddMedicationDialog from './medication/AddMedicationDialog';
+import AllergiesSection from './medication/AllergiesSection';
+import MedicationCard from './medication/MedicationCard';
+import ActionButtons from './medication/ActionButtons';
 
 const MedicationManager = () => {
   const [medications, setMedications] = useState<Medication[]>([
@@ -125,11 +95,7 @@ const MedicationManager = () => {
         }
 
         // Check allergies before taking medication
-        const allergyConflict = allergies.find(allergy => 
-          med.ingredients.some(ingredient => 
-            ingredient.toLowerCase().includes(allergy.allergen.toLowerCase())
-          )
-        );
+        const allergyConflict = checkAllergyConflict(med, allergies);
 
         if (allergyConflict) {
           toast({
@@ -190,6 +156,15 @@ const MedicationManager = () => {
         duration: 8000,
       });
     }, 3000);
+  };
+
+  const callPharmacy = (pharmacy: string) => {
+    window.location.href = `tel:${pharmacy}`;
+    toast({
+      title: "Calling Pharmacy",
+      description: `Calling ${pharmacy}...`,
+      duration: 3000,
+    });
   };
 
   const takePhoto = () => {
@@ -318,22 +293,6 @@ const MedicationManager = () => {
     });
   };
 
-  const getDosageStatus = (med: Medication) => {
-    const ratio = med.currentDaily / med.maxDaily;
-    if (ratio >= 1) return { color: 'bg-red-100 text-red-800', text: 'Limit Reached' };
-    if (ratio >= 0.8) return { color: 'bg-yellow-100 text-yellow-800', text: 'Near Limit' };
-    return { color: 'bg-green-100 text-green-800', text: 'Safe' };
-  };
-
-  const getSeverityColor = (severity: string) => {
-    switch (severity) {
-      case 'severe': return 'bg-red-100 text-red-800';
-      case 'moderate': return 'bg-yellow-100 text-yellow-800';
-      case 'mild': return 'bg-green-100 text-green-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
-
   return (
     <Card className="bg-white/80 backdrop-blur-sm border-purple-200 shadow-lg">
       <CardHeader>
@@ -347,341 +306,46 @@ const MedicationManager = () => {
               Smart medication tracking with allergy monitoring and pharmacy integration
             </CardDescription>
           </div>
-          <div className="flex gap-2">
-            <Button
-              onClick={takePhoto}
-              variant="outline"
-              className="border-blue-500 text-blue-700"
-              disabled={isTakingPhoto}
-              size="sm"
-            >
-              {isTakingPhoto ? (
-                <>
-                  <Camera className="w-3 h-3 mr-1 animate-pulse" />
-                  Taking...
-                </>
-              ) : (
-                <>
-                  <Camera className="w-3 h-3 mr-1" />
-                  Photo
-                </>
-              )}
-            </Button>
-            <Button
-              onClick={startRecording}
-              variant="outline"
-              className="border-red-500 text-red-700"
-              disabled={isRecording}
-              size="sm"
-            >
-              {isRecording ? (
-                <>
-                  <Mic className="w-3 h-3 mr-1 animate-pulse" />
-                  Recording...
-                </>
-              ) : (
-                <>
-                  <Video className="w-3 h-3 mr-1" />
-                  Record
-                </>
-              )}
-            </Button>
-            <Button
-              onClick={scanMedication}
-              variant="outline"
-              className="border-purple-500 text-purple-700"
-              disabled={isScanning}
-              size="sm"
-            >
-              {isScanning ? (
-                <>
-                  <Scan className="w-3 h-3 mr-1 animate-pulse" />
-                  Scanning...
-                </>
-              ) : (
-                <>
-                  <Scan className="w-3 h-3 mr-1" />
-                  Scan
-                </>
-              )}
-            </Button>
-          </div>
+          <ActionButtons
+            onTakePhoto={takePhoto}
+            onStartRecording={startRecording}
+            onScanMedication={scanMedication}
+            isTakingPhoto={isTakingPhoto}
+            isRecording={isRecording}
+            isScanning={isScanning}
+          />
         </div>
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Allergies Section */}
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="font-semibold text-red-800 flex items-center gap-2">
-              <Heart className="w-4 h-4" />
-              Known Allergies
-            </h3>
-            <Dialog open={isAddingAllergy} onOpenChange={setIsAddingAllergy}>
-              <DialogTrigger asChild>
-                <Button size="sm" variant="outline" className="border-red-500 text-red-700">
-                  <Plus className="w-3 h-3 mr-1" />
-                  Add Allergy
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-md">
-                <DialogHeader>
-                  <DialogTitle>Add Allergy</DialogTitle>
-                </DialogHeader>
-                <div className="space-y-4">
-                  <div>
-                    <Label htmlFor="allergen">Allergen *</Label>
-                    <Input
-                      id="allergen"
-                      value={newAllergy.allergen || ''}
-                      onChange={(e) => setNewAllergy({...newAllergy, allergen: e.target.value})}
-                      placeholder="e.g., Penicillin, Nuts, Shellfish"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="severity">Severity *</Label>
-                    <Select value={newAllergy.severity} onValueChange={(value) => setNewAllergy({...newAllergy, severity: value as any})}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select severity" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="mild">Mild</SelectItem>
-                        <SelectItem value="moderate">Moderate</SelectItem>
-                        <SelectItem value="severe">Severe</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <Label htmlFor="symptoms">Symptoms</Label>
-                    <Textarea
-                      id="symptoms"
-                      value={newAllergy.symptoms?.join(', ') || ''}
-                      onChange={(e) => setNewAllergy({...newAllergy, symptoms: e.target.value.split(', ').filter(s => s.trim())})}
-                      placeholder="Describe symptoms separated by commas"
-                    />
-                  </div>
-                  <Button onClick={addAllergy} className="w-full bg-red-600 hover:bg-red-700">
-                    Add Allergy
-                  </Button>
-                </div>
-              </DialogContent>
-            </Dialog>
-          </div>
-          
-          {allergies.length > 0 ? (
-            <div className="space-y-2">
-              {allergies.map((allergy) => (
-                <div key={allergy.id} className="bg-white border border-red-200 rounded p-3">
-                  <div className="flex items-center justify-between mb-2">
-                    <h4 className="font-medium text-red-800">{allergy.allergen}</h4>
-                    <Badge className={getSeverityColor(allergy.severity)}>
-                      {allergy.severity}
-                    </Badge>
-                  </div>
-                  {allergy.symptoms.length > 0 && (
-                    <p className="text-red-700 text-sm">
-                      <strong>Symptoms:</strong> {allergy.symptoms.join(', ')}
-                    </p>
-                  )}
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-red-600 text-sm">No allergies recorded</p>
-          )}
-        </div>
+        <AllergiesSection
+          allergies={allergies}
+          isAddingAllergy={isAddingAllergy}
+          onAddingAllergyChange={setIsAddingAllergy}
+          newAllergy={newAllergy}
+          setNewAllergy={setNewAllergy}
+          onAddAllergy={addAllergy}
+        />
 
         {/* Add Medication Dialog */}
-        <Dialog open={isAddingMed} onOpenChange={setIsAddingMed}>
-          <DialogTrigger asChild>
-            <Button className="bg-purple-600 hover:bg-purple-700">
-              <Plus className="w-4 h-4 mr-2" />
-              Add Medication
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-md max-h-[80vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>Add Medication</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="name">Medication Name *</Label>
-                <Input
-                  id="name"
-                  value={newMed.name || ''}
-                  onChange={(e) => setNewMed({...newMed, name: e.target.value})}
-                />
-              </div>
-              <div>
-                <Label htmlFor="dosage">Dosage *</Label>
-                <Input
-                  id="dosage"
-                  value={newMed.dosage || ''}
-                  onChange={(e) => setNewMed({...newMed, dosage: e.target.value})}
-                  placeholder="e.g., 50mg, 1 tablet"
-                />
-              </div>
-              <div>
-                <Label htmlFor="frequency">Frequency *</Label>
-                <Select value={newMed.frequency} onValueChange={(value) => setNewMed({...newMed, frequency: value})}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="How often?" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Once daily">Once daily</SelectItem>
-                    <SelectItem value="Twice daily">Twice daily</SelectItem>
-                    <SelectItem value="Three times daily">Three times daily</SelectItem>
-                    <SelectItem value="Four times daily">Four times daily</SelectItem>
-                    <SelectItem value="As needed">As needed</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label htmlFor="pharmacy">Pharmacy</Label>
-                <Input
-                  id="pharmacy"
-                  value={newMed.pharmacy || ''}
-                  onChange={(e) => setNewMed({...newMed, pharmacy: e.target.value})}
-                  placeholder="Preferred pharmacy"
-                />
-              </div>
-              <div>
-                <Label htmlFor="stockLevel">Current Stock</Label>
-                <Input
-                  id="stockLevel"
-                  type="number"
-                  value={newMed.stockLevel || 0}
-                  onChange={(e) => setNewMed({...newMed, stockLevel: parseInt(e.target.value)})}
-                />
-              </div>
-              <div className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  id="gpApproved"
-                  checked={newMed.isGPApproved || false}
-                  onChange={(e) => setNewMed({...newMed, isGPApproved: e.target.checked})}
-                />
-                <Label htmlFor="gpApproved">GP Pre-approved for reorder</Label>
-              </div>
-              <Button onClick={addMedication} className="w-full">
-                Add Medication
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
+        <AddMedicationDialog
+          isOpen={isAddingMed}
+          onOpenChange={setIsAddingMed}
+          newMed={newMed}
+          setNewMed={setNewMed}
+          onAddMedication={addMedication}
+        />
 
         {/* Medications List */}
-        {medications.map((med) => {
-          const dosageStatus = getDosageStatus(med);
-          const isOverdue = new Date() > med.nextDue && med.currentDaily < med.maxDaily;
-          const isLowStock = med.stockLevel <= 3;
-          
-          return (
-            <div key={med.id} className="border border-gray-200 rounded-lg p-4">
-              <div className="flex items-start justify-between mb-3">
-                <div>
-                  <h3 className="font-semibold text-gray-800">{med.name}</h3>
-                  <p className="text-sm text-gray-600">{med.dosage} - {med.frequency}</p>
-                  <p className="text-xs text-gray-500">Stock: {med.stockLevel} remaining</p>
-                  {med.pharmacy && (
-                    <p className="text-xs text-blue-600">Pharmacy: {med.pharmacy}</p>
-                  )}
-                </div>
-                <div className="flex gap-2 flex-wrap">
-                  <Badge className={dosageStatus.color}>
-                    {dosageStatus.text}
-                  </Badge>
-                  {med.isGPApproved && (
-                    <Badge className="bg-green-100 text-green-800">
-                      GP Approved
-                    </Badge>
-                  )}
-                  {isLowStock && (
-                    <Badge className="bg-orange-100 text-orange-800">
-                      Low Stock
-                    </Badge>
-                  )}
-                  {isOverdue && (
-                    <Badge className="bg-red-100 text-red-800">
-                      <Clock className="w-3 h-3 mr-1" />
-                      Due
-                    </Badge>
-                  )}
-                </div>
-              </div>
-
-              {/* Progress Bar */}
-              <div className="mb-3">
-                <div className="flex items-center justify-between text-sm">
-                  <span>Daily Progress: {med.currentDaily}/{med.maxDaily}</span>
-                  <span className="text-gray-500">
-                    Next: {med.nextDue.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})}
-                  </span>
-                </div>
-                <div className="w-full bg-gray-200 rounded-full h-2 mt-1">
-                  <div 
-                    className={`h-2 rounded-full ${med.currentDaily >= med.maxDaily ? 'bg-red-500' : 'bg-green-500'}`}
-                    style={{width: `${Math.min((med.currentDaily / med.maxDaily) * 100, 100)}%`}}
-                  />
-                </div>
-              </div>
-
-              <div className="flex gap-2 mb-3 flex-wrap">
-                <Button
-                  onClick={() => takeMedication(med.id)}
-                  disabled={med.currentDaily >= med.maxDaily}
-                  className="bg-green-600 hover:bg-green-700 text-white"
-                  size="sm"
-                >
-                  <CheckCircle className="w-3 h-3 mr-1" />
-                  Take Now
-                </Button>
-                {med.canReorder && (
-                  <Button
-                    onClick={() => reorderMedication(med.id)}
-                    variant="outline"
-                    size="sm"
-                    className="border-blue-500 text-blue-700"
-                  >
-                    <ShoppingCart className="w-3 h-3 mr-1" />
-                    Reorder
-                  </Button>
-                )}
-                {med.pharmacy && (
-                  <Button
-                    onClick={() => {
-                      window.location.href = `tel:${med.pharmacy}`;
-                      toast({
-                        title: "Calling Pharmacy",
-                        description: `Calling ${med.pharmacy}...`,
-                        duration: 3000,
-                      });
-                    }}
-                    variant="outline"
-                    size="sm"
-                    className="border-purple-500 text-purple-700"
-                  >
-                    <Phone className="w-3 h-3 mr-1" />
-                    Call Pharmacy
-                  </Button>
-                )}
-              </div>
-
-              {/* Instructions and Side Effects */}
-              {med.instructions && (
-                <div className="bg-blue-50 border border-blue-200 rounded p-2 mb-2">
-                  <p className="text-blue-800 text-sm">{med.instructions}</p>
-                </div>
-              )}
-
-              {med.sideEffects.length > 0 && (
-                <div className="text-xs text-gray-500">
-                  <span className="font-medium">Side effects: </span>
-                  {med.sideEffects.join(', ')}
-                </div>
-              )}
-            </div>
-          );
-        })}
+        {medications.map((med) => (
+          <MedicationCard
+            key={med.id}
+            medication={med}
+            onTakeMedication={takeMedication}
+            onReorderMedication={reorderMedication}
+            onCallPharmacy={callPharmacy}
+          />
+        ))}
 
         {/* Empty State */}
         {medications.length === 0 && (
