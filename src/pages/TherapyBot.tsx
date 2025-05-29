@@ -135,6 +135,24 @@ const TherapyBot = () => {
     }
   };
 
+  // Determine mood for voice response based on context
+  const determineVoiceMood = (userMessage: string, botResponse: string): 'calm' | 'empathetic' | 'thinking' | 'agreeing' => {
+    const userLower = userMessage.toLowerCase();
+    const botLower = botResponse.toLowerCase();
+    
+    if (userLower.includes('sad') || userLower.includes('hurt') || userLower.includes('pain')) {
+      return 'empathetic';
+    } else if (userLower.includes('anxious') || userLower.includes('worried') || userLower.includes('stressed')) {
+      return 'calm';
+    } else if (botLower.includes('let\'s think') || botLower.includes('explore') || botLower.includes('consider')) {
+      return 'thinking';
+    } else if (botLower.includes('that\'s right') || botLower.includes('exactly') || botLower.includes('good point')) {
+      return 'agreeing';
+    } else {
+      return 'empathetic';
+    }
+  };
+
   const sendMessage = async () => {
     if (!currentMessage.trim()) return;
 
@@ -148,6 +166,7 @@ const TherapyBot = () => {
 
     setMessages(prev => [...prev, userMessage]);
     updateAvatarEmotion(currentMessage, true);
+    const messageToClear = currentMessage;
     setCurrentMessage('');
     clearTranscript();
     setIsTyping(true);
@@ -159,7 +178,7 @@ const TherapyBot = () => {
 
     // Simulate bot response
     setTimeout(async () => {
-      const botResponse = await generateBotResponse(currentMessage, therapyType, voiceTone.tone, selectedAvatar);
+      const botResponse = await generateBotResponse(messageToClear, therapyType, voiceTone.tone, selectedAvatar);
       const botMessage: Message = {
         id: crypto.randomUUID(),
         type: 'bot',
@@ -171,9 +190,10 @@ const TherapyBot = () => {
       updateAvatarEmotion(botResponse, false);
       setIsTyping(false);
 
-      // Use accent-aware speech if voice output is enabled
+      // Use enhanced accent-aware speech with mood context
       if (voiceSettings.enabled && voiceSettings.voiceOutput && selectedAvatar) {
-        speakWithAccent(botResponse, selectedAvatar.ethnicity, selectedAvatar.personality);
+        const mood = determineVoiceMood(messageToClear, botResponse);
+        speakWithAccent(botResponse, selectedAvatar.ethnicity, selectedAvatar.personality, mood);
       }
     }, 1500);
   };
