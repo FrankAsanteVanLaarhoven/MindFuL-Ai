@@ -4,8 +4,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { Users, MessageCircle, Calendar, Trophy, Heart, Plus, ExternalLink, Clock, UserCheck, Sparkles } from 'lucide-react';
+import { Users, MessageCircle, Calendar, Trophy, Heart, Plus, ExternalLink, Clock, UserCheck, Sparkles, Podcast } from 'lucide-react';
 import { EngagementSection } from '@/components/community/EngagementSection';
+import PodcastIntegration from '@/components/PodcastIntegration';
 
 const Community = () => {
   const [activeTab, setActiveTab] = useState('forums');
@@ -152,6 +153,14 @@ const Community = () => {
               >
                 <Users className="w-4 h-4" />
                 Live Support Groups
+              </Button>
+              <Button
+                variant={activeTab === 'podcasts' ? 'default' : 'ghost'}
+                onClick={() => setActiveTab('podcasts')}
+                className="flex items-center gap-2"
+              >
+                <Podcast className="w-4 h-4" />
+                Podcasts
               </Button>
               <Button
                 variant={activeTab === 'engagement' ? 'default' : 'ghost'}
@@ -377,7 +386,10 @@ const Community = () => {
           </div>
         )}
 
-        {/* New Engagement Tab */}
+        {/* New Podcasts Tab */}
+        {activeTab === 'podcasts' && <PodcastIntegration />}
+
+        {/* Engagement Tab */}
         {activeTab === 'engagement' && <EngagementSection />}
       </div>
     </div>
