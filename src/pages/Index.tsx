@@ -92,6 +92,12 @@ const Index = () => {
                   {feature.icon} {feature.title}
                 </button>
               ))}
+              <button
+                onClick={() => navigate('/wellness-dashboard')}
+                className="text-gray-600 hover:text-teal-600 transition-colors duration-200 text-sm font-medium"
+              >
+                📊 Dashboard
+              </button>
             </div>
           </div>
         </div>
