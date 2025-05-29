@@ -12,7 +12,7 @@ import Localization from '@/components/Localization';
 import Weather from '@/components/Weather';
 import WorldClock from '@/components/WorldClock';
 import InstantTranslation from '@/components/InstantTranslation';
-import { BarChart3, Target, AlertTriangle, TrendingUp, Podcast, Smartphone, Globe, CloudSun, Clock, Translate } from 'lucide-react';
+import { BarChart3, Target, AlertTriangle, TrendingUp, Podcast, Smartphone, Globe, CloudSun, Clock, Languages } from 'lucide-react';
 
 const WellnessDashboard = () => {
   return (
@@ -64,7 +64,7 @@ const WellnessDashboard = () => {
               <span className="hidden sm:inline">Clock</span>
             </TabsTrigger>
             <TabsTrigger value="translation" className="flex items-center gap-2">
-              <Translate className="w-4 h-4" />
+              <Languages className="w-4 h-4" />
               <span className="hidden sm:inline">Translate</span>
             </TabsTrigger>
           </TabsList>

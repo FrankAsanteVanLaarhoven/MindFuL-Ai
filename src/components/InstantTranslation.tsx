@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Translate, RefreshCw, Copy } from 'lucide-react';
+import { Languages, RefreshCw, Copy } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface Language {
@@ -168,7 +168,7 @@ const InstantTranslation = () => {
     <Card className="bg-white/80 backdrop-blur-sm border-green-200 shadow-lg">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-green-800">
-          <Translate className="w-5 h-5" />
+          <Languages className="w-5 h-5" />
           Instant Translation
         </CardTitle>
         <CardDescription>
@@ -266,7 +266,7 @@ const InstantTranslation = () => {
             </>
           ) : (
             <>
-              <Translate className="w-4 h-4 mr-2" />
+              <Languages className="w-4 h-4 mr-2" />
               Translate
             </>
           )}
