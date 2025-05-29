@@ -3,7 +3,6 @@
 
 import React, { useRef, useEffect, useState } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { Sphere, MeshDistortMaterial, Environment, Float } from '@react-three/drei';
 import { motion } from 'framer-motion';
 import * as THREE from 'three';
 
@@ -70,20 +69,16 @@ const AnimatedSphere = ({ technique, isActive, currentPhase }: {
   });
 
   return (
-    <Float speed={1.5} rotationIntensity={0.5} floatIntensity={0.5}>
-      <Sphere ref={meshRef} args={[1, 64, 64]} position={[0, 0, 0]}>
-        <MeshDistortMaterial
-          color={targetColor}
-          attach="material"
-          distort={0.3}
-          speed={2}
-          roughness={0.2}
-          metalness={0.1}
-          transparent
-          opacity={0.8}
-        />
-      </Sphere>
-    </Float>
+    <mesh ref={meshRef} position={[0, 0, 0]}>
+      <sphereGeometry args={[1, 64, 64]} />
+      <meshStandardMaterial
+        color={targetColor}
+        transparent
+        opacity={0.8}
+        roughness={0.2}
+        metalness={0.1}
+      />
+    </mesh>
   );
 };
 
@@ -113,9 +108,7 @@ const ParticleField = ({ isActive }: { isActive: boolean }) => {
       <bufferGeometry>
         <bufferAttribute
           attach="attributes-position"
-          count={particleCount}
-          array={positions}
-          itemSize={3}
+          args={[positions, 3]}
         />
       </bufferGeometry>
       <pointsMaterial
@@ -157,8 +150,6 @@ const BreathingSphere3D: React.FC<BreathingSphere3DProps> = ({
         />
         
         <ParticleField isActive={isActive} />
-        
-        <Environment preset="night" />
       </Canvas>
     </motion.div>
   );
