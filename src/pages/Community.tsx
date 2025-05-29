@@ -1,11 +1,11 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { Users, MessageCircle, Calendar, Trophy, Heart, Plus, ExternalLink, Clock, UserCheck } from 'lucide-react';
+import { Users, MessageCircle, Calendar, Trophy, Heart, Plus, ExternalLink, Clock, UserCheck, Sparkles } from 'lucide-react';
+import { EngagementSection } from '@/components/community/EngagementSection';
 
 const Community = () => {
   const [activeTab, setActiveTab] = useState('forums');
@@ -152,6 +152,14 @@ const Community = () => {
               >
                 <Users className="w-4 h-4" />
                 Live Support Groups
+              </Button>
+              <Button
+                variant={activeTab === 'engagement' ? 'default' : 'ghost'}
+                onClick={() => setActiveTab('engagement')}
+                className="flex items-center gap-2"
+              >
+                <Sparkles className="w-4 h-4" />
+                Engagement
               </Button>
             </div>
           </div>
@@ -368,6 +376,9 @@ const Community = () => {
             </Card>
           </div>
         )}
+
+        {/* New Engagement Tab */}
+        {activeTab === 'engagement' && <EngagementSection />}
       </div>
     </div>
   );
