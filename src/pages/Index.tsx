@@ -1,10 +1,10 @@
-
 "use client";
 
 import React, { useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import CurrentMoodSummary from '@/components/dashboard/current-mood-summary';
+import RealTimeMoodChart from '@/components/dashboard/real-time-mood-chart';
 import { gsap } from 'gsap';
 import { useNavigate } from 'react-router-dom';
 
@@ -115,24 +115,9 @@ const Index = () => {
             <CurrentMoodSummary />
           </div>
 
-          {/* Mood Trends - Takes up 2 columns */}
+          {/* Real-time Mood Chart - Takes up 2 columns */}
           <div ref={el => { if (el) cardsRef.current[1] = el; }} className="lg:col-span-2">
-            <Card className="bg-white/80 backdrop-blur-sm border-teal-200 shadow-lg h-full">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-teal-800">
-                  <span className="text-2xl">📊</span>
-                  Mood Trends
-                </CardTitle>
-                <CardDescription>Your mood fluctuations based on logged entries (last 7 distinct days with logs).</CardDescription>
-              </CardHeader>
-              <CardContent className="flex items-center justify-center h-64">
-                <div className="text-center text-gray-500">
-                  <div className="text-4xl mb-4">📈</div>
-                  <p>Mood trends chart will appear here</p>
-                  <p className="text-sm mt-2">Log more moods to see patterns!</p>
-                </div>
-              </CardContent>
-            </Card>
+            <RealTimeMoodChart />
           </div>
         </div>
 
