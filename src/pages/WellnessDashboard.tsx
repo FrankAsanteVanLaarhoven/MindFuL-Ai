@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -16,7 +17,8 @@ import PanicButton from '@/components/PanicButton';
 import MedicationManager from '@/components/MedicationManager';
 import EmergencyServices from '@/components/EmergencyServices';
 import CareMarketplace from '@/components/CareMarketplace';
-import { BarChart3, Target, AlertTriangle, TrendingUp, Podcast, Smartphone, Globe, CloudSun, Clock, Languages, Users, Shield, Pill, Phone, Heart } from 'lucide-react';
+import TodoList from '@/components/TodoList';
+import { BarChart3, Target, AlertTriangle, TrendingUp, Podcast, Smartphone, Globe, CloudSun, Clock, Languages, Users, Shield, Pill, Phone, Heart, CheckSquare } from 'lucide-react';
 
 const WellnessDashboard = () => {
   return (
@@ -30,7 +32,7 @@ const WellnessDashboard = () => {
         </div>
 
         <Tabs defaultValue="analytics" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-15 lg:w-auto lg:grid-cols-15">
+          <TabsList className="grid w-full grid-cols-16 lg:w-auto lg:grid-cols-16">
             <TabsTrigger value="analytics" className="flex items-center gap-2">
               <BarChart3 className="w-4 h-4" />
               <span className="hidden sm:inline">Analytics</span>
@@ -38,6 +40,10 @@ const WellnessDashboard = () => {
             <TabsTrigger value="goals" className="flex items-center gap-2">
               <Target className="w-4 h-4" />
               <span className="hidden sm:inline">Goals</span>
+            </TabsTrigger>
+            <TabsTrigger value="todo" className="flex items-center gap-2">
+              <CheckSquare className="w-4 h-4" />
+              <span className="hidden sm:inline">To-Do</span>
             </TabsTrigger>
             <TabsTrigger value="mood-tracking" className="flex items-center gap-2">
               <TrendingUp className="w-4 h-4" />
@@ -99,6 +105,10 @@ const WellnessDashboard = () => {
 
           <TabsContent value="goals" className="space-y-6">
             <GoalSetting />
+          </TabsContent>
+
+          <TabsContent value="todo" className="space-y-6">
+            <TodoList />
           </TabsContent>
 
           <TabsContent value="mood-tracking" className="space-y-6">
