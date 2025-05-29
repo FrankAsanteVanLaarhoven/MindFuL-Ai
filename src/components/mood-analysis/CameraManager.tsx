@@ -59,6 +59,7 @@ const CameraManager: React.FC<CameraManagerProps> = ({ onCameraChange, onFrameCa
 
       console.log('🎥 Requesting camera access...');
       
+      // This will trigger the browser's permission dialog
       const constraints = {
         video: {
           width: { ideal: 640 },
