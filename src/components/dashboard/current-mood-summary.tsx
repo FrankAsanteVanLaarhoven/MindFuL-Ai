@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useEffect, useState, useRef } from 'react';
@@ -54,8 +53,15 @@ const CurrentMoodSummary = () => {
     id: 'mood-companion',
     type: 'therapist' as const,
     name: 'Mood Companion',
+    gender: 'female' as const,
+    age: 'middle' as const,
+    ethnicity: 'mixed' as const,
+    skinTone: '#F4A261',
+    description: 'Your empathetic mood tracking companion',
     personality: 'Understanding and empathetic',
-    skinTone: '#F4A261'
+    voiceId: 'EXAVITQu4vr4xnSDxMaL',
+    emoji: '👩‍⚕️',
+    color: 'from-teal-500 to-teal-600'
   };
 
   const loadLatestMood = () => {

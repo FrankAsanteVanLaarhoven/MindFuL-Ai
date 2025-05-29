@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
@@ -36,8 +35,15 @@ const RealTimeMoodChart = () => {
     id: 'mood-monitor',
     type: 'friend' as const,
     name: 'Live Monitor',
+    gender: 'non-binary' as const,
+    age: 'young' as const,
+    ethnicity: 'mixed' as const,
+    skinTone: '#06B6D4',
+    description: 'Your real-time mood monitoring companion',
     personality: 'Attentive and responsive',
-    skinTone: '#06B6D4'
+    voiceId: 'SAz9YHcvj6GT2YYXdXww',
+    emoji: '🤖',
+    color: 'from-cyan-500 to-cyan-600'
   };
 
   // Generate realistic mood data with some variation
