@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef, useCallback } from 'react';
 
 interface BreathDetectionState {
@@ -28,6 +27,7 @@ export const useBreathDetection = () => {
   const breathHistoryRef = useRef<number[]>([]);
   const lastBreathTimeRef = useRef<number>(0);
   const breathCountRef = useRef<number>(0);
+  const smoothingHistoryRef = useRef<number[]>([]);
 
   const analyzeAudio = useCallback(() => {
     if (!analyserRef.current) return;
@@ -46,21 +46,30 @@ export const useBreathDetection = () => {
 
     breathIntensity = breathIntensity / (breathFreqRange * 255); // Normalize to 0-1
 
-    // Smooth the intensity using moving average
-    breathHistoryRef.current.push(breathIntensity);
-    if (breathHistoryRef.current.length > 10) {
-      breathHistoryRef.current.shift();
+    // Much longer smoothing history for stability
+    smoothingHistoryRef.current.push(breathIntensity);
+    if (smoothingHistoryRef.current.length > 30) { // Increased from 10 to 30
+      smoothingHistoryRef.current.shift();
     }
 
-    const smoothedIntensity = breathHistoryRef.current.reduce((a, b) => a + b, 0) / breathHistoryRef.current.length;
+    const smoothedIntensity = smoothingHistoryRef.current.reduce((a, b) => a + b, 0) / smoothingHistoryRef.current.length;
 
-    // Detect breathing pattern
-    const threshold = 0.02;
-    const isBreathing = smoothedIntensity > threshold;
+    // Higher threshold and hysteresis to prevent flickering
+    const breathingThreshold = 0.04; // Increased from 0.02
+    const stopBreathingThreshold = 0.02; // Lower threshold for stopping
     
-    // Detect inhale/exhale pattern
-    const previousIntensity = breathHistoryRef.current[breathHistoryRef.current.length - 2] || 0;
-    const isInhaling = smoothedIntensity > previousIntensity && isBreathing;
+    // Use hysteresis - different thresholds for starting vs stopping breathing
+    const currentlyBreathing = state.isBreathing;
+    const isBreathing = currentlyBreathing 
+      ? smoothedIntensity > stopBreathingThreshold // Higher threshold to stop
+      : smoothedIntensity > breathingThreshold; // Lower threshold to start
+    
+    // Only update intensity if we're actually breathing, otherwise keep it stable
+    const finalIntensity = isBreathing ? Math.max(0, Math.min(1, smoothedIntensity)) : 0;
+
+    // Detect inhale/exhale pattern - only when breathing
+    const previousIntensity = smoothingHistoryRef.current[smoothingHistoryRef.current.length - 5] || 0; // Look further back
+    const isInhaling = isBreathing && finalIntensity > previousIntensity;
 
     // Calculate breath rate
     const now = Date.now();
@@ -78,7 +87,7 @@ export const useBreathDetection = () => {
     setState(prev => ({
       ...prev,
       isBreathing,
-      breathIntensity: smoothedIntensity,
+      breathIntensity: finalIntensity,
       isInhaling,
       breathRate
     }));
@@ -110,7 +119,7 @@ export const useBreathDetection = () => {
       // Create analyser node
       analyserRef.current = audioContext.createAnalyser();
       analyserRef.current.fftSize = 2048;
-      analyserRef.current.smoothingTimeConstant = 0.8;
+      analyserRef.current.smoothingTimeConstant = 0.9; // Increased smoothing
 
       // Connect microphone to analyser
       microphoneRef.current = audioContext.createMediaStreamSource(stream);
@@ -155,6 +164,7 @@ export const useBreathDetection = () => {
     analyserRef.current = null;
     microphoneRef.current = null;
     breathHistoryRef.current = [];
+    smoothingHistoryRef.current = [];
     breathCountRef.current = 0;
 
     setState(prev => ({
