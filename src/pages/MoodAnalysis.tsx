@@ -120,13 +120,12 @@ const MoodAnalysis = () => {
 
       console.log('🎥 Requesting camera access...');
       
-      // Mobile-optimized camera constraints
+      // Simplified camera constraints that work reliably
       const constraints = {
         video: {
-          width: { ideal: 640, max: 1280 },
-          height: { ideal: 480, max: 720 },
-          facingMode: 'user', // Front camera
-          frameRate: { ideal: 30, max: 30 }
+          width: { ideal: 640 },
+          height: { ideal: 480 },
+          facingMode: 'user'
         },
         audio: false
       };
@@ -140,15 +139,10 @@ const MoodAnalysis = () => {
       if (videoRef.current) {
         videoRef.current.srcObject = mediaStream;
         
-        // Enhanced video setup for mobile
-        videoRef.current.setAttribute('playsinline', 'true');
-        videoRef.current.setAttribute('muted', 'true');
-        videoRef.current.setAttribute('autoplay', 'true');
-        
-        // Wait for metadata and then play
-        const playVideo = () => {
+        // Wait for the video to load metadata
+        videoRef.current.onloadedmetadata = () => {
           if (videoRef.current) {
-            console.log('📹 Starting video playback...');
+            console.log('📹 Video metadata loaded, starting playback...');
             videoRef.current.play()
               .then(() => {
                 console.log('✅ Video is now playing');
@@ -167,11 +161,6 @@ const MoodAnalysis = () => {
               });
           }
         };
-
-        videoRef.current.onloadedmetadata = playVideo;
-        
-        // Fallback - try to play after a short delay
-        setTimeout(playVideo, 1000);
       }
       
     } catch (error: any) {
@@ -184,26 +173,6 @@ const MoodAnalysis = () => {
         errorMessage = 'No camera found on this device.';
       } else if (error.name === 'NotReadableError') {
         errorMessage = 'Camera is being used by another application.';
-      } else if (error.name === 'OverconstrainedError') {
-        errorMessage = 'Camera constraints not supported. Trying with basic settings...';
-        // Try with basic constraints
-        try {
-          const basicStream = await navigator.mediaDevices.getUserMedia({ video: true });
-          setStream(basicStream);
-          setHasCamera(true);
-          if (videoRef.current) {
-            videoRef.current.srcObject = basicStream;
-            videoRef.current.play();
-          }
-          toast({
-            title: "Camera activated with basic settings",
-            description: "Your camera is ready for analysis"
-          });
-          setIsCameraLoading(false);
-          return;
-        } catch (basicError) {
-          console.error('Basic camera setup also failed:', basicError);
-        }
       }
       
       setCameraError(errorMessage);
@@ -653,7 +622,7 @@ const MoodAnalysis = () => {
                         playsInline
                         muted
                         className="w-full h-48 object-cover"
-                        style={{ transform: 'scaleX(-1)' }} // Mirror for selfie view
+                        style={{ transform: 'scaleX(-1)' }}
                       />
                       <div className="absolute top-2 right-2 bg-green-500 text-white text-xs px-2 py-1 rounded flex items-center gap-1">
                         <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
@@ -672,7 +641,7 @@ const MoodAnalysis = () => {
                   <div className="space-y-3">
                     <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg text-center">
                       <p className="text-sm text-gray-600 mb-2">Camera not active</p>
-                      <p className="text-xs text-gray-500">For mobile: Make sure to allow camera permissions when prompted</p>
+                      <p className="text-xs text-gray-500">Click below to enable camera for enhanced mood analysis</p>
                     </div>
                     <Button
                       onClick={initializeCamera}
