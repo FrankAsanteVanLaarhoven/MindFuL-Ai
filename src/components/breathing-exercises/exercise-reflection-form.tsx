@@ -20,7 +20,7 @@ const ExerciseReflectionForm: React.FC<ExerciseReflectionFormProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const cardRef = useRef<HTMLDivElement>(null);
-  const starsRef = useRef<HTMLDivElement[]>([]);
+  const starsRef = useRef<(HTMLButtonElement | null)[]>([]);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -124,14 +124,11 @@ const ExerciseReflectionForm: React.FC<ExerciseReflectionFormProps> = ({
           <p className="text-sm font-medium text-gray-700 mb-3">
             Rate your calmness: 1 (Less Calm) to 5 (More Calm)
           </p>
-          <div 
-            ref={starsRef}
-            className="flex justify-center space-x-2"
-          >
+          <div className="flex justify-center space-x-2">
             {[1, 2, 3, 4, 5].map((rating) => (
               <button
                 key={rating}
-                ref={el => starsRef.current[rating - 1] = el!}
+                ref={el => { starsRef.current[rating - 1] = el; }}
                 onClick={() => handleStarClick(rating)}
                 className={`text-3xl transition-all duration-200 hover:scale-110 ${
                   calmness && rating <= calmness 

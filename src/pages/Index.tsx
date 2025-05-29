@@ -6,10 +6,10 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import CurrentMoodSummary from '@/components/dashboard/current-mood-summary';
 import { gsap } from 'gsap';
-import { useRouter } from 'next/router';
+import { useNavigate } from 'react-router-dom';
 
 const Index = () => {
-  const router = useRouter();
+  const navigate = useNavigate();
   const headerRef = useRef<HTMLDivElement>(null);
   const cardsRef = useRef<HTMLDivElement[]>([]);
 
@@ -69,9 +69,7 @@ const Index = () => {
   ];
 
   const navigateToFeature = (href: string) => {
-    // Since we're using a simple SPA structure, we'll update this later
-    // For now, just show a toast or log
-    console.log(`Navigate to: ${href}`);
+    navigate(href);
   };
 
   return (
@@ -113,12 +111,12 @@ const Index = () => {
         {/* Dashboard Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
           {/* Current Mood - Takes up 1 column */}
-          <div ref={el => cardsRef.current[0] = el!}>
+          <div ref={el => { if (el) cardsRef.current[0] = el; }}>
             <CurrentMoodSummary />
           </div>
 
           {/* Mood Trends - Takes up 2 columns */}
-          <div ref={el => cardsRef.current[1] = el!} className="lg:col-span-2">
+          <div ref={el => { if (el) cardsRef.current[1] = el; }} className="lg:col-span-2">
             <Card className="bg-white/80 backdrop-blur-sm border-teal-200 shadow-lg h-full">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-teal-800">
@@ -139,7 +137,7 @@ const Index = () => {
         </div>
 
         {/* Quick Actions */}
-        <div ref={el => cardsRef.current[2] = el!} className="mb-12">
+        <div ref={el => { if (el) cardsRef.current[2] = el; }} className="mb-12">
           <Card className="bg-white/80 backdrop-blur-sm border-teal-200 shadow-lg">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-teal-800">
@@ -161,7 +159,7 @@ const Index = () => {
           {features.map((feature, index) => (
             <div 
               key={feature.title}
-              ref={el => cardsRef.current[index + 3] = el!}
+              ref={el => { if (el) cardsRef.current[index + 3] = el; }}
             >
               <Card 
                 className="bg-white/80 backdrop-blur-sm border-teal-200 shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer group h-full"
