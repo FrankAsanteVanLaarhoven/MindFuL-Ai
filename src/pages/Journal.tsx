@@ -9,7 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { gsap } from 'gsap';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Mic, MicOff, Volume2, Settings } from 'lucide-react';
+import { Mic, MicOff, Volume2, Settings, Hand } from 'lucide-react';
 import { useVoiceInteraction } from '@/hooks/useVoiceInteraction';
 import VoiceSettings from '@/components/VoiceSettings';
 import JournalAudioPlayer from '@/components/JournalAudioPlayer';
@@ -32,10 +32,13 @@ const Journal = () => {
   const [showVoiceSettings, setShowVoiceSettings] = useState(false);
   const [showAudioPlayer, setShowAudioPlayer] = useState(false);
   const [isVoiceInputActive, setIsVoiceInputActive] = useState(false);
+  const [voiceInputMode, setVoiceInputMode] = useState<'toggle' | 'hold'>('toggle');
+  const [isHolding, setIsHolding] = useState(false);
   
   const navigate = useNavigate();
   const { toast } = useToast();
   const containerRef = useRef<HTMLDivElement>(null);
+  const holdTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const {
     isListening,
@@ -85,7 +88,15 @@ const Journal = () => {
     }
   }, [transcript, isVoiceInputActive, showNewEntry, clearTranscript]);
 
-  const toggleVoiceInput = () => {
+  // Handle hold mode - stop listening when not holding
+  useEffect(() => {
+    if (voiceInputMode === 'hold' && isListening && !isHolding) {
+      stopListening();
+      setIsVoiceInputActive(false);
+    }
+  }, [isHolding, voiceInputMode, isListening, stopListening]);
+
+  const handleVoiceInputToggle = () => {
     if (!voiceSettings.enabled || !voiceSettings.voiceInput) {
       toast({
         title: "Voice input disabled",
@@ -100,20 +111,75 @@ const Journal = () => {
       return;
     }
 
-    setIsVoiceInputActive(!isVoiceInputActive);
-    
-    if (!isListening) {
-      startListening();
+    if (voiceInputMode === 'toggle') {
+      // Toggle mode: click to start/stop
+      setIsVoiceInputActive(!isVoiceInputActive);
+      
+      if (!isListening) {
+        startListening();
+        toast({
+          title: "Voice input started",
+          description: "Click the microphone again to stop listening..."
+        });
+      } else {
+        stopListening();
+        toast({
+          title: "Voice input stopped",
+          description: "Voice input has been stopped."
+        });
+      }
+    }
+  };
+
+  const handleVoiceInputHoldStart = () => {
+    if (!voiceSettings.enabled || !voiceSettings.voiceInput) {
       toast({
-        title: "Voice input started",
-        description: "Start speaking to add to your journal entry..."
+        title: "Voice input disabled",
+        description: "Please enable voice features in settings first.",
+        variant: "destructive"
       });
-    } else {
-      stopListening();
-      toast({
-        title: "Voice input stopped",
-        description: "Voice input has been stopped."
-      });
+      return;
+    }
+
+    if (hasAudioPermission !== true) {
+      initAudioContext();
+      return;
+    }
+
+    if (voiceInputMode === 'hold') {
+      setIsHolding(true);
+      setIsVoiceInputActive(true);
+      
+      // Add small delay to prevent accidental triggers
+      holdTimeoutRef.current = setTimeout(() => {
+        if (!isListening) {
+          startListening();
+          toast({
+            title: "Voice input active",
+            description: "Hold the button and speak. Release to stop."
+          });
+        }
+      }, 100);
+    }
+  };
+
+  const handleVoiceInputHoldEnd = () => {
+    if (voiceInputMode === 'hold') {
+      setIsHolding(false);
+      
+      // Clear timeout if user releases quickly
+      if (holdTimeoutRef.current) {
+        clearTimeout(holdTimeoutRef.current);
+        holdTimeoutRef.current = null;
+      }
+      
+      // Small delay to allow final words to be captured
+      setTimeout(() => {
+        if (isListening) {
+          stopListening();
+          setIsVoiceInputActive(false);
+        }
+      }, 500);
     }
   };
 
@@ -358,28 +424,74 @@ const Journal = () => {
                         </label>
                         <div className="flex items-center gap-2">
                           {voiceSettings.enabled && voiceSettings.voiceInput && (
-                            <Button
-                              onClick={toggleVoiceInput}
-                              variant={isVoiceInputActive ? "default" : "outline"}
-                              size="sm"
-                              className={`transition-all duration-200 ${
-                                isVoiceInputActive 
-                                  ? 'bg-red-500 hover:bg-red-600 text-white animate-pulse' 
-                                  : 'border-orange-300 hover:bg-orange-50'
-                              }`}
-                            >
-                              {isListening ? (
-                                <>
-                                  <MicOff className="w-4 h-4 mr-1" />
-                                  Stop Recording
-                                </>
-                              ) : (
-                                <>
-                                  <Mic className="w-4 h-4 mr-1" />
-                                  Start Voice Input
-                                </>
+                            <>
+                              {/* Voice Input Mode Toggle */}
+                              <div className="flex items-center gap-1 mr-2">
+                                <Button
+                                  onClick={() => setVoiceInputMode('toggle')}
+                                  variant={voiceInputMode === 'toggle' ? "default" : "outline"}
+                                  size="sm"
+                                  className="px-2 py-1 text-xs"
+                                >
+                                  Click
+                                </Button>
+                                <Button
+                                  onClick={() => setVoiceInputMode('hold')}
+                                  variant={voiceInputMode === 'hold' ? "default" : "outline"}
+                                  size="sm"
+                                  className="px-2 py-1 text-xs"
+                                >
+                                  Hold
+                                </Button>
+                              </div>
+
+                              {/* Toggle Mode Button */}
+                              {voiceInputMode === 'toggle' && (
+                                <Button
+                                  onClick={handleVoiceInputToggle}
+                                  variant={isVoiceInputActive ? "default" : "outline"}
+                                  size="sm"
+                                  className={`transition-all duration-200 ${
+                                    isListening 
+                                      ? 'bg-red-500 hover:bg-red-600 text-white animate-pulse' 
+                                      : 'border-orange-300 hover:bg-orange-50'
+                                  }`}
+                                >
+                                  {isListening ? (
+                                    <>
+                                      <MicOff className="w-4 h-4 mr-1" />
+                                      Stop
+                                    </>
+                                  ) : (
+                                    <>
+                                      <Mic className="w-4 h-4 mr-1" />
+                                      Start
+                                    </>
+                                  )}
+                                </Button>
                               )}
-                            </Button>
+
+                              {/* Hold Mode Button */}
+                              {voiceInputMode === 'hold' && (
+                                <Button
+                                  onMouseDown={handleVoiceInputHoldStart}
+                                  onMouseUp={handleVoiceInputHoldEnd}
+                                  onMouseLeave={handleVoiceInputHoldEnd}
+                                  onTouchStart={handleVoiceInputHoldStart}
+                                  onTouchEnd={handleVoiceInputHoldEnd}
+                                  variant="outline"
+                                  size="sm"
+                                  className={`transition-all duration-200 select-none ${
+                                    isHolding && isListening
+                                      ? 'bg-red-500 hover:bg-red-600 text-white animate-pulse' 
+                                      : 'border-orange-300 hover:bg-orange-50'
+                                  }`}
+                                >
+                                  <Hand className="w-4 h-4 mr-1" />
+                                  {isHolding && isListening ? 'Release' : 'Hold to Talk'}
+                                </Button>
+                              )}
+                            </>
                           )}
                           {isSpeaking && (
                             <div className="flex items-center text-blue-600 text-sm">
@@ -398,7 +510,10 @@ const Journal = () => {
                       {isVoiceInputActive && (
                         <p className="text-xs text-orange-600 mt-1 flex items-center gap-1">
                           <Mic className="w-3 h-3" />
-                          Voice input is active. Speak to add to your entry.
+                          {voiceInputMode === 'hold' 
+                            ? 'Hold the button and speak to add to your entry.'
+                            : 'Voice input is active. Speak to add to your entry.'
+                          }
                         </p>
                       )}
                     </div>
@@ -425,6 +540,7 @@ const Journal = () => {
                         onClick={() => {
                           setShowNewEntry(false);
                           setIsVoiceInputActive(false);
+                          setIsHolding(false);
                           stopListening();
                         }}
                         variant="outline"
