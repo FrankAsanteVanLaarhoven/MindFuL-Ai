@@ -9,6 +9,7 @@ import Breathing from "./pages/Breathing";
 import MoodAnalysis from "./pages/MoodAnalysis";
 import TherapyBot from "./pages/TherapyBot";
 import Journal from "./pages/Journal";
+import WellnessDashboard from "./pages/WellnessDashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
