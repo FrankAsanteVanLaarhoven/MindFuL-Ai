@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { Users, MessageCircle, Calendar, Trophy, Heart, Plus } from 'lucide-react';
+import { Users, MessageCircle, Calendar, Trophy, Heart, Plus, ExternalLink, Clock, UserCheck } from 'lucide-react';
 
 const Community = () => {
   const [activeTab, setActiveTab] = useState('forums');
@@ -69,29 +69,48 @@ const Community = () => {
     }
   ];
 
-  const supportGroups = [
+  const realSupportGroups = [
     {
       title: "Anxiety Support Circle",
-      time: "Today 7:00 PM EST",
-      facilitator: "Dr. Sarah Chen",
-      participants: 12,
-      maxParticipants: 15
+      description: "Anonymous, text-based peer support available 24/7",
+      platforms: [
+        { name: "Supportiv", url: "https://www.supportiv.com/anxiety-support-group", type: "24/7 Chat" },
+        { name: "Mental Health America", url: "https://www.mhanational.org/find-support-groups", type: "Group Directory" },
+        { name: "7 Cups", url: "https://www.7cups.com/home/anxiety/", type: "Moderated Chat" }
+      ],
+      category: "Anxiety",
+      facilitatorType: "Trained moderators",
+      availability: "24/7"
     },
     {
       title: "Depression Peer Support",
-      time: "Tomorrow 6:00 PM EST",
-      facilitator: "Community Led",
-      participants: 8,
-      maxParticipants: 12
+      description: "Free, peer-led online groups for depression support",
+      platforms: [
+        { name: "DBSA", url: "https://www.dbsalliance.org/support/chapters-and-support-groups/online-support-groups/", type: "Peer-Led Groups" },
+        { name: "Mental Health America", url: "https://www.mhanational.org/find-support-groups", type: "Group Directory" },
+        { name: "7 Cups", url: "https://www.7cups.com/home/depression/", type: "Community Chat" }
+      ],
+      category: "Depression",
+      facilitatorType: "Peer-led with moderators",
+      availability: "Scheduled sessions"
     },
     {
       title: "ADHD Strategies Group",
-      time: "Wed 8:00 PM EST",
-      facilitator: "Dr. Marcus Johnson",
-      participants: 10,
-      maxParticipants: 10
+      description: "Expert-facilitated groups focusing on ADHD management strategies",
+      platforms: [
+        { name: "ADDA", url: "https://add.org/peer-support-groups/", type: "Weekly Zoom Groups" },
+        { name: "CHADD", url: "https://chadd.org/for-adults/adhd-adult-support-groups/", type: "Support Directory" },
+        { name: "Inflow", url: "https://www.getinflow.io/events", type: "App-Based Events" }
+      ],
+      category: "ADHD",
+      facilitatorType: "Clinician-led & peer support",
+      availability: "Weekly sessions"
     }
   ];
+
+  const handlePlatformClick = (url: string) => {
+    window.open(url, '_blank', 'noopener,noreferrer');
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-teal-50">
@@ -132,7 +151,7 @@ const Community = () => {
                 className="flex items-center gap-2"
               >
                 <Users className="w-4 h-4" />
-                Support Groups
+                Live Support Groups
               </Button>
             </div>
           </div>
@@ -221,56 +240,132 @@ const Community = () => {
           </div>
         )}
 
-        {/* Support Groups Tab */}
+        {/* Live Support Groups Tab */}
         {activeTab === 'groups' && (
           <div className="space-y-6">
             <div className="flex justify-between items-center">
-              <h2 className="text-2xl font-semibold text-gray-800">Virtual Support Groups</h2>
+              <div>
+                <h2 className="text-2xl font-semibold text-gray-800">Live Support Groups</h2>
+                <p className="text-gray-600 mt-1">Join reputable, professional support groups from trusted platforms</p>
+              </div>
               <Button className="flex items-center gap-2">
                 <Calendar className="w-4 h-4" />
-                Schedule Session
+                Browse All Groups
               </Button>
             </div>
             
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {supportGroups.map((group, index) => (
+            <div className="grid gap-6">
+              {realSupportGroups.map((group, index) => (
                 <Card key={index} className="bg-white/80 backdrop-blur-sm border-green-200 hover:shadow-lg transition-shadow">
                   <CardHeader>
-                    <CardTitle className="text-lg">{group.title}</CardTitle>
-                    <CardDescription className="flex items-center gap-2">
-                      <Calendar className="w-4 h-4" />
-                      {group.time}
-                    </CardDescription>
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <div className="flex items-center gap-2 mb-2">
+                          <CardTitle className="text-xl">{group.title}</CardTitle>
+                          <Badge variant="outline">{group.category}</Badge>
+                        </div>
+                        <CardDescription className="text-base">{group.description}</CardDescription>
+                      </div>
+                      <div className="text-right text-sm text-gray-500">
+                        <div className="flex items-center gap-1 mb-1">
+                          <Clock className="w-4 h-4" />
+                          {group.availability}
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <UserCheck className="w-4 h-4" />
+                          {group.facilitatorType}
+                        </div>
+                      </div>
+                    </div>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      <div className="space-y-2">
-                        <div className="flex justify-between text-sm">
-                          <span>Facilitator:</span>
-                          <span className="font-medium">{group.facilitator}</span>
-                        </div>
-                        <div className="flex justify-between text-sm">
-                          <span>Participants:</span>
-                          <span className="font-medium">{group.participants}/{group.maxParticipants}</span>
+                      <div>
+                        <h4 className="font-semibold text-gray-800 mb-3">Available Platforms:</h4>
+                        <div className="grid md:grid-cols-3 gap-3">
+                          {group.platforms.map((platform, platformIndex) => (
+                            <div key={platformIndex} className="border border-gray-200 rounded-lg p-3 hover:border-green-300 transition-colors">
+                              <div className="flex justify-between items-start mb-2">
+                                <h5 className="font-medium text-gray-800">{platform.name}</h5>
+                                <Badge variant="secondary" className="text-xs">{platform.type}</Badge>
+                              </div>
+                              <Button
+                                size="sm"
+                                className="w-full mt-2"
+                                onClick={() => handlePlatformClick(platform.url)}
+                              >
+                                <ExternalLink className="w-3 h-3 mr-1" />
+                                Join Group
+                              </Button>
+                            </div>
+                          ))}
                         </div>
                       </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div 
-                          className="bg-green-600 h-2 rounded-full" 
-                          style={{ width: `${(group.participants / group.maxParticipants) * 100}%` }}
-                        ></div>
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-sm text-green-800">
+                          <strong>Note:</strong> These are external platforms. Most require free registration. 
+                          Always verify facilitator credentials and group guidelines before participating.
+                        </p>
                       </div>
-                      <Button 
-                        className="w-full" 
-                        disabled={group.participants >= group.maxParticipants}
-                      >
-                        {group.participants >= group.maxParticipants ? 'Group Full' : 'Join Group'}
-                      </Button>
                     </div>
                   </CardContent>
                 </Card>
               ))}
             </div>
+
+            {/* Quick Access Summary */}
+            <Card className="bg-gradient-to-r from-blue-50 to-teal-50 border-blue-200">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Users className="w-5 h-5 text-blue-600" />
+                  Quick Access Summary
+                </CardTitle>
+                <CardDescription>Direct links to major support platforms</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div className="space-y-2">
+                    <h4 className="font-semibold text-gray-800">24/7 Support</h4>
+                    <div className="space-y-1">
+                      <Button variant="outline" size="sm" className="w-full justify-start" onClick={() => handlePlatformClick('https://www.supportiv.com/anxiety-support-group')}>
+                        <ExternalLink className="w-3 h-3 mr-2" />
+                        Supportiv (Anxiety)
+                      </Button>
+                      <Button variant="outline" size="sm" className="w-full justify-start" onClick={() => handlePlatformClick('https://www.7cups.com/home/anxiety/')}>
+                        <ExternalLink className="w-3 h-3 mr-2" />
+                        7 Cups (Multiple)
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <h4 className="font-semibold text-gray-800">Professional Groups</h4>
+                    <div className="space-y-1">
+                      <Button variant="outline" size="sm" className="w-full justify-start" onClick={() => handlePlatformClick('https://add.org/peer-support-groups/')}>
+                        <ExternalLink className="w-3 h-3 mr-2" />
+                        ADDA (ADHD)
+                      </Button>
+                      <Button variant="outline" size="sm" className="w-full justify-start" onClick={() => handlePlatformClick('https://www.dbsalliance.org/support/chapters-and-support-groups/online-support-groups/')}>
+                        <ExternalLink className="w-3 h-3 mr-2" />
+                        DBSA (Depression)
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <h4 className="font-semibold text-gray-800">General Directory</h4>
+                    <div className="space-y-1">
+                      <Button variant="outline" size="sm" className="w-full justify-start" onClick={() => handlePlatformClick('https://www.mhanational.org/find-support-groups')}>
+                        <ExternalLink className="w-3 h-3 mr-2" />
+                        Mental Health America
+                      </Button>
+                      <Button variant="outline" size="sm" className="w-full justify-start" onClick={() => handlePlatformClick('https://chadd.org/for-adults/adhd-adult-support-groups/')}>
+                        <ExternalLink className="w-3 h-3 mr-2" />
+                        CHADD (ADHD)
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         )}
       </div>
