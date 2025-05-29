@@ -21,8 +21,9 @@ const LiveBreathingSphere = ({ breathIntensity, isInhaling, isBreathing }: {
   const meshRef = useRef<THREE.Mesh>(null);
   const particlesRef = useRef<THREE.Points>(null);
 
-  // Much more stable scaling - only animate when actually breathing
-  const targetScale = isBreathing ? 1 + (breathIntensity * 2) : 1; // Reduced from 3x to 2x
+  // More noticeable scaling for balloon expansion - scale based on breathing
+  const baseScale = 1;
+  const targetScale = isBreathing ? baseScale + (breathIntensity * 1.5) : baseScale; // Expand up to 2.5x when breathing deeply
   
   // Dynamic color based on breathing state
   const getBreathColor = () => {
@@ -33,25 +34,18 @@ const LiveBreathingSphere = ({ breathIntensity, isInhaling, isBreathing }: {
 
   useFrame((state, delta) => {
     if (meshRef.current) {
-      // Much slower and smoother scale animation - only when breathing
-      if (isBreathing) {
-        const currentScale = meshRef.current.scale.x;
-        const newScale = THREE.MathUtils.lerp(currentScale, targetScale, delta * 1.5); // Reduced from 3
-        meshRef.current.scale.setScalar(newScale);
-      } else {
-        // Very gentle return to base scale when not breathing
-        const currentScale = meshRef.current.scale.x;
-        const newScale = THREE.MathUtils.lerp(currentScale, 1, delta * 0.5);
-        meshRef.current.scale.setScalar(newScale);
-      }
+      // Smooth scale animation - balloon expansion/contraction
+      const currentScale = meshRef.current.scale.x;
+      const newScale = THREE.MathUtils.lerp(currentScale, targetScale, delta * 2); // Responsive scaling
+      meshRef.current.scale.setScalar(newScale);
 
       // Very gentle rotation - always slow
-      meshRef.current.rotation.x += delta * 0.05; // Reduced from 0.1
-      meshRef.current.rotation.y += delta * 0.1; // Reduced from 0.2
+      meshRef.current.rotation.x += delta * 0.05;
+      meshRef.current.rotation.y += delta * 0.1;
 
       // Minimal floating effect only when breathing
       if (isBreathing) {
-        const breathFloat = Math.sin(state.clock.elapsedTime * 1) * 0.1; // Reduced frequency and amplitude
+        const breathFloat = Math.sin(state.clock.elapsedTime * 1) * 0.1;
         meshRef.current.position.y = breathFloat;
       } else {
         // Gently return to center when not breathing
@@ -68,15 +62,17 @@ const LiveBreathingSphere = ({ breathIntensity, isInhaling, isBreathing }: {
     // Animate particles based on breathing - MUCH SLOWER NOW
     if (particlesRef.current) {
       if (isBreathing) {
-        particlesRef.current.rotation.x = state.clock.elapsedTime * 0.003; // Even slower
-        particlesRef.current.rotation.y = state.clock.elapsedTime * 0.005; // Even slower
+        particlesRef.current.rotation.x = state.clock.elapsedTime * 0.003;
+        particlesRef.current.rotation.y = state.clock.elapsedTime * 0.005;
         
-        // Make particles more active when breathing - but still slow
-        const breathEffect = 1 + breathIntensity * 0.2; // Further reduced effect
+        // Make particles scale with breathing but keep it subtle
+        const breathEffect = 1 + breathIntensity * 0.1;
         particlesRef.current.scale.setScalar(breathEffect);
       } else {
-        // Stop particle movement when not breathing
-        // Keep current rotation but don't increment
+        // Keep particles still when not breathing
+        const currentScale = particlesRef.current.scale.x;
+        const newScale = THREE.MathUtils.lerp(currentScale, 1, delta * 2);
+        particlesRef.current.scale.setScalar(newScale);
       }
     }
   });
@@ -88,7 +84,7 @@ const LiveBreathingSphere = ({ breathIntensity, isInhaling, isBreathing }: {
         <meshStandardMaterial
           color={getBreathColor()}
           transparent
-          opacity={0.8} // Fixed opacity, no fluctuation
+          opacity={0.8}
           roughness={0.2}
           metalness={0.1}
         />
@@ -99,14 +95,14 @@ const LiveBreathingSphere = ({ breathIntensity, isInhaling, isBreathing }: {
         <bufferGeometry>
           <bufferAttribute
             attach="attributes-position"
-            args={[new Float32Array(Array.from({ length: 200 }, () => (Math.random() - 0.5) * 8)), 3]} // Fewer particles, closer range
+            args={[new Float32Array(Array.from({ length: 200 }, () => (Math.random() - 0.5) * 8)), 3]}
           />
         </bufferGeometry>
         <pointsMaterial
-          size={0.02} // Even smaller
+          size={0.02}
           color="#ffffff"
           transparent
-          opacity={isBreathing ? 0.3 : 0.05} // Much lower opacity
+          opacity={isBreathing ? 0.3 : 0.05}
           sizeAttenuation
         />
       </points>
@@ -290,7 +286,7 @@ const RealTimeBreathingSphere: React.FC<RealTimeBreathingSphereProps> = ({
           <ul className="space-y-1 text-sm text-blue-700">
             <li>• Allow microphone access when prompted</li>
             <li>• Breathe naturally near your device's microphone</li>
-            <li>• Watch the sphere expand and contract with your real breathing</li>
+            <li>• Watch the balloon expand and contract with your real breathing</li>
             <li>• The color changes: Cyan for inhaling, Pink for exhaling</li>
             <li>• Try to maintain steady, deep breaths for higher scores</li>
           </ul>
