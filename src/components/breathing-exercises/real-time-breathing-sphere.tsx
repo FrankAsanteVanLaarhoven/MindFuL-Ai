@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useRef, useEffect, useState } from 'react';
@@ -53,13 +52,13 @@ const LiveBreathingSphere = ({ breathIntensity, isInhaling, isBreathing }: {
       }
     }
 
-    // Animate particles based on breathing
+    // Animate particles based on breathing - MUCH SLOWER NOW
     if (particlesRef.current && isBreathing) {
-      particlesRef.current.rotation.x = state.clock.elapsedTime * 0.02;
-      particlesRef.current.rotation.y = state.clock.elapsedTime * 0.03;
+      particlesRef.current.rotation.x = state.clock.elapsedTime * 0.005; // Reduced from 0.02
+      particlesRef.current.rotation.y = state.clock.elapsedTime * 0.008; // Reduced from 0.03
       
-      // Make particles more active when breathing
-      const breathEffect = 1 + breathIntensity;
+      // Make particles more active when breathing - but still slow
+      const breathEffect = 1 + breathIntensity * 0.3; // Reduced effect
       particlesRef.current.scale.setScalar(breathEffect);
     }
   });
@@ -77,7 +76,7 @@ const LiveBreathingSphere = ({ breathIntensity, isInhaling, isBreathing }: {
         />
       </mesh>
       
-      {/* Breathing particles */}
+      {/* Breathing particles - MUCH SLOWER */}
       <points ref={particlesRef}>
         <bufferGeometry>
           <bufferAttribute
@@ -86,10 +85,10 @@ const LiveBreathingSphere = ({ breathIntensity, isInhaling, isBreathing }: {
           />
         </bufferGeometry>
         <pointsMaterial
-          size={0.05}
+          size={0.03} // Smaller size
           color="#ffffff"
           transparent
-          opacity={isBreathing ? 0.8 : 0.3}
+          opacity={isBreathing ? 0.4 : 0.1} // Lower opacity
           sizeAttenuation
         />
       </points>
