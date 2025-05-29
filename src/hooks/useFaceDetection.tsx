@@ -1,6 +1,5 @@
 
 import { useState, useEffect, useCallback } from 'react';
-import * as faceapi from 'face-api.js';
 
 interface AnalyticsEvent {
   userId: string;
@@ -13,28 +12,22 @@ export const useFaceDetection = (userId: string = 'default-user') => {
   const [modelsLoaded, setModelsLoaded] = useState(false);
   const [loadingError, setLoadingError] = useState<string | null>(null);
 
-  // Load face-api.js models
+  // Initialize demo mode instead of loading face-api.js
   useEffect(() => {
-    const loadModels = async () => {
+    const initializeDemo = async () => {
       try {
-        const MODEL_URL = "/models";
-        
-        await Promise.all([
-          faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
-          faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL),
-          faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
-          faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL)
-        ]);
+        // Simulate model loading delay
+        await new Promise(resolve => setTimeout(resolve, 1000));
         
         setModelsLoaded(true);
-        console.log('Face-api.js models loaded successfully');
+        console.log('Demo mode initialized successfully');
       } catch (error) {
-        console.error('Error loading face-api.js models:', error);
-        setLoadingError(error.message);
+        console.error('Error initializing demo mode:', error);
+        setLoadingError((error as Error).message);
       }
     };
 
-    loadModels();
+    initializeDemo();
   }, []);
 
   // Analytics function
