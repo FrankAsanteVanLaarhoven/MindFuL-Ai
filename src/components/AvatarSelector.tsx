@@ -1,9 +1,9 @@
-
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
+import CustomAvatarCreator from './CustomAvatarCreator';
 
 export interface AvatarCharacter {
   id: string;
@@ -25,6 +25,7 @@ interface AvatarSelectorProps {
   onAvatarSelect: (avatar: AvatarCharacter) => void;
 }
 
+// ... keep existing code (avatarCharacters array stays the same)
 const avatarCharacters: AvatarCharacter[] = [
   // Professional Therapists - Diverse
   {
@@ -310,7 +311,43 @@ const avatarCharacters: AvatarCharacter[] = [
 ];
 
 const AvatarSelector: React.FC<AvatarSelectorProps> = ({ selectedAvatar, onAvatarSelect }) => {
-  const groupedAvatars = avatarCharacters.reduce((groups, avatar) => {
+  const [showCustomCreator, setShowCustomCreator] = useState(false);
+  const [customAvatars, setCustomAvatars] = useState<AvatarCharacter[]>([]);
+  const [allAvatars, setAllAvatars] = useState<AvatarCharacter[]>(avatarCharacters);
+
+  // Load custom avatars from localStorage
+  useEffect(() => {
+    const savedCustomAvatars = localStorage.getItem('customTherapyAvatars');
+    if (savedCustomAvatars) {
+      const parsed = JSON.parse(savedCustomAvatars);
+      setCustomAvatars(parsed);
+      setAllAvatars([...avatarCharacters, ...parsed]);
+    }
+  }, []);
+
+  const handleCreateCustomAvatar = (avatar: AvatarCharacter) => {
+    const updatedCustomAvatars = [...customAvatars, avatar];
+    setCustomAvatars(updatedCustomAvatars);
+    setAllAvatars([...avatarCharacters, ...updatedCustomAvatars]);
+    
+    // Save to localStorage
+    localStorage.setItem('customTherapyAvatars', JSON.stringify(updatedCustomAvatars));
+    
+    // Select the new avatar
+    onAvatarSelect(avatar);
+    setShowCustomCreator(false);
+  };
+
+  if (showCustomCreator) {
+    return (
+      <CustomAvatarCreator
+        onCreateAvatar={handleCreateCustomAvatar}
+        onCancel={() => setShowCustomCreator(false)}
+      />
+    );
+  }
+
+  const groupedAvatars = allAvatars.reduce((groups, avatar) => {
     const category = avatar.type;
     if (!groups[category]) {
       groups[category] = [];
@@ -352,22 +389,33 @@ const AvatarSelector: React.FC<AvatarSelectorProps> = ({ selectedAvatar, onAvata
   return (
     <Card className="bg-white/90 backdrop-blur-sm border-purple-200">
       <CardHeader>
-        <CardTitle className="text-lg text-purple-800 flex items-center gap-2">
-          <span className="text-xl">👤</span>
-          Choose Your Therapy Companion
-        </CardTitle>
-        <CardDescription>
-          Select an avatar that feels most comfortable and represents your preferred cultural background
-        </CardDescription>
+        <div className="flex justify-between items-start">
+          <div>
+            <CardTitle className="text-lg text-purple-800 flex items-center gap-2">
+              <span className="text-xl">👤</span>
+              Choose Your Therapy Companion
+            </CardTitle>
+            <CardDescription>
+              Select an avatar that feels most comfortable and represents your preferred cultural background
+            </CardDescription>
+          </div>
+          <Button
+            onClick={() => setShowCustomCreator(true)}
+            variant="outline"
+            className="border-purple-300 text-purple-700 hover:bg-purple-50"
+          >
+            ✨ Create Custom
+          </Button>
+        </div>
       </CardHeader>
       <CardContent className="space-y-6 max-h-96 overflow-y-auto">
-        {Object.entries(groupedAvatars).map(([category, avatars]) => (
-          <div key={category} className="space-y-3">
+        {customAvatars.length > 0 && (
+          <div className="space-y-3">
             <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wider">
-              {categoryLabels[category as keyof typeof categoryLabels]}
+              Your Custom Characters
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {avatars.map((avatar) => (
+              {customAvatars.map((avatar) => (
                 <Button
                   key={avatar.id}
                   onClick={() => onAvatarSelect(avatar)}
@@ -375,7 +423,7 @@ const AvatarSelector: React.FC<AvatarSelectorProps> = ({ selectedAvatar, onAvata
                   className={`h-auto p-4 justify-start ${
                     selectedAvatar?.id === avatar.id 
                       ? `bg-gradient-to-r ${avatar.color} text-white border-none`
-                      : 'hover:border-purple-300'
+                      : 'hover:border-purple-300 border-purple-200'
                   }`}
                 >
                   <div className="flex items-center gap-3 w-full">
@@ -393,6 +441,9 @@ const AvatarSelector: React.FC<AvatarSelectorProps> = ({ selectedAvatar, onAvata
                         <Badge variant="secondary" className="text-xs">
                           {avatar.gender}
                         </Badge>
+                        <Badge variant="outline" className="text-xs border-purple-300 text-purple-700">
+                          Custom
+                        </Badge>
                       </div>
                     </div>
                   </div>
@@ -400,7 +451,54 @@ const AvatarSelector: React.FC<AvatarSelectorProps> = ({ selectedAvatar, onAvata
               ))}
             </div>
           </div>
-        ))}
+        )}
+
+        {Object.entries(groupedAvatars).map(([category, avatars]) => {
+          // Filter out custom avatars from preset categories
+          const presetAvatars = avatars.filter(avatar => !avatar.id.startsWith('custom-'));
+          if (presetAvatars.length === 0) return null;
+          
+          return (
+            <div key={category} className="space-y-3">
+              <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wider">
+                {categoryLabels[category as keyof typeof categoryLabels]}
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {presetAvatars.map((avatar) => (
+                  <Button
+                    key={avatar.id}
+                    onClick={() => onAvatarSelect(avatar)}
+                    variant={selectedAvatar?.id === avatar.id ? "default" : "outline"}
+                    className={`h-auto p-4 justify-start ${
+                      selectedAvatar?.id === avatar.id 
+                        ? `bg-gradient-to-r ${avatar.color} text-white border-none`
+                        : 'hover:border-purple-300'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3 w-full">
+                      <div className="text-2xl">{avatar.emoji}</div>
+                      <div className="flex-1 text-left">
+                        <div className="font-semibold">{avatar.name}</div>
+                        <div className="text-xs opacity-75 mt-1">{avatar.description}</div>
+                        <div className="flex gap-1 mt-2 flex-wrap">
+                          <Badge variant="secondary" className="text-xs">
+                            {getEthnicityLabel(avatar.ethnicity)}
+                          </Badge>
+                          <Badge variant="secondary" className="text-xs">
+                            {avatar.age}
+                          </Badge>
+                          <Badge variant="secondary" className="text-xs">
+                            {avatar.gender}
+                          </Badge>
+                        </div>
+                      </div>
+                    </div>
+                  </Button>
+                ))}
+              </div>
+            </div>
+          );
+        })}
       </CardContent>
     </Card>
   );
