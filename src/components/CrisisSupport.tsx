@@ -3,7 +3,8 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Phone, MessageCircle, Heart, AlertTriangle, Globe, Clock } from 'lucide-react';
+import { Phone, MessageCircle, Heart, AlertTriangle, Globe, Clock, Zap } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 interface CrisisResource {
   name: string;
@@ -18,6 +19,7 @@ interface CrisisResource {
 
 const CrisisSupport = () => {
   const [selectedRegion, setSelectedRegion] = useState<string>('US');
+  const { toast } = useToast();
 
   const crisisResources: CrisisResource[] = [
     {
@@ -69,6 +71,34 @@ const CrisisSupport = () => {
     }
   ];
 
+  const handleEmergencyCall = (phone: string, name: string) => {
+    // Attempt to initiate call
+    window.location.href = `tel:${phone}`;
+    
+    toast({
+      title: "Calling " + name,
+      description: `Dialing ${phone}... If the call doesn't start automatically, please dial manually.`,
+      duration: 5000,
+    });
+  };
+
+  const handleQuickText = (textInstruction: string, name: string) => {
+    // Extract the text number and message from instruction like "Text HOME to 741741"
+    const parts = textInstruction.split(' to ');
+    if (parts.length === 2) {
+      const message = parts[0].replace('Text ', '');
+      const number = parts[1];
+      const smsUrl = `sms:${number}?body=${encodeURIComponent(message)}`;
+      window.location.href = smsUrl;
+      
+      toast({
+        title: "Opening text message",
+        description: `Starting text to ${name}...`,
+        duration: 3000,
+      });
+    }
+  };
+
   const getTypeColor = (type: string) => {
     switch (type) {
       case 'crisis': return 'bg-red-100 text-red-800 border-red-200';
@@ -97,21 +127,29 @@ const CrisisSupport = () => {
           Crisis Support Resources
         </CardTitle>
         <CardDescription>
-          Immediate help and support when you need it most
+          Immediate help and support when you need it most - One-click calling available
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        {/* Emergency Notice */}
+        {/* Emergency Notice with One-Click Call */}
         <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
           <div className="flex items-start gap-3">
             <AlertTriangle className="w-5 h-5 text-red-600 mt-0.5" />
-            <div>
+            <div className="flex-1">
               <h3 className="font-semibold text-red-800 mb-1">
                 If you're in immediate danger
               </h3>
-              <p className="text-red-700 text-sm mb-2">
+              <p className="text-red-700 text-sm mb-3">
                 Call 911 (US) or your local emergency number immediately
               </p>
+              <Button 
+                onClick={() => handleEmergencyCall('911', 'Emergency Services')}
+                className="bg-red-600 hover:bg-red-700 text-white font-bold px-6 py-2 mb-2"
+                size="lg"
+              >
+                <Phone className="w-4 h-4 mr-2" />
+                CALL 911 NOW
+              </Button>
               <p className="text-red-600 text-xs">
                 Remember: You are not alone, and help is available
               </p>
@@ -119,7 +157,7 @@ const CrisisSupport = () => {
           </div>
         </div>
 
-        {/* Resources List */}
+        {/* Resources List with One-Click Actions */}
         <div className="space-y-4">
           {filteredResources.map((resource, index) => (
             <div key={index} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
@@ -135,32 +173,39 @@ const CrisisSupport = () => {
               
               <p className="text-gray-600 text-sm mb-3">{resource.description}</p>
               
+              {/* One-Click Action Buttons */}
               <div className="flex flex-wrap gap-2 mb-3">
                 {resource.phone && (
-                  <a 
-                    href={`tel:${resource.phone}`}
-                    className="flex items-center gap-1 bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm hover:bg-green-200 transition-colors"
+                  <Button
+                    onClick={() => handleEmergencyCall(resource.phone, resource.name)}
+                    className="bg-green-600 hover:bg-green-700 text-white font-semibold"
+                    size="sm"
                   >
-                    <Phone className="w-3 h-3" />
-                    {resource.phone}
-                  </a>
+                    <Zap className="w-3 h-3 mr-1" />
+                    Call {resource.phone}
+                  </Button>
                 )}
                 {resource.text && (
-                  <span className="flex items-center gap-1 bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">
-                    <MessageCircle className="w-3 h-3" />
-                    {resource.text}
-                  </span>
+                  <Button
+                    onClick={() => handleQuickText(resource.text, resource.name)}
+                    variant="outline"
+                    className="border-blue-500 text-blue-700 hover:bg-blue-50"
+                    size="sm"
+                  >
+                    <MessageCircle className="w-3 h-3 mr-1" />
+                    Quick Text
+                  </Button>
                 )}
                 {resource.website && (
-                  <a 
-                    href={resource.website}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-1 bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm hover:bg-purple-200 transition-colors"
+                  <Button
+                    onClick={() => window.open(resource.website, '_blank')}
+                    variant="outline"
+                    className="border-purple-500 text-purple-700 hover:bg-purple-50"
+                    size="sm"
                   >
-                    <Globe className="w-3 h-3" />
+                    <Globe className="w-3 h-3 mr-1" />
                     Website
-                  </a>
+                  </Button>
                 )}
               </div>
               
