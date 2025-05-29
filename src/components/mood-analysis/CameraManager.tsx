@@ -38,7 +38,6 @@ const CameraManager: React.FC<CameraManagerProps> = ({ onCameraChange, onFrameCa
     if (videoRef.current) {
       videoRef.current.srcObject = null;
     }
-    isInitializingRef.current = false;
   }, [stream]);
 
   // Cleanup on unmount
@@ -50,21 +49,29 @@ const CameraManager: React.FC<CameraManagerProps> = ({ onCameraChange, onFrameCa
 
   // Update parent when camera state changes
   useEffect(() => {
+    console.log('📡 Camera state update:', { hasCamera, stream: !!stream });
     onCameraChange(hasCamera, stream);
   }, [hasCamera, stream, onCameraChange]);
 
   const initializeCamera = async () => {
+    // Prevent multiple initializations
     if (isInitializingRef.current || isCameraLoading) {
       console.log('⚠️ Camera initialization already in progress, skipping...');
       return;
     }
     
+    console.log('🎬 Starting camera initialization...');
     isInitializingRef.current = true;
     setIsCameraLoading(true);
     setCameraError(null);
     setIsVideoLoaded(false);
     
     try {
+      // Check if getUserMedia is supported
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        throw new Error('Camera API not supported in this browser');
+      }
+
       console.log('🎥 Requesting camera access...');
       
       const constraints = {
@@ -79,7 +86,7 @@ const CameraManager: React.FC<CameraManagerProps> = ({ onCameraChange, onFrameCa
       const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
       console.log('✅ Camera access granted, stream received');
       
-      // Check if component is still mounted
+      // Check if component is still mounted and we're still initializing
       if (!isInitializingRef.current) {
         console.log('❌ Component unmounted during initialization');
         mediaStream.getTracks().forEach(track => track.stop());
@@ -88,50 +95,73 @@ const CameraManager: React.FC<CameraManagerProps> = ({ onCameraChange, onFrameCa
       
       const videoTracks = mediaStream.getVideoTracks();
       if (videoTracks.length === 0) {
-        throw new Error('No video tracks available');
+        throw new Error('No video tracks available in the stream');
       }
       
+      console.log('📹 Video tracks found:', videoTracks.length);
+      
+      // Set stream first
       setStream(mediaStream);
       
       if (videoRef.current) {
+        console.log('🖥️ Attaching stream to video element...');
         videoRef.current.srcObject = mediaStream;
         
+        // Wait for video to load
         const handleLoadedMetadata = () => {
-          if (videoRef.current && isInitializingRef.current) {
-            console.log('📹 Video metadata loaded');
-            
-            if (videoRef.current.videoWidth === 0 || videoRef.current.videoHeight === 0) {
-              setCameraError('Camera stream has no video data');
-              return;
-            }
-            
-            videoRef.current.play()
-              .then(() => {
-                console.log('✅ Video playing successfully');
-                setIsVideoLoaded(true);
-                setHasCamera(true);
-                isInitializingRef.current = false;
-                toast({
-                  title: "Camera activated! 📹",
-                  description: "Your camera is now ready for mood analysis"
-                });
-              })
-              .catch((playError) => {
-                console.error('❌ Video play error:', playError);
-                setCameraError('Video playback failed');
-                isInitializingRef.current = false;
-              });
+          console.log('📺 Video metadata loaded');
+          
+          if (!videoRef.current || !isInitializingRef.current) {
+            console.log('❌ Video ref or initialization lost');
+            return;
           }
+          
+          const video = videoRef.current;
+          console.log('📐 Video dimensions:', video.videoWidth, 'x', video.videoHeight);
+          
+          if (video.videoWidth === 0 || video.videoHeight === 0) {
+            console.log('❌ Invalid video dimensions');
+            setCameraError('Camera stream has no video data');
+            isInitializingRef.current = false;
+            return;
+          }
+          
+          // Try to play the video
+          video.play()
+            .then(() => {
+              console.log('✅ Video playing successfully');
+              setIsVideoLoaded(true);
+              setHasCamera(true);
+              isInitializingRef.current = false;
+              toast({
+                title: "Camera activated! 📹",
+                description: "Your camera is now ready for mood analysis"
+              });
+            })
+            .catch((playError) => {
+              console.error('❌ Video play error:', playError);
+              setCameraError('Video playback failed. Please check camera permissions.');
+              isInitializingRef.current = false;
+            });
         };
 
-        const handleError = () => {
-          console.error('❌ Video element error');
-          setCameraError('Video display error');
+        const handleError = (event: Event) => {
+          console.error('❌ Video element error:', event);
+          setCameraError('Video display error. Please try refreshing the page.');
           isInitializingRef.current = false;
         };
 
-        videoRef.current.onloadedmetadata = handleLoadedMetadata;
-        videoRef.current.onerror = handleError;
+        // Remove any existing event listeners
+        videoRef.current.removeEventListener('loadedmetadata', handleLoadedMetadata);
+        videoRef.current.removeEventListener('error', handleError);
+        
+        // Add new event listeners
+        videoRef.current.addEventListener('loadedmetadata', handleLoadedMetadata);
+        videoRef.current.addEventListener('error', handleError);
+      } else {
+        console.error('❌ Video ref not available');
+        setCameraError('Video element not available');
+        isInitializingRef.current = false;
       }
       
     } catch (error: any) {
@@ -140,11 +170,15 @@ const CameraManager: React.FC<CameraManagerProps> = ({ onCameraChange, onFrameCa
       let errorMessage = 'Camera access failed';
       
       if (error.name === 'NotAllowedError') {
-        errorMessage = 'Camera permission denied. Please allow camera access and refresh.';
+        errorMessage = 'Camera permission denied. Please allow camera access in your browser.';
       } else if (error.name === 'NotFoundError') {
         errorMessage = 'No camera found on this device';
       } else if (error.name === 'NotReadableError') {
         errorMessage = 'Camera is being used by another application';
+      } else if (error.name === 'OverconstrainedError') {
+        errorMessage = 'Camera constraints not supported';
+      } else if (error.message) {
+        errorMessage = error.message;
       }
       
       setCameraError(errorMessage);
@@ -163,6 +197,7 @@ const CameraManager: React.FC<CameraManagerProps> = ({ onCameraChange, onFrameCa
 
   const stopCamera = () => {
     console.log('🛑 User requested to stop camera...');
+    isInitializingRef.current = false;
     cleanupCamera();
     toast({
       title: "Camera stopped",
@@ -172,7 +207,12 @@ const CameraManager: React.FC<CameraManagerProps> = ({ onCameraChange, onFrameCa
 
   const captureFrame = useCallback((): string | null => {
     if (!videoRef.current || !canvasRef.current || !hasCamera || !isVideoLoaded) {
-      console.log('❌ Cannot capture frame: missing requirements');
+      console.log('❌ Cannot capture frame: missing requirements', {
+        video: !!videoRef.current,
+        canvas: !!canvasRef.current,
+        hasCamera,
+        isVideoLoaded
+      });
       return null;
     }
     
@@ -267,6 +307,7 @@ const CameraManager: React.FC<CameraManagerProps> = ({ onCameraChange, onFrameCa
                 variant="outline"
                 size="sm"
                 className="px-3"
+                title="Refresh page"
               >
                 <RefreshCw className="w-4 h-4" />
               </Button>
@@ -280,7 +321,15 @@ const CameraManager: React.FC<CameraManagerProps> = ({ onCameraChange, onFrameCa
           <AlertTriangle className="h-4 w-4 text-amber-600" />
           <AlertDescription className="text-amber-800">
             <p className="font-medium">{cameraError}</p>
-            <p className="text-sm mt-1">Try refreshing the page or check camera permissions in your browser.</p>
+            <div className="text-sm mt-2 space-y-1">
+              <p><strong>Common fixes:</strong></p>
+              <ul className="list-disc list-inside space-y-1 text-xs">
+                <li>Check browser permissions (click lock icon in address bar)</li>
+                <li>Close other apps using the camera (Zoom, Teams, etc.)</li>
+                <li>Try refreshing the page</li>
+                <li>Check system camera privacy settings</li>
+              </ul>
+            </div>
           </AlertDescription>
         </Alert>
       )}
