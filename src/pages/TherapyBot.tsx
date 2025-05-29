@@ -22,6 +22,8 @@ import SessionRecorder from '@/components/SessionRecorder';
 import VirtualMindReader from '@/components/VirtualMindReader';
 import ResourcesPanel from '@/components/ResourcesPanel';
 import { UserProfile } from '@/types/UserProfile';
+import PerplexityKeyManager from '@/components/PerplexityKeyManager';
+import { createPerplexityService } from '@/services/perplexityService';
 
 interface Message {
   id: string;
@@ -44,7 +46,8 @@ const TherapyBot = () => {
   const [selectedAvatar, setSelectedAvatar] = useState<AvatarCharacter | null>(null);
   const [avatarEmotion, setAvatarEmotion] = useState<'neutral' | 'happy' | 'concerned' | 'encouraging' | 'thoughtful'>('neutral');
   const [activeTab, setActiveTab] = useState('chat');
-  
+  const [perplexityApiKey, setPerplexityApiKey] = useState<string | null>(null);
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
@@ -218,7 +221,28 @@ const TherapyBot = () => {
   };
 
   const generateBotResponse = async (userInput: string, type: string, tone?: string, avatar?: AvatarCharacter | null): Promise<string> => {
-    // Avatar-specific response styling
+    // Try AI-powered response first if API key is available
+    if (perplexityApiKey) {
+      try {
+        const perplexityService = createPerplexityService(perplexityApiKey);
+        const userContext = userProfile?.usePersonalizedResponses ? 
+          `User profile: ${userProfile.name || 'Anonymous'}, Challenges: ${userProfile.currentChallenges?.join(', ') || 'None'}, Therapy type: ${type}` : 
+          undefined;
+        
+        const aiResponse = await perplexityService.generateTherapyResponse(
+          userInput, 
+          type as 'CBT' | 'DBT' | 'general',
+          userContext
+        );
+        
+        // Apply avatar personality modifications to AI response
+        return applyAvatarPersonality(aiResponse, avatar);
+      } catch (error) {
+        console.error('AI response failed, using fallback:', error);
+      }
+    }
+
+    // ... keep existing code (fallback to original responses)
     const avatarPersonality = avatar ? avatar.personality.toLowerCase() : '';
     
     // Get user context for personalized responses
@@ -295,11 +319,11 @@ const TherapyBot = () => {
           }
         }
         
-        return response;
+        return applyAvatarPersonality(response, avatar);
       }
     }
 
-    // ... keep existing code (fallback to original responses)
+    // ... keep existing code (fallback responses)
     const responses = {
       CBT: [
         userContext?.name 
@@ -327,23 +351,29 @@ const TherapyBot = () => {
     const typeResponses = responses[type as keyof typeof responses] || responses.general;
     let response = typeResponses[Math.floor(Math.random() * typeResponses.length)];
 
+    return applyAvatarPersonality(response, avatar);
+  };
+
+  const applyAvatarPersonality = (response: string, avatar?: AvatarCharacter | null): string => {
+    if (!avatar) return response;
+
+    const avatarPersonality = avatar.personality.toLowerCase();
+    
     // Modify response based on avatar personality
-    if (avatar) {
-      if (avatarPersonality.includes('nurturing') || avatar.type === 'grandma') {
-        response = `Oh dear, ${response.toLowerCase()} Remember, I'm here for you, just like family.`;
-      } else if (avatarPersonality.includes('wise') || avatar.type === 'grandpa') {
-        response = `You know, in my experience, ${response.toLowerCase()} Life has taught me that these feelings pass.`;
-      } else if (avatar.type === 'sibling' || avatar.type === 'friend') {
-        response = `Hey, ${response.toLowerCase().replace('i hear', 'i totally get')} We're in this together.`;
-      } else if (avatar.type === 'teacher') {
-        response = `Let's think about this step by step. ${response} This is a learning process, and that's okay.`;
-      } else if (avatarPersonality.includes('professional')) {
-        response = `${response} Based on evidence-based approaches, we can work through this systematically.`;
-      }
+    if (avatarPersonality.includes('nurturing') || avatar.type === 'grandma') {
+      response = `Oh dear, ${response.toLowerCase()} Remember, I'm here for you, just like family.`;
+    } else if (avatarPersonality.includes('wise') || avatar.type === 'grandpa') {
+      response = `You know, in my experience, ${response.toLowerCase()} Life has taught me that these feelings pass.`;
+    } else if (avatar.type === 'sibling' || avatar.type === 'friend') {
+      response = `Hey, ${response.toLowerCase().replace('i hear', 'i totally get')} We're in this together.`;
+    } else if (avatar.type === 'teacher') {
+      response = `Let's think about this step by step. ${response} This is a learning process, and that's okay.`;
+    } else if (avatarPersonality.includes('professional')) {
+      response = `${response} Based on evidence-based approaches, we can work through this systematically.`;
     }
 
     // Enhanced response with accent-specific language patterns
-    if (avatar && avatar.ethnicity) {
+    if (avatar.ethnicity) {
       const ethnicity = avatar.ethnicity;
       
       // Add accent-specific language patterns
@@ -532,6 +562,9 @@ const TherapyBot = () => {
               selectedAvatar={selectedAvatar}
               onAvatarSelect={setSelectedAvatar}
             />
+
+            {/* Perplexity API Key Setup */}
+            <PerplexityKeyManager onApiKeyChange={setPerplexityApiKey} />
 
             {/* Session Configuration */}
             <Card className="bg-white/80 backdrop-blur-sm border-purple-200 shadow-lg">
@@ -860,6 +893,8 @@ const TherapyBot = () => {
 
             <TabsContent value="settings" className="mt-6">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <PerplexityKeyManager onApiKeyChange={setPerplexityApiKey} />
+                
                 <Card className="bg-white/80 backdrop-blur-sm border-purple-200 shadow-lg">
                   <CardHeader>
                     <CardTitle className="text-lg text-purple-800">Profile Settings</CardTitle>

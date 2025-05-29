@@ -20,6 +20,14 @@ const VirtualMindReader: React.FC<VirtualMindReaderProps> = ({
 }) => {
   const [analysis, setAnalysis] = useState<CognitiveAnalysis | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [perplexityApiKey, setPerplexityApiKey] = useState<string | null>(null);
+
+  useEffect(() => {
+    const storedKey = localStorage.getItem('perplexityApiKey');
+    if (storedKey) {
+      setPerplexityApiKey(storedKey);
+    }
+  }, []);
 
   useEffect(() => {
     if (currentText.length > 50) {
@@ -75,6 +83,8 @@ const VirtualMindReader: React.FC<VirtualMindReaderProps> = ({
       <PredictiveThoughts 
         currentText={currentText}
         onRecommendation={onThoughtRecommendation}
+        therapyType="general"
+        perplexityApiKey={perplexityApiKey}
       />
     </div>
   );

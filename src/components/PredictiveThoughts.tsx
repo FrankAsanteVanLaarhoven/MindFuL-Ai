@@ -1,14 +1,16 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Brain, Lightbulb, TrendingUp, Zap, Clock } from 'lucide-react';
+import { Brain, Lightbulb, TrendingUp, Zap, Clock, Sparkles } from 'lucide-react';
+import { createPerplexityService } from '@/services/perplexityService';
 
 interface PredictiveThoughtsProps {
   currentText?: string;
   onRecommendation?: (thought: string) => void;
+  therapyType?: 'CBT' | 'DBT' | 'general';
+  perplexityApiKey?: string | null;
 }
 
 interface ThoughtPrediction {
@@ -17,15 +19,19 @@ interface ThoughtPrediction {
   confidence: number;
   category: 'positive' | 'neutral' | 'challenging';
   reasoning: string;
+  isAiGenerated?: boolean;
 }
 
 const PredictiveThoughts: React.FC<PredictiveThoughtsProps> = ({ 
   currentText = '', 
-  onRecommendation 
+  onRecommendation,
+  therapyType = 'general',
+  perplexityApiKey
 }) => {
   const [predictions, setPredictions] = useState<ThoughtPrediction[]>([]);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisProgress, setAnalysisProgress] = useState(0);
+  const [isUsingAI, setIsUsingAI] = useState(false);
 
   useEffect(() => {
     if (currentText.length > 30) {
@@ -33,11 +39,12 @@ const PredictiveThoughts: React.FC<PredictiveThoughtsProps> = ({
     } else {
       setPredictions([]);
     }
-  }, [currentText]);
+  }, [currentText, therapyType, perplexityApiKey]);
 
   const analyzePredictiveThoughts = async (text: string) => {
     setIsAnalyzing(true);
     setAnalysisProgress(0);
+    setIsUsingAI(false);
     
     // Simulate analysis progress
     const progressInterval = setInterval(() => {
@@ -50,16 +57,57 @@ const PredictiveThoughts: React.FC<PredictiveThoughtsProps> = ({
       });
     }, 150);
 
-    setTimeout(() => {
-      const newPredictions = generateThoughtPredictions(text);
-      setPredictions(newPredictions);
-      setIsAnalyzing(false);
-      setAnalysisProgress(0);
-      clearInterval(progressInterval);
-    }, 2000);
+    try {
+      let aiPredictions: ThoughtPrediction[] = [];
+      
+      // Try AI-powered predictions first if API key is available
+      if (perplexityApiKey) {
+        try {
+          setIsUsingAI(true);
+          const perplexityService = createPerplexityService(perplexityApiKey);
+          const aiThoughts = await perplexityService.generateContextualThoughts(text, therapyType);
+          
+          aiPredictions = aiThoughts.map((thought, index) => ({
+            id: `ai-${index}`,
+            thought: thought.trim(),
+            confidence: 90 + Math.floor(Math.random() * 10),
+            category: 'positive' as const,
+            reasoning: `AI-generated ${therapyType} intervention based on your expression patterns.`,
+            isAiGenerated: true
+          }));
+        } catch (error) {
+          console.error('AI prediction failed, falling back to local predictions:', error);
+        }
+      }
+
+      // Generate local predictions as backup or complement
+      const localPredictions = generateLocalThoughtPredictions(text);
+      
+      // Combine AI and local predictions, prioritizing AI
+      const combinedPredictions = aiPredictions.length > 0 
+        ? [...aiPredictions, ...localPredictions.slice(0, 1)] 
+        : localPredictions;
+
+      setTimeout(() => {
+        setPredictions(combinedPredictions.slice(0, 3));
+        setIsAnalyzing(false);
+        setAnalysisProgress(0);
+        clearInterval(progressInterval);
+      }, aiPredictions.length > 0 ? 500 : 2000);
+      
+    } catch (error) {
+      console.error('Analysis failed:', error);
+      setTimeout(() => {
+        const fallbackPredictions = generateLocalThoughtPredictions(text);
+        setPredictions(fallbackPredictions);
+        setIsAnalyzing(false);
+        setAnalysisProgress(0);
+        clearInterval(progressInterval);
+      }, 1000);
+    }
   };
 
-  const generateThoughtPredictions = (text: string): ThoughtPrediction[] => {
+  const generateLocalThoughtPredictions = (text: string): ThoughtPrediction[] => {
     const lowerText = text.toLowerCase();
     const predictions: ThoughtPrediction[] = [];
 
@@ -143,7 +191,7 @@ const PredictiveThoughts: React.FC<PredictiveThoughtsProps> = ({
       return [generalPredictions[Math.floor(Math.random() * generalPredictions.length)]];
     }
 
-    return predictions.slice(0, 3); // Limit to 3 predictions
+    return predictions.slice(0, 3);
   };
 
   const getCategoryColor = (category: string) => {
@@ -168,9 +216,18 @@ const PredictiveThoughts: React.FC<PredictiveThoughtsProps> = ({
         <CardTitle className="text-xl text-indigo-800 flex items-center gap-2">
           <Brain className="w-5 h-5" />
           Predictive Thoughts AI
+          {perplexityApiKey && (
+            <Badge className="bg-purple-100 text-purple-800 border-purple-200">
+              <Sparkles className="w-3 h-3 mr-1" />
+              AI Enhanced
+            </Badge>
+          )}
         </CardTitle>
         <CardDescription>
-          AI-powered thought recommendations based on your current expression
+          {perplexityApiKey 
+            ? `AI-powered ${therapyType} thought recommendations based on your current expression`
+            : "Pattern-based thought recommendations based on your current expression"
+          }
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -179,7 +236,9 @@ const PredictiveThoughts: React.FC<PredictiveThoughtsProps> = ({
             <div className="text-center">
               <div className="animate-pulse flex items-center justify-center gap-2 text-indigo-600 mb-3">
                 <Brain className="w-5 h-5" />
-                <span>Analyzing thought patterns...</span>
+                <span>
+                  {isUsingAI ? 'AI analyzing thought patterns...' : 'Analyzing thought patterns...'}
+                </span>
               </div>
               <Progress value={analysisProgress} className="h-2" />
             </div>
@@ -188,7 +247,9 @@ const PredictiveThoughts: React.FC<PredictiveThoughtsProps> = ({
           <div className="space-y-4">
             <div className="flex items-center gap-2 text-sm text-indigo-700">
               <Lightbulb className="w-4 h-4" />
-              <span>Recommended thoughts based on your expression:</span>
+              <span>
+                {perplexityApiKey ? 'AI-powered recommendations:' : 'Recommended thoughts:'}
+              </span>
             </div>
             
             {predictions.map((prediction) => (
@@ -204,6 +265,12 @@ const PredictiveThoughts: React.FC<PredictiveThoughtsProps> = ({
                         <TrendingUp className="w-3 h-3" />
                         {prediction.confidence}% confidence
                       </span>
+                      {prediction.isAiGenerated && (
+                        <Badge className="bg-purple-100 text-purple-700 border-purple-200 text-xs">
+                          <Sparkles className="w-3 h-3 mr-1" />
+                          AI
+                        </Badge>
+                      )}
                     </div>
                     
                     <p className="text-sm font-medium text-gray-800 mb-2">
@@ -231,7 +298,12 @@ const PredictiveThoughts: React.FC<PredictiveThoughtsProps> = ({
           <div className="text-center py-8 text-gray-500">
             <Brain className="w-12 h-12 mx-auto mb-3 opacity-50" />
             <p>Start typing to receive thought recommendations...</p>
-            <p className="text-xs mt-2">AI will analyze your expression patterns and suggest helpful thoughts</p>
+            <p className="text-xs mt-2">
+              {perplexityApiKey 
+                ? 'AI will analyze your expression patterns and suggest personalized therapeutic thoughts'
+                : 'Pattern analysis will suggest helpful thoughts based on your input'
+              }
+            </p>
           </div>
         )}
       </CardContent>
