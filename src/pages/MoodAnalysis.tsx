@@ -7,6 +7,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { gsap } from 'gsap';
 import { useNavigate } from 'react-router-dom';
+import { aiService } from '@/services/aiService';
+import AIKeyManager from '@/components/AIKeyManager';
 
 interface RealTimeMoodData {
   mood: string;
@@ -45,6 +47,8 @@ const MoodAnalysis = () => {
     isAnalyzing: false
   });
   const [isRealTimeActive, setIsRealTimeActive] = useState(false);
+  const [apiKey, setApiKey] = useState<string | null>(null);
+  const [cameraError, setCameraError] = useState<string | null>(null);
   
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -66,7 +70,7 @@ const MoodAnalysis = () => {
       );
     }
 
-    // Request camera access
+    // Improved camera initialization
     initializeCamera();
 
     return () => {
@@ -78,19 +82,68 @@ const MoodAnalysis = () => {
 
   const initializeCamera = async () => {
     try {
+      setCameraError(null);
+      
+      // Check if camera is available
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const videoDevices = devices.filter(device => device.kind === 'videoinput');
+      
+      if (videoDevices.length === 0) {
+        setCameraError('No camera found on this device');
+        setHasCamera(false);
+        return;
+      }
+
+      // Request camera with better error handling
       const mediaStream = await navigator.mediaDevices.getUserMedia({ 
-        video: { width: 640, height: 480 } 
+        video: { 
+          width: { ideal: 640 },
+          height: { ideal: 480 },
+          facingMode: 'user' // Prefer front camera
+        } 
       });
+      
       setStream(mediaStream);
       setHasCamera(true);
       
       if (videoRef.current) {
         videoRef.current.srcObject = mediaStream;
+        // Ensure video starts playing
+        videoRef.current.onloadedmetadata = () => {
+          videoRef.current?.play().catch(console.error);
+        };
       }
-    } catch (error) {
-      console.log('Camera access denied or not available');
+      
+      toast({
+        title: "Camera access granted",
+        description: "Your camera is now ready for mood analysis"
+      });
+      
+    } catch (error: any) {
+      console.error('Camera access error:', error);
+      
+      let errorMessage = 'Camera access denied or not available';
+      if (error.name === 'NotAllowedError') {
+        errorMessage = 'Camera permission denied. Please allow camera access and refresh the page.';
+      } else if (error.name === 'NotFoundError') {
+        errorMessage = 'No camera found on this device.';
+      } else if (error.name === 'NotReadableError') {
+        errorMessage = 'Camera is being used by another application.';
+      }
+      
+      setCameraError(errorMessage);
       setHasCamera(false);
+      
+      toast({
+        title: "Camera access failed",
+        description: errorMessage,
+        variant: "destructive"
+      });
     }
+  };
+
+  const retryCamera = () => {
+    initializeCamera();
   };
 
   const captureFrame = (): string | null => {
@@ -120,37 +173,22 @@ const MoodAnalysis = () => {
     setIsAnalyzing(true);
     
     try {
-      // Simulate AI mood analysis
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      const frameData = hasCamera ? captureFrame() : undefined;
       
-      const frameData = captureFrame();
-      const mockResult = {
-        mood: 'Calm',
-        confidence: 0.85,
-        emotions: {
-          happiness: 0.7,
-          sadness: 0.1,
-          anxiety: 0.2,
-          anger: 0.0
-        },
-        suggestions: [
-          'Consider taking a short walk',
-          'Practice deep breathing exercises',
-          'Journal about your current feelings'
-        ]
-      };
+      // Use AI service for analysis
+      const result = await aiService.analyzeMood(textInput, frameData);
       
-      setAnalysisResult(mockResult);
+      setAnalysisResult(result.analysis);
       
       // Save to localStorage
       const moodEntry = {
         id: crypto.randomUUID(),
         timestamp: new Date().toISOString(),
-        mood: mockResult.mood,
-        confidence: mockResult.confidence,
+        mood: result.analysis.mood,
+        confidence: result.analysis.confidence,
         textInput: textInput.trim(),
         hasImage: !!frameData,
-        emotions: mockResult.emotions
+        emotions: result.analysis.emotions
       };
       
       const existingMoods = JSON.parse(localStorage.getItem('moodEntries') || '[]');
@@ -159,10 +197,11 @@ const MoodAnalysis = () => {
       
       toast({
         title: "Mood analyzed successfully!",
-        description: `Your mood appears to be ${mockResult.mood} with ${Math.round(mockResult.confidence * 100)}% confidence.`
+        description: `Your mood appears to be ${result.analysis.mood} with ${Math.round(result.analysis.confidence * 100)}% confidence.`
       });
       
     } catch (error) {
+      console.error('Analysis error:', error);
       toast({
         title: "Analysis failed",
         description: "Please try again later",
@@ -284,12 +323,15 @@ const MoodAnalysis = () => {
           </Button>
           <h1 className="text-4xl font-bold text-indigo-800 mb-4 flex items-center justify-center gap-3">
             <span className="text-5xl">🧠</span>
-            Real-Time Mood Analysis
+            AI-Powered Mood Analysis
           </h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
             Advanced AI-powered mood detection with live emotion tracking and interactive feedback.
           </p>
         </div>
+
+        {/* AI Key Manager */}
+        <AIKeyManager onApiKeyChange={setApiKey} />
 
         <div ref={cardRef} className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Real-Time Analysis Section */}
@@ -388,10 +430,15 @@ const MoodAnalysis = () => {
             <CardHeader>
               <CardTitle className="text-xl text-indigo-800 flex items-center gap-2">
                 <span className="text-2xl">💭</span>
-                Traditional Analysis
+                AI Analysis
+                {apiKey && (
+                  <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
+                    AI Enhanced
+                  </span>
+                )}
               </CardTitle>
               <CardDescription>
-                Text and camera-based mood analysis
+                Text and camera-based mood analysis with AI
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -408,11 +455,24 @@ const MoodAnalysis = () => {
                 />
               </div>
               
-              {hasCamera && (
-                <div>
-                  <label className="text-sm font-medium text-gray-700 mb-2 block">
-                    Facial Expression Analysis
-                  </label>
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-2 block">
+                  Camera Analysis
+                </label>
+                {cameraError ? (
+                  <div className="space-y-3">
+                    <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+                      <p className="text-sm text-red-700">{cameraError}</p>
+                    </div>
+                    <Button
+                      onClick={retryCamera}
+                      variant="outline"
+                      className="w-full"
+                    >
+                      🔄 Retry Camera Access
+                    </Button>
+                  </div>
+                ) : hasCamera ? (
                   <div className="relative rounded-lg overflow-hidden border border-indigo-200">
                     <video
                       ref={videoRef}
@@ -421,12 +481,24 @@ const MoodAnalysis = () => {
                       muted
                       className="w-full h-48 object-cover"
                     />
-                    <div className="absolute top-2 right-2 bg-green-500 text-white text-xs px-2 py-1 rounded">
+                    <div className="absolute top-2 right-2 bg-green-500 text-white text-xs px-2 py-1 rounded flex items-center gap-1">
+                      <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
                       Live
                     </div>
                   </div>
-                </div>
-              )}
+                ) : (
+                  <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg text-center">
+                    <p className="text-sm text-gray-600 mb-2">Camera not available</p>
+                    <Button
+                      onClick={retryCamera}
+                      variant="outline"
+                      size="sm"
+                    >
+                      🔄 Enable Camera
+                    </Button>
+                  </div>
+                )}
+              </div>
               
               <Button
                 onClick={() => analyzeMood()}
@@ -436,12 +508,12 @@ const MoodAnalysis = () => {
                 {isAnalyzing ? (
                   <div className="flex items-center justify-center gap-2">
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    Analyzing...
+                    {apiKey ? 'AI Analyzing...' : 'Analyzing...'}
                   </div>
                 ) : (
                   <div className="flex items-center justify-center gap-2">
                     <span>🔍</span>
-                    Analyze Mood
+                    {apiKey ? 'AI Analyze Mood' : 'Analyze Mood'}
                   </div>
                 )}
               </Button>
@@ -473,7 +545,7 @@ const MoodAnalysis = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <h5 className="font-medium text-gray-800">Suggestions:</h5>
+                    <h5 className="font-medium text-gray-800">AI Suggestions:</h5>
                     {analysisResult.suggestions.map((suggestion, index) => (
                       <div key={index} className="flex items-center gap-2 text-gray-700 text-sm">
                         <span className="text-indigo-500">•</span>
