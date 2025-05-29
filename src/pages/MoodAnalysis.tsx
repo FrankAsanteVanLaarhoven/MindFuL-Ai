@@ -9,6 +9,8 @@ import { gsap } from 'gsap';
 import { useNavigate } from 'react-router-dom';
 import { aiService } from '@/services/aiService';
 import AIKeyManager from '@/components/AIKeyManager';
+import FaceDetectionGuide from '@/components/FaceDetectionGuide';
+import MoodGestureGuide from '@/components/MoodGestureGuide';
 
 interface RealTimeMoodData {
   mood: string;
@@ -50,6 +52,9 @@ const MoodAnalysis = () => {
   const [apiKey, setApiKey] = useState<string | null>(null);
   const [cameraError, setCameraError] = useState<string | null>(null);
   const [isCameraLoading, setIsCameraLoading] = useState(false);
+  const [showFaceGuide, setShowFaceGuide] = useState(false);
+  const [showGestureGuide, setShowGestureGuide] = useState(false);
+  const [faceDetectedMood, setFaceDetectedMood] = useState('Neutral');
   
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -386,6 +391,38 @@ const MoodAnalysis = () => {
     }
   };
 
+  const handleFaceMoodChange = (mood: string, confidence: number) => {
+    setFaceDetectedMood(mood);
+    // Update real-time mood with face detection data
+    setRealTimeMood(prev => ({
+      ...prev,
+      mood,
+      confidence,
+      emotions: {
+        happiness: mood === 'Happy' ? confidence : prev.emotions.happiness * 0.9,
+        sadness: mood === 'Sad' ? confidence : prev.emotions.sadness * 0.9,
+        anxiety: mood === 'Anxious' ? confidence : prev.emotions.anxiety * 0.9,
+        anger: mood === 'Angry' ? confidence : prev.emotions.anger * 0.9
+      }
+    }));
+  };
+
+  const handleGestureComplete = (exercise: string, targetMood: string) => {
+    toast({
+      title: "Exercise completed! 🎉",
+      description: `${exercise} finished. Targeting ${targetMood} mood.`
+    });
+    
+    // Simulate mood improvement after exercise
+    setTimeout(() => {
+      setRealTimeMood(prev => ({
+        ...prev,
+        mood: targetMood,
+        confidence: Math.min(prev.confidence + 0.1, 1.0)
+      }));
+    }, 1000);
+  };
+
   useEffect(() => {
     return () => {
       if (intervalRef.current) {
@@ -393,6 +430,18 @@ const MoodAnalysis = () => {
       }
     };
   }, []);
+
+  const toggleFaceGuide = () => {
+    if (!hasCamera) {
+      toast({
+        title: "Camera required",
+        description: "Please enable camera first to use face detection",
+        variant: "destructive"
+      });
+      return;
+    }
+    setShowFaceGuide(!showFaceGuide);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-4">
@@ -413,7 +462,7 @@ const MoodAnalysis = () => {
             AI-Powered Mood Analysis
           </h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Advanced AI-powered mood detection with live emotion tracking and interactive feedback.
+            Advanced AI-powered mood detection with live emotion tracking, face detection, and interactive feedback.
           </p>
         </div>
 
@@ -427,9 +476,29 @@ const MoodAnalysis = () => {
               <CardTitle className="text-xl text-indigo-800 flex items-center gap-2">
                 <span className="text-2xl">📊</span>
                 Live Mood Detection
+                {hasCamera && (
+                  <div className="flex gap-2 ml-auto">
+                    <Button
+                      onClick={toggleFaceGuide}
+                      size="sm"
+                      variant={showFaceGuide ? "secondary" : "outline"}
+                      className="text-xs"
+                    >
+                      👁️ Face Guide
+                    </Button>
+                    <Button
+                      onClick={() => setShowGestureGuide(!showGestureGuide)}
+                      size="sm"
+                      variant={showGestureGuide ? "secondary" : "outline"}
+                      className="text-xs"
+                    >
+                      🎯 Exercises
+                    </Button>
+                  </div>
+                )}
               </CardTitle>
               <CardDescription>
-                Real-time emotion analysis with interactive visual feedback
+                Real-time emotion analysis with interactive visual feedback and face detection
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -452,6 +521,9 @@ const MoodAnalysis = () => {
                 <div className={`w-3 h-3 rounded-full ${isRealTimeActive ? 'bg-green-500 animate-pulse' : 'bg-gray-400'}`} />
                 <span className="text-sm text-gray-600">
                   {isRealTimeActive ? 'Analyzing in real-time...' : 'Analysis stopped'}
+                  {showFaceGuide && hasCamera && (
+                    <span className="ml-2 text-blue-600 font-medium">+ Face Detection Active</span>
+                  )}
                 </span>
               </div>
 
@@ -469,6 +541,11 @@ const MoodAnalysis = () => {
                   <h3 className="text-2xl font-bold text-indigo-800 mb-2">
                     {realTimeMood.mood}
                   </h3>
+                  {showFaceGuide && (
+                    <p className="text-sm text-blue-600 mb-2">
+                      Face Detection: {faceDetectedMood}
+                    </p>
+                  )}
                   <div className="space-y-2">
                     <p className="text-sm text-gray-600">Confidence Level</p>
                     <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
@@ -695,6 +772,24 @@ const MoodAnalysis = () => {
             </CardContent>
           </Card>
         </div>
+
+        {/* Face Detection Guide */}
+        {showFaceGuide && (
+          <FaceDetectionGuide
+            videoRef={videoRef}
+            isActive={showFaceGuide && hasCamera}
+            onMoodChange={handleFaceMoodChange}
+          />
+        )}
+
+        {/* Mood Gesture Guide */}
+        {showGestureGuide && (
+          <MoodGestureGuide
+            isActive={showGestureGuide}
+            currentMood={faceDetectedMood || realTimeMood.mood}
+            onGestureComplete={handleGestureComplete}
+          />
+        )}
       </div>
     </div>
   );
