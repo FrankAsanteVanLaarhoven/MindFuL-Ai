@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useRef, useEffect } from 'react';
@@ -44,8 +43,8 @@ const MoodAnalysis = () => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [hasCamera, setHasCamera] = useState(false);
-  const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
-  const [realTimeMood, setRealTimeMood] = useState<RealTimeMoodData>({
+  const [analysisResult, setAnalysisResult] = useState<any>(null);
+  const [realTimeMood, setRealTimeMood] = useState({
     mood: 'Neutral',
     confidence: 0,
     emotions: { happiness: 0, sadness: 0, anxiety: 0, anger: 0 },
@@ -91,6 +90,21 @@ const MoodAnalysis = () => {
 
   const captureFrame = () => {
     return captureFrameRef.current();
+  };
+
+  const handleCameraMoodChange = (mood: string, confidence: number) => {
+    setFaceDetectedMood(mood);
+    setRealTimeMood(prev => ({
+      ...prev,
+      mood,
+      confidence,
+      emotions: {
+        happiness: mood === 'happy' ? confidence : prev.emotions.happiness * 0.9,
+        sadness: mood === 'sad' ? confidence : prev.emotions.sadness * 0.9,
+        anxiety: mood === 'fearful' ? confidence : prev.emotions.anxiety * 0.9,
+        anger: mood === 'angry' ? confidence : prev.emotions.anger * 0.9
+      }
+    }));
   };
 
   const analyzeMood = async () => {
@@ -286,6 +300,7 @@ const MoodAnalysis = () => {
               apiKey={apiKey}
               onCameraChange={handleCameraChange}
               onFrameCapture={handleFrameCapture}
+              onMoodChange={handleCameraMoodChange}
             />
             <CardContent>
               <AnalysisResults analysisResult={analysisResult} />
