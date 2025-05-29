@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useRef, useEffect } from 'react';
@@ -9,12 +8,17 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useToast } from '@/hooks/use-toast';
 import { gsap } from 'gsap';
 import { useNavigate } from 'react-router-dom';
+import { Mic, MicOff, Volume2, VolumeX, MessageSquare, Settings2 } from 'lucide-react';
+import { useVoiceInteraction } from '@/hooks/useVoiceInteraction';
+import VoiceSettings from '@/components/VoiceSettings';
+import VoiceToneIndicator from '@/components/VoiceToneIndicator';
 
 interface Message {
   id: string;
   type: 'user' | 'bot';
   content: string;
   timestamp: Date;
+  voiceTone?: string;
 }
 
 const TherapyBot = () => {
@@ -23,11 +27,30 @@ const TherapyBot = () => {
   const [currentMessage, setCurrentMessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [sessionStarted, setSessionStarted] = useState(false);
+  const [inputMode, setInputMode] = useState<'text' | 'voice'>('text');
+  const [showVoiceSettings, setShowVoiceSettings] = useState(false);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  const {
+    isListening,
+    isSpeaking,
+    transcript,
+    voiceTone,
+    voiceSettings,
+    availableVoices,
+    hasAudioPermission,
+    startListening,
+    stopListening,
+    speak,
+    stopSpeaking,
+    clearTranscript,
+    setVoiceSettings,
+    initAudioContext
+  } = useVoiceInteraction();
 
   useEffect(() => {
     if (chatContainerRef.current) {
@@ -56,6 +79,11 @@ const TherapyBot = () => {
     };
     setMessages([welcomeMessage]);
     
+    // Speak welcome message if voice output is enabled
+    if (voiceSettings.enabled && voiceSettings.voiceOutput) {
+      speak(welcomeMessage.content);
+    }
+    
     toast({
       title: "Therapy session started",
       description: `${therapyType} therapy bot is ready to help you.`
@@ -80,16 +108,23 @@ const TherapyBot = () => {
       id: crypto.randomUUID(),
       type: 'user',
       content: currentMessage,
-      timestamp: new Date()
+      timestamp: new Date(),
+      voiceTone: inputMode === 'voice' ? voiceTone.tone : undefined
     };
 
     setMessages(prev => [...prev, userMessage]);
     setCurrentMessage('');
+    clearTranscript();
     setIsTyping(true);
+
+    // Stop listening when sending message
+    if (isListening) {
+      stopListening();
+    }
 
     // Simulate bot response
     setTimeout(async () => {
-      const botResponse = await generateBotResponse(currentMessage, therapyType);
+      const botResponse = await generateBotResponse(currentMessage, therapyType, voiceTone.tone);
       const botMessage: Message = {
         id: crypto.randomUUID(),
         type: 'bot',
@@ -99,11 +134,64 @@ const TherapyBot = () => {
       
       setMessages(prev => [...prev, botMessage]);
       setIsTyping(false);
+
+      // Speak bot response if voice output is enabled
+      if (voiceSettings.enabled && voiceSettings.voiceOutput) {
+        speak(botResponse);
+      }
     }, 1500);
   };
 
-  const generateBotResponse = async (userInput: string, type: string): Promise<string> => {
-    // Simulated AI responses based on therapy type
+  const generateBotResponse = async (userInput: string, type: string, tone?: string): Promise<string> => {
+    // Enhanced responses that consider voice tone
+    const toneAwareResponses = {
+      CBT: {
+        calm: [
+          "I can hear the calm in your voice, which is wonderful. Let's explore what's helping you maintain this peaceful state and how we can build on it.",
+          "Your calm tone suggests you're in a good headspace right now. This is an excellent opportunity to examine your thoughts more clearly."
+        ],
+        stressed: [
+          "I notice some tension in your voice. That's completely understandable. Let's work together to identify what thoughts might be contributing to this stress.",
+          "Your voice reflects the stress you're experiencing. Remember, stress often comes from our thought patterns. What specific thoughts are going through your mind right now?"
+        ],
+        excited: [
+          "I can hear the energy in your voice! That's great. Let's channel this positive energy into exploring what thoughts and behaviors are contributing to this feeling.",
+          "Your excitement comes through clearly. This positive emotional state can help us examine your thought patterns from a different perspective."
+        ],
+        sad: [
+          "I can hear the sadness in your voice, and I want you to know that's okay. These feelings are valid. Let's gently explore what thoughts might be connected to this sadness.",
+          "The pain in your voice is palpable. Remember that you're not alone in this. Let's look at what thoughts are contributing to these difficult feelings."
+        ]
+      },
+      DBT: {
+        calm: [
+          "Your calm voice shows you're practicing good emotional regulation. Let's use this mindful state to explore your current experience.",
+          "I can hear the groundedness in your voice. This is a perfect time to practice mindfulness and observe your thoughts without judgment."
+        ],
+        stressed: [
+          "I hear the distress in your voice. Let's practice some distress tolerance skills together. Can you try the 5-4-3-2-1 grounding technique with me?",
+          "Your voice shows you're struggling right now. That's okay. Let's focus on getting through this moment using some coping skills."
+        ],
+        excited: [
+          "Your excitement is wonderful to hear! Let's practice mindfulness to fully experience this positive emotion while staying present.",
+          "I can hear the joy in your voice. This is a great opportunity to practice savoring positive emotions mindfully."
+        ],
+        sad: [
+          "The sadness in your voice tells me you're hurting. Let's practice radical acceptance and self-compassion together.",
+          "I hear your pain. Remember, all emotions are temporary. Let's work on sitting with this feeling while practicing self-kindness."
+        ]
+      }
+    };
+
+    // Get tone-aware response if available
+    if (tone && toneAwareResponses[type as keyof typeof toneAwareResponses]) {
+      const toneResponses = toneAwareResponses[type as keyof typeof toneAwareResponses][tone as keyof typeof toneAwareResponses.CBT];
+      if (toneResponses && toneResponses.length > 0) {
+        return toneResponses[Math.floor(Math.random() * toneResponses.length)];
+      }
+    }
+
+    // ... keep existing code (fallback to original responses)
     const responses = {
       CBT: [
         "I hear that you're experiencing some challenging thoughts. Let's explore this together. Can you tell me more about what specific thoughts are going through your mind when you feel this way?",
@@ -124,6 +212,14 @@ const TherapyBot = () => {
 
     const typeResponses = responses[type as keyof typeof responses] || responses.general;
     return typeResponses[Math.floor(Math.random() * typeResponses.length)];
+  };
+
+  const toggleVoiceInput = () => {
+    if (inputMode === 'voice' && isListening) {
+      stopListening();
+    } else if (inputMode === 'voice' && !isListening) {
+      startListening();
+    }
   };
 
   const therapyTypes = {
@@ -164,7 +260,7 @@ const TherapyBot = () => {
 
         {!sessionStarted ? (
           /* Session Setup */
-          <div ref={chatContainerRef}>
+          <div ref={chatContainerRef} className="space-y-6">
             <Card className="bg-white/80 backdrop-blur-sm border-purple-200 shadow-lg">
               <CardHeader>
                 <CardTitle className="text-xl text-purple-800 flex items-center gap-2">
@@ -220,89 +316,191 @@ const TherapyBot = () => {
                 </Button>
               </CardContent>
             </Card>
+
+            {/* Voice Settings */}
+            <VoiceSettings
+              voiceSettings={voiceSettings}
+              setVoiceSettings={setVoiceSettings}
+              availableVoices={availableVoices}
+              hasAudioPermission={hasAudioPermission}
+              initAudioContext={initAudioContext}
+              isListening={isListening}
+              isSpeaking={isSpeaking}
+            />
           </div>
         ) : (
           /* Chat Interface */
           <div ref={chatContainerRef} className="space-y-4">
-            <Card className="bg-white/80 backdrop-blur-sm border-purple-200 shadow-lg">
-              <CardHeader className="pb-4">
-                <div className="flex justify-between items-center">
-                  <CardTitle className="text-lg text-purple-800 flex items-center gap-2">
-                    <span className="text-xl">💬</span>
-                    {therapyTypes[therapyType].name} Session
-                  </CardTitle>
-                  <Button 
-                    onClick={() => setSessionStarted(false)}
-                    variant="outline"
-                    size="sm"
-                  >
-                    New Session
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="h-96 overflow-y-auto border border-gray-200 rounded-lg p-4 mb-4 bg-gray-50/50">
-                  {messages.map((message) => (
-                    <div
-                      key={message.id}
-                      className={`mb-4 flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
-                    >
-                      <div
-                        className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
-                          message.type === 'user'
-                            ? 'bg-purple-500 text-white'
-                            : 'bg-white border border-gray-200 text-gray-800'
-                        }`}
-                      >
-                        <p className="text-sm">{message.content}</p>
-                        <p className={`text-xs mt-1 ${
-                          message.type === 'user' ? 'text-purple-100' : 'text-gray-500'
-                        }`}>
-                          {message.timestamp.toLocaleTimeString()}
-                        </p>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+              {/* Main Chat */}
+              <div className="lg:col-span-2">
+                <Card className="bg-white/80 backdrop-blur-sm border-purple-200 shadow-lg">
+                  <CardHeader className="pb-4">
+                    <div className="flex justify-between items-center">
+                      <CardTitle className="text-lg text-purple-800 flex items-center gap-2">
+                        <span className="text-xl">💬</span>
+                        {therapyTypes[therapyType].name} Session
+                      </CardTitle>
+                      <div className="flex gap-2">
+                        <Button 
+                          onClick={() => setShowVoiceSettings(!showVoiceSettings)}
+                          variant="outline"
+                          size="sm"
+                        >
+                          <Settings2 className="w-4 h-4" />
+                        </Button>
+                        <Button 
+                          onClick={() => setSessionStarted(false)}
+                          variant="outline"
+                          size="sm"
+                        >
+                          New Session
+                        </Button>
                       </div>
                     </div>
-                  ))}
-                  
-                  {isTyping && (
-                    <div className="flex justify-start mb-4">
-                      <div className="bg-white border border-gray-200 rounded-lg px-4 py-2">
-                        <div className="flex space-x-1">
-                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
-                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="h-96 overflow-y-auto border border-gray-200 rounded-lg p-4 mb-4 bg-gray-50/50">
+                      {messages.map((message) => (
+                        <div
+                          key={message.id}
+                          className={`mb-4 flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
+                        >
+                          <div
+                            className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
+                              message.type === 'user'
+                                ? 'bg-purple-500 text-white'
+                                : 'bg-white border border-gray-200 text-gray-800'
+                            }`}
+                          >
+                            <p className="text-sm">{message.content}</p>
+                            <div className="flex justify-between items-center mt-1">
+                              <p className={`text-xs ${
+                                message.type === 'user' ? 'text-purple-100' : 'text-gray-500'
+                              }`}>
+                                {message.timestamp.toLocaleTimeString()}
+                              </p>
+                              {message.voiceTone && (
+                                <span className={`text-xs px-2 py-1 rounded-full ${
+                                  message.type === 'user' ? 'bg-purple-400 text-purple-100' : 'bg-gray-100 text-gray-600'
+                                }`}>
+                                  Tone: {message.voiceTone}
+                                </span>
+                              )}
+                            </div>
+                          </div>
                         </div>
+                      ))}
+                      
+                      {isTyping && (
+                        <div className="flex justify-start mb-4">
+                          <div className="bg-white border border-gray-200 rounded-lg px-4 py-2">
+                            <div className="flex space-x-1">
+                              <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                              <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
+                              <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                      
+                      <div ref={messagesEndRef} />
+                    </div>
+                    
+                    {/* Input Mode Selector */}
+                    {voiceSettings.enabled && (
+                      <div className="flex gap-2 mb-4">
+                        <Button
+                          onClick={() => setInputMode('text')}
+                          variant={inputMode === 'text' ? 'default' : 'outline'}
+                          size="sm"
+                          className="flex items-center gap-2"
+                        >
+                          <MessageSquare className="w-4 h-4" />
+                          Text
+                        </Button>
+                        <Button
+                          onClick={() => setInputMode('voice')}
+                          variant={inputMode === 'voice' ? 'default' : 'outline'}
+                          size="sm"
+                          className="flex items-center gap-2"
+                          disabled={!voiceSettings.voiceInput || hasAudioPermission !== true}
+                        >
+                          {isListening ? <Mic className="w-4 h-4" /> : <MicOff className="w-4 h-4" />}
+                          Voice
+                        </Button>
+                      </div>
+                    )}
+                    
+                    <div className="flex gap-2">
+                      <Textarea
+                        value={currentMessage}
+                        onChange={(e) => setCurrentMessage(e.target.value)}
+                        placeholder={inputMode === 'voice' ? "Speak your message..." : "Share your thoughts and feelings..."}
+                        className="flex-1 resize-none border-purple-200 focus:border-purple-400 focus:ring-purple-400"
+                        rows={2}
+                        onKeyPress={(e) => {
+                          if (e.key === 'Enter' && !e.shiftKey) {
+                            e.preventDefault();
+                            sendMessage();
+                          }
+                        }}
+                        disabled={inputMode === 'voice'}
+                      />
+                      <div className="flex flex-col gap-2">
+                        {inputMode === 'voice' && voiceSettings.enabled && (
+                          <Button
+                            onClick={toggleVoiceInput}
+                            variant={isListening ? 'destructive' : 'outline'}
+                            className="px-4"
+                            disabled={!voiceSettings.voiceInput || hasAudioPermission !== true}
+                          >
+                            {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+                          </Button>
+                        )}
+                        
+                        {isSpeaking && (
+                          <Button
+                            onClick={stopSpeaking}
+                            variant="outline"
+                            className="px-4"
+                          >
+                            <VolumeX className="w-4 h-4" />
+                          </Button>
+                        )}
+                        
+                        <Button
+                          onClick={sendMessage}
+                          disabled={!currentMessage.trim() || isTyping || (inputMode === 'voice' && isListening)}
+                          className="bg-purple-500 hover:bg-purple-600 text-white px-6"
+                        >
+                          Send
+                        </Button>
                       </div>
                     </div>
-                  )}
-                  
-                  <div ref={messagesEndRef} />
-                </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Side Panel */}
+              <div className="space-y-4">
+                {/* Voice Tone Indicator */}
+                <VoiceToneIndicator voiceTone={voiceTone} isListening={isListening} />
                 
-                <div className="flex gap-2">
-                  <Textarea
-                    value={currentMessage}
-                    onChange={(e) => setCurrentMessage(e.target.value)}
-                    placeholder="Share your thoughts and feelings..."
-                    className="flex-1 resize-none border-purple-200 focus:border-purple-400 focus:ring-purple-400"
-                    rows={2}
-                    onKeyPress={(e) => {
-                      if (e.key === 'Enter' && !e.shiftKey) {
-                        e.preventDefault();
-                        sendMessage();
-                      }
-                    }}
+                {/* Voice Settings Panel */}
+                {showVoiceSettings && (
+                  <VoiceSettings
+                    voiceSettings={voiceSettings}
+                    setVoiceSettings={setVoiceSettings}
+                    availableVoices={availableVoices}
+                    hasAudioPermission={hasAudioPermission}
+                    initAudioContext={initAudioContext}
+                    isListening={isListening}
+                    isSpeaking={isSpeaking}
                   />
-                  <Button
-                    onClick={sendMessage}
-                    disabled={!currentMessage.trim() || isTyping}
-                    className="bg-purple-500 hover:bg-purple-600 text-white px-6"
-                  >
-                    Send
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+                )}
+              </div>
+            </div>
           </div>
         )}
       </div>
