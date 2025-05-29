@@ -46,24 +46,6 @@ const CameraManager: React.FC<CameraManagerProps> = ({ onCameraChange, onFrameCa
     onCameraChange(hasCamera, stream);
   }, [hasCamera, stream, onCameraChange]);
 
-  const checkCameraAvailability = async () => {
-    try {
-      const devices = await navigator.mediaDevices.enumerateDevices();
-      const videoDevices = devices.filter(device => device.kind === 'videoinput');
-      
-      if (videoDevices.length === 0) {
-        setCameraError('No camera found on this device');
-        setHasCamera(false);
-      } else {
-        setCameraError(null);
-      }
-    } catch (error) {
-      console.error('Error checking camera availability:', error);
-      setCameraError('Unable to check camera availability');
-      setHasCamera(false);
-    }
-  };
-
   const initializeCamera = async () => {
     if (isCameraLoading) return;
     
@@ -177,39 +159,13 @@ const CameraManager: React.FC<CameraManagerProps> = ({ onCameraChange, onFrameCa
     onFrameCapture(captureFrame);
   }, [hasCamera, onFrameCapture]);
 
-  // Check camera availability on mount (but don't start it)
-  useEffect(() => {
-    checkCameraAvailability();
-  }, []);
-
   return (
     <div>
       <canvas ref={canvasRef} style={{ display: 'none' }} />
       <label className="text-sm font-medium text-gray-700 mb-2 block">
         Camera Analysis
       </label>
-      {cameraError ? (
-        <div className="space-y-3">
-          <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-            <p className="text-sm text-red-700">{cameraError}</p>
-          </div>
-          <Button
-            onClick={initializeCamera}
-            disabled={isCameraLoading}
-            variant="outline"
-            className="w-full"
-          >
-            {isCameraLoading ? (
-              <div className="flex items-center gap-2">
-                <div className="w-4 h-4 border-2 border-gray-500 border-t-transparent rounded-full animate-spin" />
-                Connecting Camera...
-              </div>
-            ) : (
-              '🔄 Enable Camera'
-            )}
-          </Button>
-        </div>
-      ) : hasCamera ? (
+      {hasCamera ? (
         <div className="space-y-3">
           <div className="relative rounded-lg overflow-hidden border border-indigo-200 bg-black">
             <video
@@ -254,6 +210,11 @@ const CameraManager: React.FC<CameraManagerProps> = ({ onCameraChange, onFrameCa
               '📹 Enable Camera'
             )}
           </Button>
+        </div>
+      )}
+      {cameraError && (
+        <div className="mt-3 p-4 bg-red-50 border border-red-200 rounded-lg">
+          <p className="text-sm text-red-700">{cameraError}</p>
         </div>
       )}
     </div>
