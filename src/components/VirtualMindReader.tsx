@@ -1,10 +1,10 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Brain, Eye, Heart, Zap, TrendingUp } from 'lucide-react';
+import PredictiveThoughts from './PredictiveThoughts';
 
 interface CognitiveAnalysis {
   emotion: string;
@@ -20,12 +20,14 @@ interface VirtualMindReaderProps {
   userProfile?: any;
   currentText?: string;
   voiceTone?: string;
+  onThoughtRecommendation?: (thought: string) => void;
 }
 
 const VirtualMindReader: React.FC<VirtualMindReaderProps> = ({ 
   userProfile, 
   currentText = '', 
-  voiceTone 
+  voiceTone,
+  onThoughtRecommendation
 }) => {
   const [analysis, setAnalysis] = useState<CognitiveAnalysis | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -164,113 +166,122 @@ const VirtualMindReader: React.FC<VirtualMindReaderProps> = ({
   };
 
   return (
-    <Card className="bg-white/80 backdrop-blur-sm border-indigo-200 shadow-lg">
-      <CardHeader>
-        <CardTitle className="text-xl text-indigo-800 flex items-center gap-2">
-          <Brain className="w-5 h-5" />
-          Virtual Mind Reader
-        </CardTitle>
-        <CardDescription>
-          Cognitive and contextual analysis of your mental state
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {isAnalyzing ? (
-          <div className="text-center py-8">
-            <div className="animate-spin w-8 h-8 border-4 border-indigo-200 border-t-indigo-600 rounded-full mx-auto mb-3"></div>
-            <p className="text-indigo-600">Analyzing your cognitive patterns...</p>
-          </div>
-        ) : analysis ? (
-          <div className="space-y-4">
-            {/* Emotion Detection */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Heart className="w-4 h-4 text-pink-500" />
-                <span className="font-medium">Detected Emotion:</span>
-              </div>
-              <Badge className={`${getEmotionColor(analysis.emotion)} bg-transparent border-current`}>
-                {analysis.emotion} ({analysis.confidence}%)
-              </Badge>
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* Original Virtual Mind Reader */}
+      <Card className="bg-white/80 backdrop-blur-sm border-indigo-200 shadow-lg">
+        <CardHeader>
+          <CardTitle className="text-xl text-indigo-800 flex items-center gap-2">
+            <Brain className="w-5 h-5" />
+            Virtual Mind Reader
+          </CardTitle>
+          <CardDescription>
+            Cognitive and contextual analysis of your mental state
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {isAnalyzing ? (
+            <div className="text-center py-8">
+              <div className="animate-spin w-8 h-8 border-4 border-indigo-200 border-t-indigo-600 rounded-full mx-auto mb-3"></div>
+              <p className="text-indigo-600">Analyzing your cognitive patterns...</p>
             </div>
-            
-            {/* Metrics */}
-            <div className="grid grid-cols-1 gap-4">
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-medium flex items-center gap-1">
-                    <Zap className="w-3 h-3" />
-                    Stress Level
-                  </span>
-                  <span className="text-sm">{analysis.stressLevel}%</span>
+          ) : analysis ? (
+            <div className="space-y-4">
+              {/* Emotion Detection */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Heart className="w-4 h-4 text-pink-500" />
+                  <span className="font-medium">Detected Emotion:</span>
                 </div>
-                <Progress value={analysis.stressLevel} className="h-2" />
+                <Badge className={`${getEmotionColor(analysis.emotion)} bg-transparent border-current`}>
+                  {analysis.emotion} ({analysis.confidence}%)
+                </Badge>
               </div>
               
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-medium flex items-center gap-1">
-                    <Brain className="w-3 h-3" />
-                    Cognitive Load
-                  </span>
-                  <span className="text-sm">{analysis.cognitiveLoad}%</span>
+              {/* Metrics */}
+              <div className="grid grid-cols-1 gap-4">
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium flex items-center gap-1">
+                      <Zap className="w-3 h-3" />
+                      Stress Level
+                    </span>
+                    <span className="text-sm">{analysis.stressLevel}%</span>
+                  </div>
+                  <Progress value={analysis.stressLevel} className="h-2" />
                 </div>
-                <Progress value={analysis.cognitiveLoad} className="h-2" />
+                
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium flex items-center gap-1">
+                      <Brain className="w-3 h-3" />
+                      Cognitive Load
+                    </span>
+                    <span className="text-sm">{analysis.cognitiveLoad}%</span>
+                  </div>
+                  <Progress value={analysis.cognitiveLoad} className="h-2" />
+                </div>
+                
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium flex items-center gap-1">
+                      <TrendingUp className="w-3 h-3" />
+                      Engagement
+                    </span>
+                    <span className="text-sm">{analysis.engagement}%</span>
+                  </div>
+                  <Progress value={analysis.engagement} className="h-2" />
+                </div>
               </div>
               
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-medium flex items-center gap-1">
-                    <TrendingUp className="w-3 h-3" />
-                    Engagement
-                  </span>
-                  <span className="text-sm">{analysis.engagement}%</span>
+              {/* Insights */}
+              {analysis.insights.length > 0 && (
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <Eye className="w-4 h-4 text-indigo-500" />
+                    <span className="font-medium">Insights</span>
+                  </div>
+                  <div className="space-y-2">
+                    {analysis.insights.map((insight, index) => (
+                      <div key={index} className="text-sm bg-indigo-50 rounded-lg p-3 border border-indigo-100">
+                        {insight}
+                      </div>
+                    ))}
+                  </div>
                 </div>
-                <Progress value={analysis.engagement} className="h-2" />
-              </div>
+              )}
+              
+              {/* Recommendations */}
+              {analysis.recommendations.length > 0 && (
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <Heart className="w-4 h-4 text-green-500" />
+                    <span className="font-medium">Recommendations</span>
+                  </div>
+                  <div className="space-y-2">
+                    {analysis.recommendations.map((rec, index) => (
+                      <div key={index} className="text-sm bg-green-50 rounded-lg p-3 border border-green-100">
+                        {rec}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
-            
-            {/* Insights */}
-            {analysis.insights.length > 0 && (
-              <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <Eye className="w-4 h-4 text-indigo-500" />
-                  <span className="font-medium">Insights</span>
-                </div>
-                <div className="space-y-2">
-                  {analysis.insights.map((insight, index) => (
-                    <div key={index} className="text-sm bg-indigo-50 rounded-lg p-3 border border-indigo-100">
-                      {insight}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-            
-            {/* Recommendations */}
-            {analysis.recommendations.length > 0 && (
-              <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <Heart className="w-4 h-4 text-green-500" />
-                  <span className="font-medium">Recommendations</span>
-                </div>
-                <div className="space-y-2">
-                  {analysis.recommendations.map((rec, index) => (
-                    <div key={index} className="text-sm bg-green-50 rounded-lg p-3 border border-green-100">
-                      {rec}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        ) : (
-          <div className="text-center py-8 text-gray-500">
-            <Brain className="w-12 h-12 mx-auto mb-3 opacity-50" />
-            <p>Start typing or speaking to begin cognitive analysis...</p>
-          </div>
-        )}
-      </CardContent>
-    </Card>
+          ) : (
+            <div className="text-center py-8 text-gray-500">
+              <Brain className="w-12 h-12 mx-auto mb-3 opacity-50" />
+              <p>Start typing or speaking to begin cognitive analysis...</p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Predictive Thoughts AI */}
+      <PredictiveThoughts 
+        currentText={currentText}
+        onRecommendation={onThoughtRecommendation}
+      />
+    </div>
   );
 };
 

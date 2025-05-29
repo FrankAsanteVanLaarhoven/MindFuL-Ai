@@ -419,6 +419,15 @@ const TherapyBot = () => {
     });
   };
 
+  const handleThoughtRecommendation = (thought: string) => {
+    setCurrentMessage(thought);
+    
+    // Optionally auto-send the recommended thought
+    setTimeout(() => {
+      sendMessage();
+    }, 500);
+  };
+
   if (showProfileManager) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-rose-50 p-4">
@@ -841,6 +850,7 @@ const TherapyBot = () => {
                 userProfile={userProfile}
                 currentText={currentMessage}
                 voiceTone={voiceTone.tone}
+                onThoughtRecommendation={handleThoughtRecommendation}
               />
             </TabsContent>
 
