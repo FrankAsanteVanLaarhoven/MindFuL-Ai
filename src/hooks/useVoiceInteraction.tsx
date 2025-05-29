@@ -33,6 +33,25 @@ export const useVoiceInteraction = () => {
 
   const { isListening, startListening: startSpeechRecognition, stopListening } = useSpeechRecognition(voiceSettings.continuousListening);
 
+  // Check speech recognition support on mount
+  useEffect(() => {
+    const checkSpeechRecognitionSupport = () => {
+      const SpeechRecognitionAPI = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      if (SpeechRecognitionAPI) {
+        console.log('✅ Speech Recognition API is supported');
+        return true;
+      } else {
+        console.log('❌ Speech Recognition API is not supported in this browser');
+        return false;
+      }
+    };
+
+    const isSupported = checkSpeechRecognitionSupport();
+    if (!isSupported) {
+      setVoiceSettings(prev => ({ ...prev, voiceInput: false }));
+    }
+  }, []);
+
   // Load voice settings from localStorage
   useEffect(() => {
     const savedSettings = localStorage.getItem('voiceSettings');
@@ -68,11 +87,13 @@ export const useVoiceInteraction = () => {
 
   const initAudioContext = useCallback(async () => {
     try {
+      console.log('🎤 Requesting microphone permission...');
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      console.log('✅ Microphone permission granted');
       setHasAudioPermission(true);
       stream.getTracks().forEach(track => track.stop());
     } catch (error) {
-      console.error('Microphone permission denied:', error);
+      console.error('❌ Microphone permission denied:', error);
       setHasAudioPermission(false);
     }
   }, []);

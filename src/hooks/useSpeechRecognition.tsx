@@ -8,8 +8,8 @@ export const useSpeechRecognition = (continuousListening: boolean) => {
   const initializeRecognition = useCallback(() => {
     console.log('🎤 Initializing speech recognition...');
     
-    // Check if speech recognition is supported
-    const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
+    // Check if speech recognition is supported with better detection
+    const SpeechRecognitionAPI = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     
     if (!SpeechRecognitionAPI) {
       console.error('❌ Speech recognition not supported in this browser');
@@ -24,6 +24,7 @@ export const useSpeechRecognition = (continuousListening: boolean) => {
       recognition.interimResults = true;
       recognition.lang = 'en-US';
 
+      console.log('✅ Speech recognition instance created successfully');
       return recognition;
     } catch (error) {
       console.error('❌ Error creating speech recognition instance:', error);
@@ -69,6 +70,7 @@ export const useSpeechRecognition = (continuousListening: boolean) => {
         console.log('✅ Final transcript:', finalTranscript);
         onResult(finalTranscript, true);
       } else {
+        console.log('⏳ Interim transcript:', interimTranscript);
         onResult(interimTranscript, false);
       }
     };
@@ -76,7 +78,15 @@ export const useSpeechRecognition = (continuousListening: boolean) => {
     recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
       console.error('❌ Speech recognition error:', event.error, event.message);
       setIsListening(false);
-      onError(event.error);
+      
+      // Provide more specific error handling
+      if (event.error === 'not-allowed') {
+        onError('Microphone access denied. Please allow microphone access and try again.');
+      } else if (event.error === 'network') {
+        onError('Network error. Please check your internet connection.');
+      } else {
+        onError(`Speech recognition error: ${event.error}`);
+      }
     };
 
     recognition.onend = () => {
