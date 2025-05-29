@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import CurrentMoodSummary from '@/components/dashboard/current-mood-summary';
 import RealTimeMoodChart from '@/components/dashboard/real-time-mood-chart';
+import ResourcesPanel from '@/components/ResourcesPanel';
 import { gsap } from 'gsap';
 import { useNavigate } from 'react-router-dom';
 import { 
@@ -157,57 +158,44 @@ const Index = () => {
                     📚 Resources
                   </NavigationMenuTrigger>
                   <NavigationMenuContent>
-                    <div className="grid w-[500px] gap-3 p-4">
-                      <button
-                        onClick={() => navigate('/community')}
-                        className="flex items-center gap-3 p-3 rounded-lg hover:bg-teal-50 transition-colors"
-                      >
-                        <Users className="w-5 h-5 text-green-600" />
-                        <div className="text-left">
-                          <div className="font-medium">Community Forums</div>
-                          <div className="text-sm text-gray-600">Connect with peers & support groups</div>
+                    <div className="w-[600px] p-4">
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                        <div className="space-y-3">
+                          <button
+                            onClick={() => navigate('/community')}
+                            className="flex items-center gap-3 p-3 rounded-lg hover:bg-teal-50 transition-colors w-full"
+                          >
+                            <Users className="w-5 h-5 text-green-600" />
+                            <div className="text-left">
+                              <div className="font-medium">Community Forums</div>
+                              <div className="text-sm text-gray-600">Connect with peers & support groups</div>
+                            </div>
+                          </button>
+                          <button
+                            onClick={() => navigate('/community')}
+                            className="flex items-center gap-3 p-3 rounded-lg hover:bg-teal-50 transition-colors w-full"
+                          >
+                            <Podcast className="w-5 h-5 text-purple-600" />
+                            <div className="text-left">
+                              <div className="font-medium">Mental Health Podcasts</div>
+                              <div className="text-sm text-gray-600">Curated CBT & wellness podcasts</div>
+                            </div>
+                          </button>
+                          <button
+                            onClick={() => navigate('/teletherapy')}
+                            className="flex items-center gap-3 p-3 rounded-lg hover:bg-teal-50 transition-colors w-full"
+                          >
+                            <Video className="w-5 h-5 text-blue-600" />
+                            <div className="text-left">
+                              <div className="font-medium">Professional Therapy</div>
+                              <div className="text-sm text-gray-600">Book sessions with licensed therapists</div>
+                            </div>
+                          </button>
                         </div>
-                      </button>
-                      <button
-                        onClick={() => navigate('/community')}
-                        className="flex items-center gap-3 p-3 rounded-lg hover:bg-teal-50 transition-colors"
-                      >
-                        <Podcast className="w-5 h-5 text-purple-600" />
-                        <div className="text-left">
-                          <div className="font-medium">Mental Health Podcasts</div>
-                          <div className="text-sm text-gray-600">Curated CBT & wellness podcasts</div>
+                        <div>
+                          <ResourcesPanel />
                         </div>
-                      </button>
-                      <button
-                        onClick={() => navigate('/teletherapy')}
-                        className="flex items-center gap-3 p-3 rounded-lg hover:bg-teal-50 transition-colors"
-                      >
-                        <Video className="w-5 h-5 text-blue-600" />
-                        <div className="text-left">
-                          <div className="font-medium">Professional Therapy</div>
-                          <div className="text-sm text-gray-600">Book sessions with licensed therapists</div>
-                        </div>
-                      </button>
-                      <button
-                        onClick={() => navigate('/session-recording')}
-                        className="flex items-center gap-3 p-3 rounded-lg hover:bg-teal-50 transition-colors"
-                      >
-                        <Headphones className="w-5 h-5 text-purple-600" />
-                        <div className="text-left">
-                          <div className="font-medium">Session Recording</div>
-                          <div className="text-sm text-gray-600">Record & transcribe your sessions</div>
-                        </div>
-                      </button>
-                      <button
-                        onClick={() => navigate('/dynamic-content')}
-                        className="flex items-center gap-3 p-3 rounded-lg hover:bg-teal-50 transition-colors"
-                      >
-                        <FileText className="w-5 h-5 text-orange-600" />
-                        <div className="text-left">
-                          <div className="font-medium">Personalized Content</div>
-                          <div className="text-sm text-gray-600">AI-adapted exercises & strategies</div>
-                        </div>
-                      </button>
+                      </div>
                     </div>
                   </NavigationMenuContent>
                 </NavigationMenuItem>
