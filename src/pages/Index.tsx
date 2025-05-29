@@ -35,11 +35,11 @@ const Index = () => {
     <div className="min-h-screen bg-gradient-to-br from-teal-50 via-blue-50 to-mint-50">
       <NavigationBar />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12">
         <HeroSection />
 
         {/* Dashboard Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 mb-8 sm:mb-12">
           {/* Current Mood - Takes up 1 column */}
           <div ref={el => { if (el) cardsRef.current[0] = el; }}>
             <CurrentMoodSummary />
@@ -52,7 +52,7 @@ const Index = () => {
         </div>
 
         {/* Quick Actions */}
-        <div ref={el => { if (el) cardsRef.current[2] = el; }} className="mb-12">
+        <div ref={el => { if (el) cardsRef.current[2] = el; }} className="mb-8 sm:mb-12">
           <QuickActionsCard />
         </div>
 

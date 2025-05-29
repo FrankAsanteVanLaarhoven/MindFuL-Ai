@@ -64,40 +64,42 @@ const FeaturesGrid = () => {
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-      {features.map((feature, index) => (
-        <div 
-          key={feature.title}
-          ref={el => { if (el) cardsRef.current[index] = el; }}
-        >
-          <Card 
-            className="bg-white/80 backdrop-blur-sm border-teal-200 shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer group h-full overflow-hidden"
-            onClick={() => navigateToFeature(feature.href)}
+    <div className="px-4 sm:px-0">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+        {features.map((feature, index) => (
+          <div 
+            key={feature.title}
+            ref={el => { if (el) cardsRef.current[index] = el; }}
           >
-            <div className="relative">
-              <img 
-                src={feature.image}
-                alt={`${feature.title} feature`}
-                className="w-full h-32 object-cover group-hover:scale-105 transition-transform duration-300"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
-              <div className="absolute top-2 right-2 bg-white/90 rounded-full p-2">
-                <span className="text-xl">{feature.icon}</span>
+            <Card 
+              className="bg-white/80 backdrop-blur-sm border-teal-200 shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer group h-full overflow-hidden"
+              onClick={() => navigateToFeature(feature.href)}
+            >
+              <div className="relative">
+                <img 
+                  src={feature.image}
+                  alt={`${feature.title} feature`}
+                  className="w-full h-28 sm:h-32 object-cover group-hover:scale-105 transition-transform duration-300"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+                <div className="absolute top-2 right-2 bg-white/90 rounded-full p-1.5 sm:p-2">
+                  <span className="text-lg sm:text-xl">{feature.icon}</span>
+                </div>
               </div>
-            </div>
-            <CardHeader className="text-center">
-              <CardTitle className="text-lg text-teal-800">
-                {feature.title}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-gray-600 text-center">
-                {feature.description}
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-      ))}
+              <CardHeader className="text-center pb-2 sm:pb-4 px-3 sm:px-6">
+                <CardTitle className="text-base sm:text-lg text-teal-800">
+                  {feature.title}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="px-3 sm:px-6 pb-4 sm:pb-6">
+                <p className="text-xs sm:text-sm text-gray-600 text-center leading-relaxed">
+                  {feature.description}
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        ))}
+      </div>
     </div>
   );
 };
