@@ -3,7 +3,6 @@ import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import CameraManager from './CameraManager';
 
 interface AnalysisFormProps {
   textInput: string;
@@ -20,9 +19,7 @@ const AnalysisForm: React.FC<AnalysisFormProps> = ({
   setTextInput,
   isAnalyzing,
   onAnalyze,
-  apiKey,
-  onCameraChange,
-  onFrameCapture
+  apiKey
 }) => {
   return (
     <Card className="bg-white/80 backdrop-blur-sm border-indigo-200 shadow-lg">
@@ -37,7 +34,7 @@ const AnalysisForm: React.FC<AnalysisFormProps> = ({
           )}
         </CardTitle>
         <CardDescription>
-          Text and camera-based mood analysis with AI
+          Text-based mood analysis with AI
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -53,11 +50,6 @@ const AnalysisForm: React.FC<AnalysisFormProps> = ({
             rows={4}
           />
         </div>
-        
-        <CameraManager
-          onCameraChange={onCameraChange}
-          onFrameCapture={onFrameCapture}
-        />
         
         <Button
           onClick={onAnalyze}
