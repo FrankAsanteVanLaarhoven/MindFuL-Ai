@@ -8,12 +8,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useToast } from '@/hooks/use-toast';
 import { gsap } from 'gsap';
 import { useNavigate } from 'react-router-dom';
-import { Mic, MicOff, Volume2, VolumeX, MessageSquare, Settings2 } from 'lucide-react';
+import { Mic, MicOff, Volume2, VolumeX, MessageSquare, Settings2, User } from 'lucide-react';
 import { useVoiceInteraction } from '@/hooks/useVoiceInteraction';
 import VoiceSettings from '@/components/VoiceSettings';
 import VoiceToneIndicator from '@/components/VoiceToneIndicator';
 import AvatarSelector, { AvatarCharacter } from '@/components/AvatarSelector';
 import TherapyAvatar3D from '@/components/TherapyAvatar3D';
+import UserProfileManager from '@/components/UserProfileManager';
+import { UserProfile } from '@/types/UserProfile';
 
 interface Message {
   id: string;
@@ -31,6 +33,8 @@ const TherapyBot = () => {
   const [sessionStarted, setSessionStarted] = useState(false);
   const [inputMode, setInputMode] = useState<'text' | 'voice'>('text');
   const [showVoiceSettings, setShowVoiceSettings] = useState(false);
+  const [showProfileManager, setShowProfileManager] = useState(false);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [selectedAvatar, setSelectedAvatar] = useState<AvatarCharacter | null>(null);
   const [avatarEmotion, setAvatarEmotion] = useState<'neutral' | 'happy' | 'concerned' | 'encouraging' | 'thoughtful'>('neutral');
   
@@ -50,13 +54,21 @@ const TherapyBot = () => {
     startListening,
     stopListening,
     speak,
-    speakWithAccent, // Use the new accent-aware speak function
+    speakWithAccent,
     stopSpeaking,
     clearTranscript,
     setVoiceSettings,
     initAudioContext,
     setTranscript
   } = useVoiceInteraction();
+
+  // Load user profile from localStorage
+  useEffect(() => {
+    const savedProfile = localStorage.getItem('therapyUserProfile');
+    if (savedProfile) {
+      setUserProfile(JSON.parse(savedProfile));
+    }
+  }, []);
 
   useEffect(() => {
     if (chatContainerRef.current) {
@@ -202,15 +214,22 @@ const TherapyBot = () => {
     // Avatar-specific response styling
     const avatarPersonality = avatar ? avatar.personality.toLowerCase() : '';
     
-    // Enhanced responses that consider voice tone
+    // Get user context for personalized responses
+    const userContext = userProfile?.usePersonalizedResponses ? userProfile : null;
+    
+    // Enhanced responses that consider voice tone AND user profile
     const toneAwareResponses = {
       CBT: {
         calm: [
-          "I can hear the calm in your voice, which is wonderful. Let's explore what's helping you maintain this peaceful state and how we can build on it.",
+          userContext?.name 
+            ? `I can hear the calm in your voice, ${userContext.name}. That's wonderful. Let's explore what's helping you maintain this peaceful state and how we can build on it.`
+            : "I can hear the calm in your voice, which is wonderful. Let's explore what's helping you maintain this peaceful state and how we can build on it.",
           "Your calm tone suggests you're in a good headspace right now. This is an excellent opportunity to examine your thoughts more clearly."
         ],
         stressed: [
-          "I notice some tension in your voice. That's completely understandable. Let's work together to identify what thoughts might be contributing to this stress.",
+          userContext?.workStress === 'high' 
+            ? "I notice some tension in your voice, and I understand work stress can be overwhelming. Let's work together to identify what thoughts might be contributing to this stress."
+            : "I notice some tension in your voice. That's completely understandable. Let's work together to identify what thoughts might be contributing to this stress.",
           "Your voice reflects the stress you're experiencing. Remember, stress often comes from our thought patterns. What specific thoughts are going through your mind right now?"
         ],
         excited: [
@@ -218,18 +237,24 @@ const TherapyBot = () => {
           "Your excitement comes through clearly. This positive emotional state can help us examine your thought patterns from a different perspective."
         ],
         sad: [
-          "I can hear the sadness in your voice, and I want you to know that's okay. These feelings are valid. Let's gently explore what thoughts might be connected to this sadness.",
+          userContext?.familySupport === 'none' 
+            ? "I can hear the sadness in your voice, and I know you may feel alone in this. These feelings are valid. Let's gently explore what thoughts might be connected to this sadness."
+            : "I can hear the sadness in your voice, and I want you to know that's okay. These feelings are valid. Let's gently explore what thoughts might be connected to this sadness.",
           "The pain in your voice is palpable. Remember that you're not alone in this. Let's look at what thoughts are contributing to these difficult feelings."
         ]
       },
       DBT: {
         calm: [
           "Your calm voice shows you're practicing good emotional regulation. Let's use this mindful state to explore your current experience.",
-          "I can hear the groundedness in your voice. This is a perfect time to practice mindfulness and observe your thoughts without judgment."
+          userContext?.previousTherapy 
+            ? "I can hear the groundedness in your voice - your previous therapy experience is showing. This is a perfect time to practice mindfulness and observe your thoughts without judgment."
+            : "I can hear the groundedness in your voice. This is a perfect time to practice mindfulness and observe your thoughts without judgment."
         ],
         stressed: [
           "I hear the distress in your voice. Let's practice some distress tolerance skills together. Can you try the 5-4-3-2-1 grounding technique with me?",
-          "Your voice shows you're struggling right now. That's okay. Let's focus on getting through this moment using some coping skills."
+          userContext?.copingMechanisms?.length 
+            ? `Your voice shows you're struggling right now. That's okay. Let's focus on getting through this moment using some coping skills. I see you've mentioned ${userContext.copingMechanisms[0]} works for you - shall we try that or something else?`
+            : "Your voice shows you're struggling right now. That's okay. Let's focus on getting through this moment using some coping skills."
         ],
         excited: [
           "Your excitement is wonderful to hear! Let's practice mindfulness to fully experience this positive emotion while staying present.",
@@ -246,43 +271,54 @@ const TherapyBot = () => {
     if (tone && toneAwareResponses[type as keyof typeof toneAwareResponses]) {
       const toneResponses = toneAwareResponses[type as keyof typeof toneAwareResponses][tone as keyof typeof toneAwareResponses.CBT];
       if (toneResponses && toneResponses.length > 0) {
-        return toneResponses[Math.floor(Math.random() * toneResponses.length)];
+        let response = toneResponses[Math.floor(Math.random() * toneResponses.length)];
+        
+        // Add context-specific follow-ups based on profile
+        if (userContext) {
+          if (userContext.currentChallenges?.length) {
+            response += ` I notice you've mentioned dealing with ${userContext.currentChallenges[0]} - would you like to explore how this relates to what you're experiencing right now?`;
+          }
+          
+          if (userContext.hasChildren && userContext.workStress === 'high') {
+            response += " Balancing work and family can be especially challenging.";
+          }
+          
+          if (userContext.religion && Math.random() > 0.7) {
+            response += " I respect that your faith may be an important part of your healing journey.";
+          }
+        }
+        
+        return response;
       }
     }
 
     // ... keep existing code (fallback to original responses)
     const responses = {
       CBT: [
-        "I hear that you're experiencing some challenging thoughts. Let's explore this together. Can you tell me more about what specific thoughts are going through your mind when you feel this way?",
+        userContext?.name 
+          ? `I hear that you're experiencing some challenging thoughts, ${userContext.name}. Let's explore this together. Can you tell me more about what specific thoughts are going through your mind when you feel this way?`
+          : "I hear that you're experiencing some challenging thoughts. Let's explore this together. Can you tell me more about what specific thoughts are going through your mind when you feel this way?",
         "That sounds difficult. In CBT, we often look at the connection between thoughts, feelings, and behaviors. When you have these thoughts, how do they make you feel, and what do you typically do in response?",
         "It's important to recognize that thoughts aren't always facts. What evidence do you have for and against this thought? Sometimes examining the evidence can help us see situations more clearly."
       ],
       DBT: [
         "Thank you for sharing that with me. It takes courage to open up about difficult experiences. Let's practice some mindfulness - can you describe what you're noticing in your body right now?",
         "I can hear the pain in what you're sharing. DBT teaches us that we can hold two seemingly opposite things at once - we can validate your feelings while also working on strategies to cope. How might you use distress tolerance skills in this situation?",
-        "Your emotions are valid and understandable given what you're experiencing. Let's think about some emotion regulation techniques. What activities have helped you feel grounded in the past?"
+        userContext?.copingMechanisms?.length 
+          ? `Your emotions are valid and understandable given what you're experiencing. I see you've mentioned ${userContext.copingMechanisms[0]} as a coping mechanism. How has that been working for you lately?`
+          : "Your emotions are valid and understandable given what you're experiencing. Let's think about some emotion regulation techniques. What activities have helped you feel grounded in the past?"
       ],
       general: [
-        "Thank you for trusting me with this. It sounds like you're going through a lot right now. How long have you been feeling this way?",
+        userContext?.name 
+          ? `Thank you for trusting me with this, ${userContext.name}. It sounds like you're going through a lot right now. How long have you been feeling this way?`
+          : "Thank you for trusting me with this. It sounds like you're going through a lot right now. How long have you been feeling this way?",
         "I appreciate you sharing that with me. Sometimes just putting our thoughts into words can be helpful. What would you say is the most challenging part of what you're experiencing?",
         "It takes strength to reach out when you're struggling. What kind of support feels most helpful to you right now?"
       ]
     };
 
     const typeResponses = responses[type as keyof typeof responses] || responses.general;
-    let response = '';
-
-    // Get base response from existing logic
-    if (tone && toneAwareResponses[type as keyof typeof toneAwareResponses]) {
-      const toneResponses = toneAwareResponses[type as keyof typeof toneAwareResponses][tone as keyof typeof toneAwareResponses.CBT];
-      if (toneResponses && toneResponses.length > 0) {
-        response = toneResponses[Math.floor(Math.random() * toneResponses.length)];
-      }
-    }
-
-    if (!response) {
-      response = typeResponses[Math.floor(Math.random() * typeResponses.length)];
-    }
+    let response = typeResponses[Math.floor(Math.random() * typeResponses.length)];
 
     // Modify response based on avatar personality
     if (avatar) {
@@ -353,6 +389,44 @@ const TherapyBot = () => {
     }
   };
 
+  const handleProfileSave = (profile: UserProfile) => {
+    setUserProfile(profile);
+    localStorage.setItem('therapyUserProfile', JSON.stringify(profile));
+    setShowProfileManager(false);
+    
+    toast({
+      title: "Profile saved",
+      description: profile.usePersonalizedResponses 
+        ? "Your therapy sessions will now be personalized based on your profile."
+        : "Profile saved. You can enable personalized responses anytime."
+    });
+  };
+
+  if (showProfileManager) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-rose-50 p-4">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center py-6">
+            <Button 
+              onClick={() => navigate('/')}
+              variant="outline"
+              className="mb-4"
+            >
+              ← Back to Dashboard
+            </Button>
+            <h1 className="text-4xl font-bold text-purple-800 mb-4">Profile Setup</h1>
+          </div>
+          
+          <UserProfileManager
+            existingProfile={userProfile}
+            onSave={handleProfileSave}
+            onCancel={() => setShowProfileManager(false)}
+          />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-rose-50 p-4">
       <div className="max-w-6xl mx-auto space-y-6">
@@ -377,6 +451,46 @@ const TherapyBot = () => {
         {!sessionStarted ? (
           /* Session Setup */
           <div ref={chatContainerRef} className="space-y-6">
+            {/* Profile Setup */}
+            <Card className="bg-white/80 backdrop-blur-sm border-purple-200 shadow-lg">
+              <CardHeader>
+                <CardTitle className="text-xl text-purple-800 flex items-center gap-2">
+                  <User className="w-5 h-5" />
+                  Personal Profile
+                </CardTitle>
+                <CardDescription>
+                  {userProfile 
+                    ? `Profile: ${userProfile.name || 'Anonymous'} | Personalized: ${userProfile.usePersonalizedResponses ? 'Enabled' : 'Disabled'}`
+                    : 'Set up your profile for personalized therapy sessions (optional)'
+                  }
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex gap-3">
+                  <Button
+                    onClick={() => setShowProfileManager(true)}
+                    variant="outline"
+                    className="flex-1"
+                  >
+                    {userProfile ? 'Edit Profile' : 'Create Profile'}
+                  </Button>
+                  {userProfile && (
+                    <Button
+                      onClick={() => {
+                        setUserProfile(null);
+                        localStorage.removeItem('therapyUserProfile');
+                        toast({ title: "Profile cleared", description: "Using neutral assessment mode." });
+                      }}
+                      variant="outline"
+                      className="flex-1"
+                    >
+                      Use Neutral Mode
+                    </Button>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
             {/* Avatar Selection */}
             <AvatarSelector
               selectedAvatar={selectedAvatar}
@@ -463,6 +577,9 @@ const TherapyBot = () => {
                     <CardHeader className="pb-2">
                       <CardTitle className="text-sm text-purple-800 text-center">
                         Your Therapy Companion
+                        {userProfile?.usePersonalizedResponses && (
+                          <div className="text-xs text-green-600 mt-1">Personalized for {userProfile.name || 'you'}</div>
+                        )}
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="pt-0">
@@ -493,6 +610,13 @@ const TherapyBot = () => {
                           size="sm"
                         >
                           <Settings2 className="w-4 h-4" />
+                        </Button>
+                        <Button 
+                          onClick={() => setShowProfileManager(true)}
+                          variant="outline"
+                          size="sm"
+                        >
+                          <User className="w-4 h-4" />
                         </Button>
                         <Button 
                           onClick={() => setSessionStarted(false)}
