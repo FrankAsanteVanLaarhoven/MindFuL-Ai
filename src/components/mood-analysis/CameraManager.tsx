@@ -59,11 +59,10 @@ const CameraManager: React.FC<CameraManagerProps> = ({ onCameraChange, onFrameCa
 
       console.log('🎥 Requesting camera access...');
       
-      // This will trigger the browser's permission dialog
       const constraints = {
         video: {
-          width: { ideal: 640 },
-          height: { ideal: 480 },
+          width: { ideal: 640, max: 1280 },
+          height: { ideal: 480, max: 720 },
           facingMode: 'user'
         },
         audio: false
@@ -71,19 +70,22 @@ const CameraManager: React.FC<CameraManagerProps> = ({ onCameraChange, onFrameCa
 
       const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
       console.log('✅ Camera access granted, stream received:', mediaStream);
+      console.log('📹 Video tracks:', mediaStream.getVideoTracks());
       
       setStream(mediaStream);
-      setHasCamera(true);
       
       if (videoRef.current) {
         videoRef.current.srcObject = mediaStream;
         
+        // Wait for video metadata to load
         videoRef.current.onloadedmetadata = () => {
           if (videoRef.current) {
-            console.log('📹 Video metadata loaded, starting playback...');
+            console.log('📹 Video metadata loaded, dimensions:', videoRef.current.videoWidth, 'x', videoRef.current.videoHeight);
+            
             videoRef.current.play()
               .then(() => {
                 console.log('✅ Video is now playing');
+                setHasCamera(true);
                 toast({
                   title: "Camera activated! 📹",
                   description: "Your camera is now ready for mood analysis"
@@ -91,6 +93,7 @@ const CameraManager: React.FC<CameraManagerProps> = ({ onCameraChange, onFrameCa
               })
               .catch((playError) => {
                 console.error('❌ Video play error:', playError);
+                setHasCamera(false);
                 toast({
                   title: "Video playback issue",
                   description: "Camera connected but video playback failed. Try refreshing.",
@@ -98,6 +101,13 @@ const CameraManager: React.FC<CameraManagerProps> = ({ onCameraChange, onFrameCa
                 });
               });
           }
+        };
+
+        // Handle video loading errors
+        videoRef.current.onerror = (error) => {
+          console.error('❌ Video element error:', error);
+          setHasCamera(false);
+          setCameraError('Video display error occurred');
         };
       }
       
@@ -111,6 +121,8 @@ const CameraManager: React.FC<CameraManagerProps> = ({ onCameraChange, onFrameCa
         errorMessage = 'No camera found on this device.';
       } else if (error.name === 'NotReadableError') {
         errorMessage = 'Camera is being used by another application.';
+      } else if (error.name === 'OverconstrainedError') {
+        errorMessage = 'Camera constraints not supported.';
       }
       
       setCameraError(errorMessage);
@@ -136,22 +148,36 @@ const CameraManager: React.FC<CameraManagerProps> = ({ onCameraChange, onFrameCa
   };
 
   const captureFrame = (): string | null => {
-    if (!videoRef.current || !canvasRef.current || !hasCamera) return null;
+    if (!videoRef.current || !canvasRef.current || !hasCamera) {
+      console.log('❌ Cannot capture frame: missing video, canvas, or camera not active');
+      return null;
+    }
     
     const canvas = canvasRef.current;
     const video = videoRef.current;
     const ctx = canvas.getContext('2d');
     
-    if (!ctx) return null;
+    if (!ctx) {
+      console.log('❌ Cannot get canvas context');
+      return null;
+    }
     
-    canvas.width = video.videoWidth || 640;
-    canvas.height = video.videoHeight || 480;
+    // Ensure video has valid dimensions
+    if (video.videoWidth === 0 || video.videoHeight === 0) {
+      console.log('❌ Video has no dimensions');
+      return null;
+    }
+    
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
     
     try {
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-      return canvas.toDataURL('image/jpeg', 0.8);
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+      console.log('📸 Frame captured successfully');
+      return dataUrl;
     } catch (error) {
-      console.error('Error capturing frame:', error);
+      console.error('❌ Error capturing frame:', error);
       return null;
     }
   };
@@ -169,19 +195,25 @@ const CameraManager: React.FC<CameraManagerProps> = ({ onCameraChange, onFrameCa
       </label>
       {hasCamera ? (
         <div className="space-y-3">
-          <div className="relative rounded-lg overflow-hidden border border-indigo-200 bg-black">
+          <div className="relative rounded-lg overflow-hidden border border-indigo-200 bg-black min-h-[200px]">
             <video
               ref={videoRef}
               autoPlay
               playsInline
               muted
-              className="w-full h-48 object-cover"
+              className="w-full h-48 object-cover bg-black"
               style={{ transform: 'scaleX(-1)' }}
             />
             <div className="absolute top-2 right-2 bg-green-500 text-white text-xs px-2 py-1 rounded flex items-center gap-1">
               <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
               Live
             </div>
+            {/* Debug info */}
+            {videoRef.current && (
+              <div className="absolute bottom-2 left-2 bg-black/50 text-white text-xs px-2 py-1 rounded">
+                {videoRef.current.videoWidth}x{videoRef.current.videoHeight}
+              </div>
+            )}
           </div>
           <Button
             onClick={stopCamera}
@@ -193,7 +225,7 @@ const CameraManager: React.FC<CameraManagerProps> = ({ onCameraChange, onFrameCa
         </div>
       ) : (
         <div className="space-y-3">
-          <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg text-center">
+          <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg text-center min-h-[200px] flex flex-col justify-center">
             <p className="text-sm text-gray-600 mb-2">Camera not active</p>
             <p className="text-xs text-gray-500">Click below to enable camera for enhanced mood analysis</p>
           </div>
