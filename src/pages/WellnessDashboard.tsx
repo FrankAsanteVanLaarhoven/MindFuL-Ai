@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -12,7 +11,12 @@ import Localization from '@/components/Localization';
 import Weather from '@/components/Weather';
 import WorldClock from '@/components/WorldClock';
 import InstantTranslation from '@/components/InstantTranslation';
-import { BarChart3, Target, AlertTriangle, TrendingUp, Podcast, Smartphone, Globe, CloudSun, Clock, Languages } from 'lucide-react';
+import EmergencyContacts from '@/components/EmergencyContacts';
+import PanicButton from '@/components/PanicButton';
+import MedicationManager from '@/components/MedicationManager';
+import EmergencyServices from '@/components/EmergencyServices';
+import CareMarketplace from '@/components/CareMarketplace';
+import { BarChart3, Target, AlertTriangle, TrendingUp, Podcast, Smartphone, Globe, CloudSun, Clock, Languages, Users, Shield, Pill, Phone, Heart } from 'lucide-react';
 
 const WellnessDashboard = () => {
   return (
@@ -26,7 +30,7 @@ const WellnessDashboard = () => {
         </div>
 
         <Tabs defaultValue="analytics" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-10 lg:w-auto lg:grid-cols-10">
+          <TabsList className="grid w-full grid-cols-15 lg:w-auto lg:grid-cols-15">
             <TabsTrigger value="analytics" className="flex items-center gap-2">
               <BarChart3 className="w-4 h-4" />
               <span className="hidden sm:inline">Analytics</span>
@@ -50,6 +54,26 @@ const WellnessDashboard = () => {
             <TabsTrigger value="crisis" className="flex items-center gap-2">
               <AlertTriangle className="w-4 h-4" />
               <span className="hidden sm:inline">Crisis</span>
+            </TabsTrigger>
+            <TabsTrigger value="emergency-contacts" className="flex items-center gap-2">
+              <Users className="w-4 h-4" />
+              <span className="hidden sm:inline">Contacts</span>
+            </TabsTrigger>
+            <TabsTrigger value="panic-button" className="flex items-center gap-2">
+              <Shield className="w-4 h-4" />
+              <span className="hidden sm:inline">Panic</span>
+            </TabsTrigger>
+            <TabsTrigger value="medication" className="flex items-center gap-2">
+              <Pill className="w-4 h-4" />
+              <span className="hidden sm:inline">Meds</span>
+            </TabsTrigger>
+            <TabsTrigger value="emergency-services" className="flex items-center gap-2">
+              <Phone className="w-4 h-4" />
+              <span className="hidden sm:inline">Emergency</span>
+            </TabsTrigger>
+            <TabsTrigger value="marketplace" className="flex items-center gap-2">
+              <Heart className="w-4 h-4" />
+              <span className="hidden sm:inline">Care</span>
             </TabsTrigger>
             <TabsTrigger value="localization" className="flex items-center gap-2">
               <Globe className="w-4 h-4" />
@@ -91,6 +115,26 @@ const WellnessDashboard = () => {
 
           <TabsContent value="crisis" className="space-y-6">
             <CrisisSupport />
+          </TabsContent>
+
+          <TabsContent value="emergency-contacts" className="space-y-6">
+            <EmergencyContacts />
+          </TabsContent>
+
+          <TabsContent value="panic-button" className="space-y-6">
+            <PanicButton />
+          </TabsContent>
+
+          <TabsContent value="medication" className="space-y-6">
+            <MedicationManager />
+          </TabsContent>
+
+          <TabsContent value="emergency-services" className="space-y-6">
+            <EmergencyServices />
+          </TabsContent>
+
+          <TabsContent value="marketplace" className="space-y-6">
+            <CareMarketplace />
           </TabsContent>
 
           <TabsContent value="localization" className="space-y-6">
