@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useRef, useEffect } from 'react';
@@ -14,7 +15,7 @@ import {
   NavigationMenuList,
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
-import { Brain, Bot, Headphones, FileText, Users, Video, Calendar } from 'lucide-react';
+import { Brain, Bot, Headphones, FileText, Users, Video, Calendar, Podcast } from 'lucide-react';
 
 const Index = () => {
   const navigate = useNavigate();
@@ -165,6 +166,16 @@ const Index = () => {
                         <div className="text-left">
                           <div className="font-medium">Community Forums</div>
                           <div className="text-sm text-gray-600">Connect with peers & support groups</div>
+                        </div>
+                      </button>
+                      <button
+                        onClick={() => navigate('/community')}
+                        className="flex items-center gap-3 p-3 rounded-lg hover:bg-teal-50 transition-colors"
+                      >
+                        <Podcast className="w-5 h-5 text-purple-600" />
+                        <div className="text-left">
+                          <div className="font-medium">Mental Health Podcasts</div>
+                          <div className="text-sm text-gray-600">Curated CBT & wellness podcasts</div>
                         </div>
                       </button>
                       <button
