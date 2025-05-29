@@ -12,6 +12,7 @@ import { motion } from 'framer-motion';
 import { Mic, MicOff, Volume2, Settings } from 'lucide-react';
 import { useVoiceInteraction } from '@/hooks/useVoiceInteraction';
 import VoiceSettings from '@/components/VoiceSettings';
+import JournalAudioPlayer from '@/components/JournalAudioPlayer';
 
 interface JournalEntry {
   id: string;
@@ -29,6 +30,7 @@ const Journal = () => {
   const [isGeneratingInsight, setIsGeneratingInsight] = useState(false);
   const [showNewEntry, setShowNewEntry] = useState(false);
   const [showVoiceSettings, setShowVoiceSettings] = useState(false);
+  const [showAudioPlayer, setShowAudioPlayer] = useState(false);
   const [isVoiceInputActive, setIsVoiceInputActive] = useState(false);
   
   const navigate = useNavigate();
@@ -230,6 +232,14 @@ const Journal = () => {
               <Settings className="w-4 h-4" />
               Voice Settings
             </Button>
+            <Button
+              onClick={() => setShowAudioPlayer(!showAudioPlayer)}
+              variant={showAudioPlayer ? "default" : "outline"}
+              className="flex items-center gap-2"
+            >
+              <Volume2 className="w-4 h-4" />
+              Audio Player
+            </Button>
           </div>
           <h1 className="text-4xl font-bold text-orange-800 mb-4 flex items-center justify-center gap-3">
             <span className="text-5xl">📝</span>
@@ -255,6 +265,21 @@ const Journal = () => {
               initAudioContext={initAudioContext}
               isListening={isListening}
               isSpeaking={isSpeaking}
+            />
+          </motion.div>
+        )}
+
+        {/* Audio Player */}
+        {showAudioPlayer && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            transition={{ duration: 0.3 }}
+          >
+            <JournalAudioPlayer
+              entries={entries}
+              availableVoices={availableVoices}
+              voiceSettings={voiceSettings}
             />
           </motion.div>
         )}
