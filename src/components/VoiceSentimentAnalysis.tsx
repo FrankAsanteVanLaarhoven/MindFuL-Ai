@@ -1,10 +1,10 @@
-
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Mic, MicOff, Volume2, Brain, Users, Globe } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Mic, MicOff, Volume2, Brain, Users, Globe, AlertTriangle, Info } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useSpeechRecognition } from '@/hooks/useSpeechRecognition';
 
@@ -39,6 +39,12 @@ const VoiceSentimentAnalysis: React.FC<VoiceSentimentAnalysisProps> = ({
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [speakers, setSpeakers] = useState<{ [key: string]: SentimentResult }>({});
   const [currentSpeaker, setCurrentSpeaker] = useState('Speaker 1');
+  const [browserCompatibility, setBrowserCompatibility] = useState<{
+    speechRecognition: boolean;
+    microphone: boolean;
+    https: boolean;
+    browser: string;
+  } | null>(null);
   
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
@@ -46,6 +52,40 @@ const VoiceSentimentAnalysis: React.FC<VoiceSentimentAnalysisProps> = ({
   
   const { toast } = useToast();
   const { isListening, startListening, stopListening } = useSpeechRecognition(true);
+
+  // Check browser compatibility on mount
+  useEffect(() => {
+    const checkCompatibility = () => {
+      const userAgent = navigator.userAgent;
+      let browserName = 'Unknown';
+      
+      if (userAgent.includes('Chrome')) browserName = 'Chrome';
+      else if (userAgent.includes('Firefox')) browserName = 'Firefox';
+      else if (userAgent.includes('Safari')) browserName = 'Safari';
+      else if (userAgent.includes('Edge')) browserName = 'Edge';
+      
+      const SpeechRecognitionAPI = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      const hasSpeechRecognition = !!SpeechRecognitionAPI;
+      const hasMicrophone = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+      const isHttps = location.protocol === 'https:' || location.hostname === 'localhost';
+      
+      setBrowserCompatibility({
+        speechRecognition: hasSpeechRecognition,
+        microphone: hasMicrophone,
+        https: isHttps,
+        browser: browserName
+      });
+
+      console.log('Browser Compatibility Check:', {
+        browser: browserName,
+        speechRecognition: hasSpeechRecognition,
+        microphone: hasMicrophone,
+        https: isHttps
+      });
+    };
+
+    checkCompatibility();
+  }, []);
 
   // Initialize audio context for prosodic analysis
   useEffect(() => {
@@ -208,8 +248,10 @@ const VoiceSentimentAnalysis: React.FC<VoiceSentimentAnalysisProps> = ({
     }
   }, [enableAspectBased]);
 
-  // Handle voice input with real-time analysis
+  // Handle voice input with enhanced error handling
   const handleVoiceInput = useCallback(async () => {
+    if (!browserCompatibility) return;
+
     if (isListening) {
       stopListening();
       if (streamRef.current) {
@@ -219,8 +261,35 @@ const VoiceSentimentAnalysis: React.FC<VoiceSentimentAnalysisProps> = ({
       return;
     }
 
+    // Check compatibility before starting
+    if (!browserCompatibility.speechRecognition) {
+      toast({
+        title: "Speech Recognition Not Supported",
+        description: `Your browser (${browserCompatibility.browser}) doesn't support speech recognition. Please use Chrome or Edge.`,
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!browserCompatibility.https) {
+      toast({
+        title: "Secure Connection Required",
+        description: "Voice features require HTTPS. Please use a secure connection.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!browserCompatibility.microphone) {
+      toast({
+        title: "Microphone Not Available",
+        description: "Your browser doesn't support microphone access.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     try {
-      // Start audio capture for prosodic analysis
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       streamRef.current = stream;
       
@@ -231,7 +300,6 @@ const VoiceSentimentAnalysis: React.FC<VoiceSentimentAnalysisProps> = ({
         source.connect(analyserRef.current);
       }
       
-      // Start speech recognition
       startListening(
         async (transcript: string, isFinal: boolean) => {
           setTranscript(transcript);
@@ -279,13 +347,23 @@ const VoiceSentimentAnalysis: React.FC<VoiceSentimentAnalysisProps> = ({
       );
       
     } catch (error) {
-      toast({
-        title: "Microphone Error",
-        description: "Unable to access microphone. Please check permissions.",
-        variant: "destructive"
-      });
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      
+      if (errorMessage.includes('Permission denied') || errorMessage.includes('NotAllowedError')) {
+        toast({
+          title: "Microphone Permission Denied",
+          description: "Please allow microphone access in your browser settings and refresh the page.",
+          variant: "destructive"
+        });
+      } else {
+        toast({
+          title: "Microphone Error",
+          description: `Unable to access microphone: ${errorMessage}`,
+          variant: "destructive"
+        });
+      }
     }
-  }, [isListening, startListening, stopListening, analyzeSentiment, onSentimentDetected, enableMultiSpeaker, currentSpeaker, toast]);
+  }, [isListening, startListening, stopListening, analyzeSentiment, onSentimentDetected, enableMultiSpeaker, currentSpeaker, toast, browserCompatibility]);
 
   const getEmotionEmoji = (emotion: string) => {
     const emojis: { [key: string]: string } = {
@@ -309,6 +387,19 @@ const VoiceSentimentAnalysis: React.FC<VoiceSentimentAnalysisProps> = ({
     }
   };
 
+  if (!browserCompatibility) {
+    return (
+      <Card className="bg-white/90 backdrop-blur-sm border-purple-200 shadow-lg">
+        <CardContent className="p-6">
+          <div className="flex items-center justify-center">
+            <div className="animate-spin w-6 h-6 border-2 border-purple-500 border-t-transparent rounded-full"></div>
+            <span className="ml-2">Checking browser compatibility...</span>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card className="bg-white/90 backdrop-blur-sm border-purple-200 shadow-lg">
       <CardHeader>
@@ -324,11 +415,43 @@ const VoiceSentimentAnalysis: React.FC<VoiceSentimentAnalysisProps> = ({
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
+        {/* Browser Compatibility Warnings */}
+        {(!browserCompatibility.speechRecognition || !browserCompatibility.https || !browserCompatibility.microphone) && (
+          <Alert variant="destructive">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertDescription className="space-y-2">
+              <div className="font-semibold">Compatibility Issues Detected:</div>
+              <ul className="space-y-1 text-sm">
+                {!browserCompatibility.speechRecognition && (
+                  <li>• Speech Recognition not supported in {browserCompatibility.browser}. Please use Chrome or Edge.</li>
+                )}
+                {!browserCompatibility.https && (
+                  <li>• Secure connection (HTTPS) required for voice features.</li>
+                )}
+                {!browserCompatibility.microphone && (
+                  <li>• Microphone access not available in this browser.</li>
+                )}
+              </ul>
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {/* Info Alert for Supported Browsers */}
+        {browserCompatibility.speechRecognition && browserCompatibility.https && browserCompatibility.microphone && (
+          <Alert>
+            <Info className="h-4 w-4" />
+            <AlertDescription>
+              ✅ Your browser ({browserCompatibility.browser}) supports all voice features. Click "Start Voice Analysis" to begin.
+            </AlertDescription>
+          </Alert>
+        )}
+
         {/* Control Button */}
         <Button
           onClick={handleVoiceInput}
           variant={isListening ? "destructive" : "default"}
           className="w-full"
+          disabled={!browserCompatibility.speechRecognition || !browserCompatibility.https || !browserCompatibility.microphone}
           aria-pressed={isListening}
           aria-label={isListening ? "Stop voice analysis" : "Start voice analysis"}
         >
