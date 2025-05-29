@@ -49,6 +49,7 @@ const MoodAnalysis = () => {
   const [isRealTimeActive, setIsRealTimeActive] = useState(false);
   const [apiKey, setApiKey] = useState<string | null>(null);
   const [cameraError, setCameraError] = useState<string | null>(null);
+  const [isCameraLoading, setIsCameraLoading] = useState(false);
   
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -70,8 +71,8 @@ const MoodAnalysis = () => {
       );
     }
 
-    // Improved camera initialization
-    initializeCamera();
+    // Check if camera is available on load
+    checkCameraAvailability();
 
     return () => {
       if (stream) {
@@ -80,55 +81,124 @@ const MoodAnalysis = () => {
     };
   }, []);
 
-  const initializeCamera = async () => {
+  const checkCameraAvailability = async () => {
     try {
-      setCameraError(null);
-      
-      // Check if camera is available
       const devices = await navigator.mediaDevices.enumerateDevices();
       const videoDevices = devices.filter(device => device.kind === 'videoinput');
       
       if (videoDevices.length === 0) {
         setCameraError('No camera found on this device');
         setHasCamera(false);
-        return;
+      } else {
+        setCameraError(null);
+        // Don't automatically initialize camera, wait for user action
+      }
+    } catch (error) {
+      console.error('Error checking camera availability:', error);
+      setCameraError('Unable to check camera availability');
+      setHasCamera(false);
+    }
+  };
+
+  const initializeCamera = async () => {
+    if (isCameraLoading) return;
+    
+    setIsCameraLoading(true);
+    setCameraError(null);
+    
+    try {
+      // Stop any existing stream first
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+        setStream(null);
       }
 
-      // Request camera with better error handling
-      const mediaStream = await navigator.mediaDevices.getUserMedia({ 
-        video: { 
-          width: { ideal: 640 },
-          height: { ideal: 480 },
-          facingMode: 'user' // Prefer front camera
-        } 
-      });
+      console.log('🎥 Requesting camera access...');
+      
+      // Mobile-optimized camera constraints
+      const constraints = {
+        video: {
+          width: { ideal: 640, max: 1280 },
+          height: { ideal: 480, max: 720 },
+          facingMode: 'user', // Front camera
+          frameRate: { ideal: 30, max: 30 }
+        },
+        audio: false
+      };
+
+      const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
+      console.log('✅ Camera access granted, stream received:', mediaStream);
       
       setStream(mediaStream);
       setHasCamera(true);
       
       if (videoRef.current) {
         videoRef.current.srcObject = mediaStream;
-        // Ensure video starts playing
-        videoRef.current.onloadedmetadata = () => {
-          videoRef.current?.play().catch(console.error);
+        
+        // Enhanced video setup for mobile
+        videoRef.current.setAttribute('playsinline', 'true');
+        videoRef.current.setAttribute('muted', 'true');
+        videoRef.current.setAttribute('autoplay', 'true');
+        
+        // Wait for metadata and then play
+        const playVideo = () => {
+          if (videoRef.current) {
+            console.log('📹 Starting video playback...');
+            videoRef.current.play()
+              .then(() => {
+                console.log('✅ Video is now playing');
+                toast({
+                  title: "Camera activated! 📹",
+                  description: "Your camera is now ready for mood analysis"
+                });
+              })
+              .catch((playError) => {
+                console.error('❌ Video play error:', playError);
+                toast({
+                  title: "Video playback issue",
+                  description: "Camera connected but video playback failed. Try refreshing.",
+                  variant: "destructive"
+                });
+              });
+          }
         };
+
+        videoRef.current.onloadedmetadata = playVideo;
+        
+        // Fallback - try to play after a short delay
+        setTimeout(playVideo, 1000);
       }
       
-      toast({
-        title: "Camera access granted",
-        description: "Your camera is now ready for mood analysis"
-      });
-      
     } catch (error: any) {
-      console.error('Camera access error:', error);
+      console.error('❌ Camera access error:', error);
       
-      let errorMessage = 'Camera access denied or not available';
+      let errorMessage = 'Camera access failed';
       if (error.name === 'NotAllowedError') {
-        errorMessage = 'Camera permission denied. Please allow camera access and refresh the page.';
+        errorMessage = 'Camera permission denied. Please allow camera access and try again.';
       } else if (error.name === 'NotFoundError') {
         errorMessage = 'No camera found on this device.';
       } else if (error.name === 'NotReadableError') {
         errorMessage = 'Camera is being used by another application.';
+      } else if (error.name === 'OverconstrainedError') {
+        errorMessage = 'Camera constraints not supported. Trying with basic settings...';
+        // Try with basic constraints
+        try {
+          const basicStream = await navigator.mediaDevices.getUserMedia({ video: true });
+          setStream(basicStream);
+          setHasCamera(true);
+          if (videoRef.current) {
+            videoRef.current.srcObject = basicStream;
+            videoRef.current.play();
+          }
+          toast({
+            title: "Camera activated with basic settings",
+            description: "Your camera is ready for analysis"
+          });
+          setIsCameraLoading(false);
+          return;
+        } catch (basicError) {
+          console.error('Basic camera setup also failed:', basicError);
+        }
       }
       
       setCameraError(errorMessage);
@@ -139,11 +209,25 @@ const MoodAnalysis = () => {
         description: errorMessage,
         variant: "destructive"
       });
+    } finally {
+      setIsCameraLoading(false);
     }
   };
 
-  const retryCamera = () => {
-    initializeCamera();
+  const stopCamera = () => {
+    if (stream) {
+      console.log('🛑 Stopping camera...');
+      stream.getTracks().forEach(track => track.stop());
+      setStream(null);
+    }
+    setHasCamera(false);
+    if (videoRef.current) {
+      videoRef.current.srcObject = null;
+    }
+    toast({
+      title: "Camera stopped",
+      description: "Camera access has been turned off"
+    });
   };
 
   const captureFrame = (): string | null => {
@@ -153,11 +237,19 @@ const MoodAnalysis = () => {
     const video = videoRef.current;
     const ctx = canvas.getContext('2d');
     
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    ctx?.drawImage(video, 0, 0);
+    if (!ctx) return null;
     
-    return canvas.toDataURL('image/jpeg', 0.8);
+    // Set canvas size to match video
+    canvas.width = video.videoWidth || 640;
+    canvas.height = video.videoHeight || 480;
+    
+    try {
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      return canvas.toDataURL('image/jpeg', 0.8);
+    } catch (error) {
+      console.error('Error capturing frame:', error);
+      return null;
+    }
   };
 
   const analyzeMood = async () => {
@@ -228,17 +320,15 @@ const MoodAnalysis = () => {
   };
 
   const generateRealTimeMood = () => {
-    // Simulate realistic mood detection with some variation
     const moods = ['Happy', 'Calm', 'Excited', 'Sad', 'Anxious', 'Neutral'];
     const baseMood = moods[Math.floor(Math.random() * moods.length)];
     
-    // Generate realistic emotion values that add up logically
     const happiness = Math.random() * (baseMood === 'Happy' ? 0.8 : 0.3);
     const sadness = Math.random() * (baseMood === 'Sad' ? 0.6 : 0.2);
     const anxiety = Math.random() * (baseMood === 'Anxious' ? 0.7 : 0.3);
     const anger = Math.random() * (baseMood === 'Angry' ? 0.8 : 0.1);
     
-    const confidence = 0.7 + Math.random() * 0.25; // 70-95% confidence
+    const confidence = 0.7 + Math.random() * 0.25;
     
     return {
       mood: baseMood,
@@ -256,7 +346,6 @@ const MoodAnalysis = () => {
       const newMoodData = generateRealTimeMood();
       setRealTimeMood(newMoodData);
       
-      // Animate mood icon change
       if (moodIconRef.current) {
         gsap.fromTo(moodIconRef.current,
           { scale: 0.8, rotation: -10 },
@@ -264,7 +353,6 @@ const MoodAnalysis = () => {
         );
       }
       
-      // Animate confidence meter
       if (confidenceRef.current) {
         gsap.to(confidenceRef.current, {
           width: `${newMoodData.confidence * 100}%`,
@@ -273,7 +361,6 @@ const MoodAnalysis = () => {
         });
       }
       
-      // Animate emotion bars
       emotionBarsRef.current.forEach((bar, index) => {
         if (bar) {
           const emotions = Object.values(newMoodData.emotions);
@@ -286,7 +373,7 @@ const MoodAnalysis = () => {
         }
       });
       
-    }, 2000); // Update every 2 seconds
+    }, 2000);
   };
 
   const stopRealTimeAnalysis = () => {
@@ -465,36 +552,65 @@ const MoodAnalysis = () => {
                       <p className="text-sm text-red-700">{cameraError}</p>
                     </div>
                     <Button
-                      onClick={retryCamera}
+                      onClick={initializeCamera}
+                      disabled={isCameraLoading}
                       variant="outline"
                       className="w-full"
                     >
-                      🔄 Retry Camera Access
+                      {isCameraLoading ? (
+                        <div className="flex items-center gap-2">
+                          <div className="w-4 h-4 border-2 border-gray-500 border-t-transparent rounded-full animate-spin" />
+                          Connecting Camera...
+                        </div>
+                      ) : (
+                        '🔄 Enable Camera'
+                      )}
                     </Button>
                   </div>
                 ) : hasCamera ? (
-                  <div className="relative rounded-lg overflow-hidden border border-indigo-200">
-                    <video
-                      ref={videoRef}
-                      autoPlay
-                      playsInline
-                      muted
-                      className="w-full h-48 object-cover"
-                    />
-                    <div className="absolute top-2 right-2 bg-green-500 text-white text-xs px-2 py-1 rounded flex items-center gap-1">
-                      <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
-                      Live
+                  <div className="space-y-3">
+                    <div className="relative rounded-lg overflow-hidden border border-indigo-200 bg-black">
+                      <video
+                        ref={videoRef}
+                        autoPlay
+                        playsInline
+                        muted
+                        className="w-full h-48 object-cover"
+                        style={{ transform: 'scaleX(-1)' }} // Mirror for selfie view
+                      />
+                      <div className="absolute top-2 right-2 bg-green-500 text-white text-xs px-2 py-1 rounded flex items-center gap-1">
+                        <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
+                        Live
+                      </div>
                     </div>
+                    <Button
+                      onClick={stopCamera}
+                      variant="outline"
+                      className="w-full"
+                    >
+                      🛑 Stop Camera
+                    </Button>
                   </div>
                 ) : (
-                  <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg text-center">
-                    <p className="text-sm text-gray-600 mb-2">Camera not available</p>
+                  <div className="space-y-3">
+                    <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg text-center">
+                      <p className="text-sm text-gray-600 mb-2">Camera not active</p>
+                      <p className="text-xs text-gray-500">For mobile: Make sure to allow camera permissions when prompted</p>
+                    </div>
                     <Button
-                      onClick={retryCamera}
+                      onClick={initializeCamera}
+                      disabled={isCameraLoading}
                       variant="outline"
-                      size="sm"
+                      className="w-full"
                     >
-                      🔄 Enable Camera
+                      {isCameraLoading ? (
+                        <div className="flex items-center gap-2">
+                          <div className="w-4 h-4 border-2 border-gray-500 border-t-transparent rounded-full animate-spin" />
+                          Connecting Camera...
+                        </div>
+                      ) : (
+                        '📹 Enable Camera'
+                      )}
                     </Button>
                   </div>
                 )}
