@@ -50,6 +50,7 @@ const TherapyBot = () => {
     startListening,
     stopListening,
     speak,
+    speakWithAccent, // Use the new accent-aware speak function
     stopSpeaking,
     clearTranscript,
     setVoiceSettings,
@@ -170,16 +171,9 @@ const TherapyBot = () => {
       updateAvatarEmotion(botResponse, false);
       setIsTyping(false);
 
-      // Speak bot response if voice output is enabled
+      // Use accent-aware speech if voice output is enabled
       if (voiceSettings.enabled && voiceSettings.voiceOutput && selectedAvatar) {
-        // Use avatar's specific voice
-        const originalVoice = voiceSettings.selectedVoice;
-        setVoiceSettings(prev => ({ ...prev, selectedVoice: selectedAvatar.voiceId }));
-        speak(botResponse);
-        // Restore original voice setting after speaking
-        setTimeout(() => {
-          setVoiceSettings(prev => ({ ...prev, selectedVoice: originalVoice }));
-        }, 1000);
+        speakWithAccent(botResponse, selectedAvatar.ethnicity, selectedAvatar.personality);
       }
     }, 1500);
   };
@@ -282,6 +276,34 @@ const TherapyBot = () => {
         response = `Let's think about this step by step. ${response} This is a learning process, and that's okay.`;
       } else if (avatarPersonality.includes('professional')) {
         response = `${response} Based on evidence-based approaches, we can work through this systematically.`;
+      }
+    }
+
+    // Enhanced response with accent-specific language patterns
+    if (avatar && avatar.ethnicity) {
+      const ethnicity = avatar.ethnicity;
+      
+      // Add accent-specific language patterns
+      if (ethnicity === 'jamaican') {
+        response = response.replace(/\byou\b/g, 'yuh');
+        response = response.replace(/\bokay\b/g, 'irie');
+        response = response.replace(/\bfeeling\b/g, 'vibes');
+      } else if (ethnicity === 'african') {
+        response = response.replace(/\bchild\b/g, 'my child');
+        response = response.replace(/\bunderstand\b/g, 'I hear you');
+      } else if (ethnicity === 'indian') {
+        response = response.replace(/\byes\b/g, 'yes indeed');
+        response = response.replace(/\bgood\b/g, 'very good');
+      } else if (ethnicity === 'mexican') {
+        if (Math.random() > 0.8) {
+          response = response.replace(/\bgood\b/g, 'muy bueno');
+          response = response.replace(/\byes\b/g, 'sí, claro');
+        }
+      } else if (ethnicity === 'italian') {
+        if (Math.random() > 0.8) {
+          response = response.replace(/\bgood\b/g, 'molto bene');
+          response = response.replace(/\bbeautiful\b/g, 'bellissimo');
+        }
       }
     }
 

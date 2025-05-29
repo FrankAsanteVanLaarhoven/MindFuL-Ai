@@ -1,4 +1,3 @@
-
 import { useState, useRef, useCallback, useEffect } from 'react';
 
 // Add type declarations for Web Speech API
@@ -75,6 +74,111 @@ interface VoiceSettings {
   autoSend: boolean;
   continuousListening: boolean;
 }
+
+// Enhanced voice mappings with accent preferences
+const accentVoiceMapping = {
+  african: {
+    preferred: ['George', 'Daniel', 'Brian'],
+    fallback: ['onwK4e9ZLuTAKqWW03F9', 'JBFqnCBsd6RMkjVDRZzb'],
+    speechRate: 0.9,
+    speechPitch: 1.1
+  },
+  asian: {
+    preferred: ['Sarah', 'Jessica', 'Lily'],
+    fallback: ['EXAVITQu4vr4xnSDxMaL', 'cgSgspJ2msm6clMCkdW9'],
+    speechRate: 0.95,
+    speechPitch: 1.2
+  },
+  indian: {
+    preferred: ['Aria', 'Sarah', 'Daniel'],
+    fallback: ['9BWtsMINqrJLrRacOk9x', 'EXAVITQu4vr4xnSDxMaL'],
+    speechRate: 0.9,
+    speechPitch: 1.0
+  },
+  chinese: {
+    preferred: ['Jessica', 'Eric', 'Alice'],
+    fallback: ['cgSgspJ2msm6clMCkdW9', 'cjVigY5qzO86Huf0OWal'],
+    speechRate: 0.95,
+    speechPitch: 1.15
+  },
+  european: {
+    preferred: ['Charlotte', 'Will', 'Laura'],
+    fallback: ['XB0fDUnXU5powFXDhCwa', 'bIHbv24MWmeRgasZH58o'],
+    speechRate: 1.0,
+    speechPitch: 1.0
+  },
+  mexican: {
+    preferred: ['Laura', 'Charlie', 'Daniel'],
+    fallback: ['FGY2WhTYpPnrIDTdsKH5', 'IKne3meq5aSn9XLyUdCD'],
+    speechRate: 0.9,
+    speechPitch: 0.95
+  },
+  jamaican: {
+    preferred: ['River', 'George', 'Brian'],
+    fallback: ['SAz9YHcvj6GT2YYXdXww', 'JBFqnCBsd6RMkjVDRZzb'],
+    speechRate: 0.85,
+    speechPitch: 1.1
+  },
+  moroccan: {
+    preferred: ['Aria', 'Daniel', 'Sarah'],
+    fallback: ['9BWtsMINqrJLrRacOk9x', 'onwK4e9ZLuTAKqWW03F9'],
+    speechRate: 0.9,
+    speechPitch: 1.05
+  },
+  spanish: {
+    preferred: ['Laura', 'Charlie', 'Aria'],
+    fallback: ['FGY2WhTYpPnrIDTdsKH5', 'IKne3meq5aSn9XLyUdCD'],
+    speechRate: 0.95,
+    speechPitch: 0.9
+  },
+  italian: {
+    preferred: ['Charlotte', 'Will', 'Laura'],
+    fallback: ['XB0fDUnXU5powFXDhCwa', 'bIHbv24MWmeRgasZH58o'],
+    speechRate: 1.05,
+    speechPitch: 1.1
+  },
+  ethiopian: {
+    preferred: ['George', 'Aria', 'Daniel'],
+    fallback: ['JBFqnCBsd6RMkjVDRZzb', '9BWtsMINqrJLrRacOk9x'],
+    speechRate: 0.9,
+    speechPitch: 1.0
+  },
+  mixed: {
+    preferred: ['River', 'Alex', 'Taylor'],
+    fallback: ['SAz9YHcvj6GT2YYXdXww', 'EXAVITQu4vr4xnSDxMaL'],
+    speechRate: 1.0,
+    speechPitch: 1.0
+  }
+};
+
+// Accent-specific speech patterns and modifications
+const accentModifications = {
+  african: {
+    emphasis: ['very', 'really', 'indeed'],
+    phrases: ['my child', 'you know', 'let me tell you'],
+    intonation: 'rising'
+  },
+  jamaican: {
+    emphasis: ['ya know', 'seen', 'bredrin'],
+    phrases: ['big up yourself', 'easy nuh', 'every ting cool'],
+    intonation: 'rhythmic'
+  },
+  indian: {
+    emphasis: ['actually', 'definitely', 'absolutely'],
+    phrases: ['isn\'t it', 'no problem', 'very good'],
+    intonation: 'melodic'
+  },
+  mexican: {
+    emphasis: ['¡Órale!', 'muy bien', 'claro que sí'],
+    phrases: ['mi amor', 'no te preocupes', 'está bien'],
+    intonation: 'warm'
+  },
+  italian: {
+    emphasis: ['Madonna mia', 'bene bene', 'perfetto'],
+    phrases: ['caro mio', 'non ti preoccupare', 'va tutto bene'],
+    intonation: 'expressive'
+  }
+};
 
 export const useVoiceInteraction = () => {
   const [isListening, setIsListening] = useState(false);
@@ -263,6 +367,63 @@ export const useVoiceInteraction = () => {
     }
   }, [voiceSettings, availableVoices]);
 
+  // Enhanced speak function with accent support
+  const speakWithAccent = useCallback((text: string, ethnicity?: string, personality?: string) => {
+    if ('speechSynthesis' in window) {
+      setIsSpeaking(true);
+      let modifiedText = text;
+      
+      // Apply accent-specific modifications
+      if (ethnicity && accentModifications[ethnicity as keyof typeof accentModifications]) {
+        const accent = accentModifications[ethnicity as keyof typeof accentModifications];
+        
+        // Add occasional accent-specific phrases for authenticity
+        if (Math.random() > 0.7) {
+          const phrases = accent.phrases;
+          const randomPhrase = phrases[Math.floor(Math.random() * phrases.length)];
+          modifiedText = `${randomPhrase}, ${text.toLowerCase()}`;
+        }
+      }
+      
+      const utterance = new SpeechSynthesisUtterance(modifiedText);
+      
+      // Set accent-specific voice preferences
+      if (ethnicity && accentVoiceMapping[ethnicity as keyof typeof accentVoiceMapping]) {
+        const accentConfig = accentVoiceMapping[ethnicity as keyof typeof accentVoiceMapping];
+        
+        // Try to find preferred voice for this accent
+        const preferredVoice = availableVoices.find(voice => 
+          accentConfig.preferred.some(name => voice.name.toLowerCase().includes(name.toLowerCase()))
+        );
+        
+        if (preferredVoice) {
+          utterance.voice = preferredVoice;
+        }
+        
+        // Apply accent-specific speech characteristics
+        utterance.rate = accentConfig.speechRate * voiceSettings.voiceSpeed;
+        utterance.pitch = accentConfig.speechPitch * voiceSettings.voicePitch;
+      } else {
+        // Fallback to regular voice settings
+        if (availableVoices.length > 0 && voiceSettings.selectedVoice) {
+          const selectedVoice = availableVoices.find(voice => voice.name === voiceSettings.selectedVoice);
+          if (selectedVoice) {
+            utterance.voice = selectedVoice;
+          }
+        }
+        utterance.rate = voiceSettings.voiceSpeed;
+        utterance.pitch = voiceSettings.voicePitch;
+      }
+      
+      utterance.volume = 1;
+      
+      utterance.onend = () => setIsSpeaking(false);
+      utterance.onerror = () => setIsSpeaking(false);
+      
+      speechSynthesis.speak(utterance);
+    }
+  }, [voiceSettings, availableVoices]);
+
   // Stop speaking
   const stopSpeaking = useCallback(() => {
     speechSynthesis.cancel();
@@ -308,6 +469,7 @@ export const useVoiceInteraction = () => {
     startListening,
     stopListening,
     speak,
+    speakWithAccent, // New function for accent-aware speech
     stopSpeaking,
     clearTranscript,
     updateVoiceSettings,
