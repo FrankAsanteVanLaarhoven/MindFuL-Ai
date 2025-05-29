@@ -18,15 +18,30 @@ const CameraManager: React.FC<CameraManagerProps> = ({ onCameraChange, onFrameCa
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const { toast } = useToast();
 
+  // Cleanup function
+  const cleanupCamera = () => {
+    if (stream) {
+      console.log('🧹 Cleaning up camera stream...');
+      stream.getTracks().forEach(track => {
+        track.stop();
+        console.log('🛑 Track stopped:', track.kind);
+      });
+      setStream(null);
+    }
+    setHasCamera(false);
+    if (videoRef.current) {
+      videoRef.current.srcObject = null;
+    }
+  };
+
+  // Cleanup on unmount
   useEffect(() => {
-    checkCameraAvailability();
     return () => {
-      if (stream) {
-        stream.getTracks().forEach(track => track.stop());
-      }
+      cleanupCamera();
     };
   }, []);
 
+  // Update parent when camera state changes
   useEffect(() => {
     onCameraChange(hasCamera, stream);
   }, [hasCamera, stream, onCameraChange]);
@@ -56,10 +71,8 @@ const CameraManager: React.FC<CameraManagerProps> = ({ onCameraChange, onFrameCa
     setCameraError(null);
     
     try {
-      if (stream) {
-        stream.getTracks().forEach(track => track.stop());
-        setStream(null);
-      }
+      // Clean up any existing stream first
+      cleanupCamera();
 
       console.log('🎥 Requesting camera access...');
       
@@ -130,15 +143,8 @@ const CameraManager: React.FC<CameraManagerProps> = ({ onCameraChange, onFrameCa
   };
 
   const stopCamera = () => {
-    if (stream) {
-      console.log('🛑 Stopping camera...');
-      stream.getTracks().forEach(track => track.stop());
-      setStream(null);
-    }
-    setHasCamera(false);
-    if (videoRef.current) {
-      videoRef.current.srcObject = null;
-    }
+    console.log('🛑 User requested to stop camera...');
+    cleanupCamera();
     toast({
       title: "Camera stopped",
       description: "Camera access has been turned off"
@@ -170,6 +176,11 @@ const CameraManager: React.FC<CameraManagerProps> = ({ onCameraChange, onFrameCa
   useEffect(() => {
     onFrameCapture(captureFrame);
   }, [hasCamera, onFrameCapture]);
+
+  // Check camera availability on mount (but don't start it)
+  useEffect(() => {
+    checkCameraAvailability();
+  }, []);
 
   return (
     <div>
