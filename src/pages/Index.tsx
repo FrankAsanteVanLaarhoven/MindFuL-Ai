@@ -1,12 +1,13 @@
-
 "use client";
 
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import CurrentMoodSummary from '@/components/dashboard/current-mood-summary';
 import RealTimeMoodChart from '@/components/dashboard/real-time-mood-chart';
 import ResourcesPanel from '@/components/ResourcesPanel';
+import AIKeyManager from '@/components/AIKeyManager';
+import PerplexityKeyManager from '@/components/PerplexityKeyManager';
 import { gsap } from 'gsap';
 import { useNavigate } from 'react-router-dom';
 import { 
@@ -16,13 +17,15 @@ import {
   NavigationMenuList,
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
-import { Brain, Bot, Headphones, FileText, Users, Video, Calendar, Podcast } from 'lucide-react';
+import { Brain, Bot, Headphones, FileText, Users, Video, Calendar, Podcast, Key } from 'lucide-react';
 
 const Index = () => {
   const navigate = useNavigate();
   const headerRef = useRef<HTMLDivElement>(null);
   const cardsRef = useRef<HTMLDivElement[]>([]);
   const heroImageRef = useRef<HTMLDivElement>(null);
+  const [openaiApiKey, setOpenaiApiKey] = useState<string | null>(null);
+  const [perplexityApiKey, setPerplexityApiKey] = useState<string | null>(null);
 
   useEffect(() => {
     // Animate header
@@ -158,8 +161,8 @@ const Index = () => {
                     📚 Resources
                   </NavigationMenuTrigger>
                   <NavigationMenuContent>
-                    <div className="w-[600px] p-4">
-                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    <div className="w-[800px] p-4">
+                      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
                         <div className="space-y-3">
                           <button
                             onClick={() => navigate('/community')}
@@ -194,6 +197,17 @@ const Index = () => {
                         </div>
                         <div>
                           <ResourcesPanel />
+                        </div>
+                        <div className="space-y-4">
+                          <div className="border-l-2 border-blue-200 pl-4">
+                            <h4 className="font-medium text-blue-800 mb-2 flex items-center gap-2">
+                              <Key className="w-4 h-4" />
+                              AI Configuration
+                            </h4>
+                            <p className="text-sm text-gray-600 mb-3">Configure your AI API keys for enhanced features</p>
+                          </div>
+                          <AIKeyManager onApiKeyChange={setOpenaiApiKey} />
+                          <PerplexityKeyManager onApiKeyChange={setPerplexityApiKey} />
                         </div>
                       </div>
                     </div>
@@ -335,7 +349,7 @@ const Index = () => {
                 </div>
                 <div className="hidden md:block">
                   <img 
-                    src="https://images.unsplash.com/photo-1516302593371-8d5c01d69e1a?w=200&h=150&fit=crop"
+                    src="https://images.unsplash.com/photo-1516302593-94ddf0286df2?w=200&h=150&fit=crop"
                     alt="Diverse group meditation"
                     className="rounded-lg shadow-md"
                   />
