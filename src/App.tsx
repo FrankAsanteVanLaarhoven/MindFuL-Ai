@@ -11,6 +11,8 @@ import MoodAnalysis from "./pages/MoodAnalysis";
 import TherapyBot from "./pages/TherapyBot";
 import Journal from "./pages/Journal";
 import WellnessDashboard from "./pages/WellnessDashboard";
+import Community from "./pages/Community";
+import Teletherapy from "./pages/Teletherapy";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -29,6 +31,8 @@ const App = () => (
           <Route path="/therapy-bot" element={<TherapyBot />} />
           <Route path="/journal" element={<Journal />} />
           <Route path="/wellness-dashboard" element={<WellnessDashboard />} />
+          <Route path="/community" element={<Community />} />
+          <Route path="/teletherapy" element={<Teletherapy />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
