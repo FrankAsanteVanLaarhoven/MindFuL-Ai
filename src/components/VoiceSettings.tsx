@@ -40,6 +40,50 @@ const VoiceSettings: React.FC<VoiceSettingsProps> = ({
     await initAudioContext();
   };
 
+  // Group voices by language/region for better organization
+  const groupVoicesByRegion = (voices: SpeechSynthesisVoice[]) => {
+    const groups: { [key: string]: SpeechSynthesisVoice[] } = {
+      'English (US)': [],
+      'English (UK)': [],
+      'English (AU)': [],
+      'German': [],
+      'French': [],
+      'Dutch': [],
+      'Spanish': [],
+      'Italian': [],
+      'Other': []
+    };
+
+    voices.forEach(voice => {
+      const lang = voice.lang.toLowerCase();
+      const name = voice.name.toLowerCase();
+      
+      if (lang.includes('en-us') || name.includes('united states') || name.includes('us ')) {
+        groups['English (US)'].push(voice);
+      } else if (lang.includes('en-gb') || name.includes('united kingdom') || name.includes('uk ') || name.includes('british')) {
+        groups['English (UK)'].push(voice);
+      } else if (lang.includes('en-au') || name.includes('australia') || name.includes('australian')) {
+        groups['English (AU)'].push(voice);
+      } else if (lang.includes('de') || name.includes('german') || name.includes('deutsch')) {
+        groups['German'].push(voice);
+      } else if (lang.includes('fr') || name.includes('french') || name.includes('français')) {
+        groups['French'].push(voice);
+      } else if (lang.includes('nl') || name.includes('dutch') || name.includes('nederlands')) {
+        groups['Dutch'].push(voice);
+      } else if (lang.includes('es') || name.includes('spanish') || name.includes('español')) {
+        groups['Spanish'].push(voice);
+      } else if (lang.includes('it') || name.includes('italian') || name.includes('italiano')) {
+        groups['Italian'].push(voice);
+      } else {
+        groups['Other'].push(voice);
+      }
+    });
+
+    return groups;
+  };
+
+  const voiceGroups = groupVoicesByRegion(availableVoices);
+
   return (
     <Card className="bg-white/90 backdrop-blur-sm border-purple-200">
       <CardHeader>
@@ -48,7 +92,7 @@ const VoiceSettings: React.FC<VoiceSettingsProps> = ({
           Voice & Accessibility Settings
         </CardTitle>
         <CardDescription>
-          Configure voice interaction and accessibility options
+          Configure voice interaction and accessibility options with international voices
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -121,7 +165,7 @@ const VoiceSettings: React.FC<VoiceSettingsProps> = ({
                 />
               </div>
 
-              {/* Voice Selection */}
+              {/* Enhanced Voice Selection */}
               {voiceSettings.voiceOutput && availableVoices.length > 0 && (
                 <div className="space-y-2">
                   <Label>Voice Selection</Label>
@@ -134,14 +178,48 @@ const VoiceSettings: React.FC<VoiceSettingsProps> = ({
                     <SelectTrigger>
                       <SelectValue placeholder="Select a voice" />
                     </SelectTrigger>
-                    <SelectContent>
-                      {availableVoices.map((voice) => (
-                        <SelectItem key={voice.name} value={voice.name}>
-                          {voice.name} ({voice.lang})
-                        </SelectItem>
-                      ))}
+                    <SelectContent className="max-h-60">
+                      {Object.entries(voiceGroups).map(([region, voices]) => 
+                        voices.length > 0 && (
+                          <div key={region}>
+                            <div className="px-2 py-1 text-xs font-semibold text-gray-500 bg-gray-100">
+                              {region}
+                            </div>
+                            {voices.map((voice) => {
+                              // Create friendly display names
+                              let displayName = voice.name;
+                              
+                              // Add common name mappings for popular voices
+                              if (voice.name.toLowerCase().includes('maria')) {
+                                displayName = `Maria (${voice.lang})`;
+                              } else if (voice.name.toLowerCase().includes('sophie') || voice.name.toLowerCase().includes('sofia')) {
+                                displayName = `Sophie (${voice.lang})`;
+                              } else if (voice.name.toLowerCase().includes('adam')) {
+                                displayName = `Adam (${voice.lang})`;
+                              } else if (voice.name.toLowerCase().includes('jan')) {
+                                displayName = `Jan (${voice.lang})`;
+                              } else if (voice.name.toLowerCase().includes('morris') || voice.name.toLowerCase().includes('maurice')) {
+                                displayName = `Morris (${voice.lang})`;
+                              }
+                              
+                              return (
+                                <SelectItem key={voice.name} value={voice.name}>
+                                  {displayName}
+                                </SelectItem>
+                              );
+                            })}
+                          </div>
+                        )
+                      )}
                     </SelectContent>
                   </Select>
+                  
+                  {/* Voice Preview */}
+                  {voiceSettings.selectedVoice && (
+                    <div className="p-2 bg-blue-50 border border-blue-200 rounded text-xs text-blue-700">
+                      Selected: {availableVoices.find(v => v.name === voiceSettings.selectedVoice)?.name || 'Unknown'}
+                    </div>
+                  )}
                 </div>
               )}
 
