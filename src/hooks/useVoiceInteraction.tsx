@@ -310,6 +310,7 @@ export const useVoiceInteraction = () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       setHasAudioPermission(true);
+      console.log('✅ Audio permission granted');
       
       // Initialize audio context for tone analysis
       audioContextRef.current = new AudioContext();
@@ -341,52 +342,69 @@ export const useVoiceInteraction = () => {
     };
   }, [voiceSettings.selectedVoice]);
 
-  // Initialize speech recognition
+  // Initialize speech recognition with better browser support detection
   const initializeRecognition = useCallback(() => {
-    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-      console.error('Speech recognition not supported');
+    console.log('🎤 Initializing speech recognition...');
+    
+    // Check if speech recognition is supported
+    const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
+    
+    if (!SpeechRecognitionAPI) {
+      console.error('❌ Speech recognition not supported in this browser');
       return null;
     }
 
-    const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognitionAPI) return null;
+    console.log('✅ Speech recognition API found, creating instance...');
 
-    const recognition = new SpeechRecognitionAPI();
-    recognition.continuous = voiceSettings.continuousListening;
-    recognition.interimResults = true;
-    recognition.lang = 'en-US';
+    try {
+      const recognition = new SpeechRecognitionAPI();
+      recognition.continuous = voiceSettings.continuousListening;
+      recognition.interimResults = true;
+      recognition.lang = 'en-US';
 
-    recognition.onresult = (event: SpeechRecognitionEvent) => {
-      let finalTranscript = '';
-      let interimTranscript = '';
+      recognition.onstart = () => {
+        console.log('🎤 Speech recognition started');
+        setIsListening(true);
+      };
 
-      for (let i = event.resultIndex; i < event.results.length; i++) {
-        const transcript = event.results[i][0].transcript;
-        if (event.results[i].isFinal) {
-          finalTranscript += transcript;
-        } else {
-          interimTranscript += transcript;
+      recognition.onresult = (event: SpeechRecognitionEvent) => {
+        console.log('📝 Speech recognition result received');
+        let finalTranscript = '';
+        let interimTranscript = '';
+
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          const transcript = event.results[i][0].transcript;
+          if (event.results[i].isFinal) {
+            finalTranscript += transcript;
+          } else {
+            interimTranscript += transcript;
+          }
         }
-      }
 
-      if (finalTranscript) {
-        setTranscript(finalTranscript);
-        analyzeVoiceTone(finalTranscript);
-      } else {
-        setTranscript(interimTranscript);
-      }
-    };
+        if (finalTranscript) {
+          console.log('✅ Final transcript:', finalTranscript);
+          setTranscript(finalTranscript);
+          analyzeVoiceTone(finalTranscript);
+        } else {
+          setTranscript(interimTranscript);
+        }
+      };
 
-    recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
-      console.error('Speech recognition error:', event.error);
-      setIsListening(false);
-    };
+      recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
+        console.error('❌ Speech recognition error:', event.error, event.message);
+        setIsListening(false);
+      };
 
-    recognition.onend = () => {
-      setIsListening(false);
-    };
+      recognition.onend = () => {
+        console.log('🛑 Speech recognition ended');
+        setIsListening(false);
+      };
 
-    return recognition;
+      return recognition;
+    } catch (error) {
+      console.error('❌ Error creating speech recognition instance:', error);
+      return null;
+    }
   }, [voiceSettings.continuousListening]);
 
   // Analyze voice tone (mock implementation)
@@ -420,17 +438,29 @@ export const useVoiceInteraction = () => {
 
   // Start listening
   const startListening = useCallback(() => {
+    console.log('🎤 Starting speech recognition...');
+    
     const recognition = initializeRecognition();
-    if (!recognition) return;
+    if (!recognition) {
+      console.error('❌ Cannot start listening - speech recognition not available');
+      return;
+    }
 
     recognitionRef.current = recognition;
-    setIsListening(true);
     setTranscript('');
-    recognition.start();
+    
+    try {
+      recognition.start();
+      console.log('✅ Speech recognition start() called');
+    } catch (error) {
+      console.error('❌ Error starting speech recognition:', error);
+      setIsListening(false);
+    }
   }, [initializeRecognition]);
 
   // Stop listening
   const stopListening = useCallback(() => {
+    console.log('🛑 Stopping speech recognition...');
     if (recognitionRef.current) {
       recognitionRef.current.stop();
     }
@@ -635,7 +665,7 @@ export const useVoiceInteraction = () => {
     startListening,
     stopListening,
     speak,
-    speakWithAccent, // New function for accent-aware speech
+    speakWithAccent,
     stopSpeaking,
     clearTranscript,
     updateVoiceSettings,
