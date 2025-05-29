@@ -44,9 +44,26 @@ export interface UserProfile {
   currentChallenges?: string[];
   copingMechanisms?: string[];
   
+  // Medication & Health
+  medications?: {
+    name: string;
+    dosage: string;
+    frequency: string;
+    purpose: string;
+  }[];
+  
+  // Session & Recording Settings
+  recordSessions?: boolean;
+  allowPlayback?: boolean;
+  
+  // Wellness Preferences
+  preferredExerciseType?: 'cardio' | 'strength' | 'yoga' | 'pilates' | 'dance' | 'martial-arts' | 'mixed';
+  musicPreferences?: ('neural' | 'sanctuary' | 'nature' | 'classical' | 'ambient' | 'binaural')[];
+  
   // Privacy Settings
   usePersonalizedResponses?: boolean;
   shareWithTherapist?: boolean;
+  allowDataCollection?: boolean;
   
   createdAt: Date;
   updatedAt: Date;
@@ -56,5 +73,10 @@ export const DEFAULT_PROFILE: Partial<UserProfile> = {
   usePersonalizedResponses: false,
   shareWithTherapist: false,
   hasChildren: false,
-  previousTherapy: false
+  previousTherapy: false,
+  recordSessions: false,
+  allowPlayback: false,
+  allowDataCollection: true,
+  medications: [],
+  musicPreferences: ['sanctuary', 'nature']
 };

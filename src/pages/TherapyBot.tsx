@@ -5,16 +5,21 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { gsap } from 'gsap';
 import { useNavigate } from 'react-router-dom';
-import { Mic, MicOff, Volume2, VolumeX, MessageSquare, Settings2, User } from 'lucide-react';
+import { Mic, MicOff, Volume2, VolumeX, MessageSquare, Settings2, User, Music, Dumbbell, Activity, Trash2 } from 'lucide-react';
 import { useVoiceInteraction } from '@/hooks/useVoiceInteraction';
 import VoiceSettings from '@/components/VoiceSettings';
 import VoiceToneIndicator from '@/components/VoiceToneIndicator';
 import AvatarSelector, { AvatarCharacter } from '@/components/AvatarSelector';
 import TherapyAvatar3D from '@/components/TherapyAvatar3D';
 import UserProfileManager from '@/components/UserProfileManager';
+import PersonalTrainer from '@/components/PersonalTrainer';
+import MusicTherapy from '@/components/MusicTherapy';
+import SessionRecorder from '@/components/SessionRecorder';
+import VirtualMindReader from '@/components/VirtualMindReader';
 import { UserProfile } from '@/types/UserProfile';
 
 interface Message {
@@ -37,6 +42,7 @@ const TherapyBot = () => {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [selectedAvatar, setSelectedAvatar] = useState<AvatarCharacter | null>(null);
   const [avatarEmotion, setAvatarEmotion] = useState<'neutral' | 'happy' | 'concerned' | 'encouraging' | 'thoughtful'>('neutral');
+  const [activeTab, setActiveTab] = useState('chat');
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
@@ -402,6 +408,17 @@ const TherapyBot = () => {
     });
   };
 
+  const clearAllData = () => {
+    setUserProfile(null);
+    setMessages([]);
+    localStorage.removeItem('therapyUserProfile');
+    localStorage.removeItem('therapyRecordings');
+    toast({
+      title: "All data cleared",
+      description: "Your profile and session data have been deleted for transparency."
+    });
+  };
+
   if (showProfileManager) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-rose-50 p-4">
@@ -429,22 +446,31 @@ const TherapyBot = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-rose-50 p-4">
-      <div className="max-w-6xl mx-auto space-y-6">
+      <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
         <div className="text-center py-6">
-          <Button 
-            onClick={() => navigate('/')}
-            variant="outline"
-            className="mb-4"
-          >
-            ← Back to Dashboard
-          </Button>
+          <div className="flex justify-between items-center mb-4">
+            <Button 
+              onClick={() => navigate('/')}
+              variant="outline"
+            >
+              ← Back to Dashboard
+            </Button>
+            <Button 
+              onClick={clearAllData}
+              variant="outline"
+              className="text-red-600 hover:text-red-700"
+            >
+              <Trash2 className="w-4 h-4 mr-2" />
+              Clear All Data
+            </Button>
+          </div>
           <h1 className="text-4xl font-bold text-purple-800 mb-4 flex items-center justify-center gap-3">
             <span className="text-5xl">🤖</span>
             AI Therapy Assistant
           </h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Personalized therapeutic support using evidence-based approaches
+            Comprehensive wellness platform with personalized therapeutic support
           </p>
         </div>
 
@@ -518,11 +544,9 @@ const TherapyBot = () => {
                       <SelectValue placeholder="Select therapy approach" />
                     </SelectTrigger>
                     <SelectContent>
-                      {Object.entries(therapyTypes).map(([key, type]) => (
-                        <SelectItem key={key} value={key}>
-                          {type.name}
-                        </SelectItem>
-                      ))}
+                      <SelectItem value="CBT">Cognitive Behavioral Therapy (CBT)</SelectItem>
+                      <SelectItem value="DBT">Dialectical Behavior Therapy (DBT)</SelectItem>
+                      <SelectItem value="general">General Support</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -546,7 +570,7 @@ const TherapyBot = () => {
                 </div>
                 
                 <Button
-                  onClick={startSession}
+                  onClick={() => setSessionStarted(true)}
                   disabled={!selectedAvatar}
                   className="w-full bg-purple-500 hover:bg-purple-600 text-white font-medium py-3 rounded-full transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
@@ -567,210 +591,297 @@ const TherapyBot = () => {
             />
           </div>
         ) : (
-          /* Chat Interface */
-          <div ref={chatContainerRef} className="space-y-4">
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-              {/* Avatar Display */}
-              <div className="lg:col-span-1">
-                {selectedAvatar && (
-                  <Card className="bg-white/80 backdrop-blur-sm border-purple-200 shadow-lg">
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-sm text-purple-800 text-center">
-                        Your Therapy Companion
-                        {userProfile?.usePersonalizedResponses && (
-                          <div className="text-xs text-green-600 mt-1">Personalized for {userProfile.name || 'you'}</div>
-                        )}
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="pt-0">
-                      <TherapyAvatar3D
-                        avatar={selectedAvatar}
-                        isActive={sessionStarted}
-                        isSpeaking={isSpeaking}
-                        emotion={avatarEmotion}
-                      />
-                    </CardContent>
-                  </Card>
-                )}
-              </div>
+          /* Main Application Tabs */
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="grid w-full grid-cols-6">
+              <TabsTrigger value="chat" className="flex items-center gap-2">
+                <MessageSquare className="w-4 h-4" />
+                Chat
+              </TabsTrigger>
+              <TabsTrigger value="trainer" className="flex items-center gap-2">
+                <Dumbbell className="w-4 h-4" />
+                Trainer
+              </TabsTrigger>
+              <TabsTrigger value="music" className="flex items-center gap-2">
+                <Music className="w-4 h-4" />
+                Music
+              </TabsTrigger>
+              <TabsTrigger value="recorder" className="flex items-center gap-2">
+                <Mic className="w-4 h-4" />
+                Recorder
+              </TabsTrigger>
+              <TabsTrigger value="mindreader" className="flex items-center gap-2">
+                <Activity className="w-4 h-4" />
+                Mind Reader
+              </TabsTrigger>
+              <TabsTrigger value="settings" className="flex items-center gap-2">
+                <Settings2 className="w-4 h-4" />
+                Settings
+              </TabsTrigger>
+            </TabsList>
 
-              {/* Main Chat */}
-              <div className="lg:col-span-2">
-                <Card className="bg-white/80 backdrop-blur-sm border-purple-200 shadow-lg">
-                  <CardHeader className="pb-4">
-                    <div className="flex justify-between items-center">
-                      <CardTitle className="text-lg text-purple-800 flex items-center gap-2">
-                        <span className="text-xl">💬</span>
-                        {therapyTypes[therapyType].name} Session
-                      </CardTitle>
-                      <div className="flex gap-2">
-                        <Button 
-                          onClick={() => setShowVoiceSettings(!showVoiceSettings)}
-                          variant="outline"
-                          size="sm"
-                        >
-                          <Settings2 className="w-4 h-4" />
-                        </Button>
-                        <Button 
-                          onClick={() => setShowProfileManager(true)}
-                          variant="outline"
-                          size="sm"
-                        >
-                          <User className="w-4 h-4" />
-                        </Button>
-                        <Button 
-                          onClick={() => setSessionStarted(false)}
-                          variant="outline"
-                          size="sm"
-                        >
-                          New Session
-                        </Button>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="h-96 overflow-y-auto border border-gray-200 rounded-lg p-4 mb-4 bg-gray-50/50">
-                      {messages.map((message) => (
-                        <div
-                          key={message.id}
-                          className={`mb-4 flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
-                        >
-                          <div
-                            className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
-                              message.type === 'user'
-                                ? 'bg-purple-500 text-white'
-                                : 'bg-white border border-gray-200 text-gray-800'
-                            }`}
+            <TabsContent value="chat" className="mt-6">
+              <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                {/* Avatar Display */}
+                <div className="lg:col-span-1">
+                  {selectedAvatar && (
+                    <Card className="bg-white/80 backdrop-blur-sm border-purple-200 shadow-lg">
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-sm text-purple-800 text-center">
+                          Your Therapy Companion
+                          {userProfile?.usePersonalizedResponses && (
+                            <div className="text-xs text-green-600 mt-1">Personalized for {userProfile.name || 'you'}</div>
+                          )}
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="pt-0">
+                        <TherapyAvatar3D
+                          avatar={selectedAvatar}
+                          isActive={sessionStarted}
+                          isSpeaking={isSpeaking}
+                          emotion={avatarEmotion}
+                        />
+                      </CardContent>
+                    </Card>
+                  )}
+                </div>
+
+                {/* Main Chat */}
+                <div className="lg:col-span-2">
+                  <Card className="bg-white/80 backdrop-blur-sm border-purple-200 shadow-lg">
+                    <CardHeader className="pb-4">
+                      <div className="flex justify-between items-center">
+                        <CardTitle className="text-lg text-purple-800 flex items-center gap-2">
+                          <span className="text-xl">💬</span>
+                          {therapyTypes[therapyType].name} Session
+                        </CardTitle>
+                        <div className="flex gap-2">
+                          <Button 
+                            onClick={() => setShowVoiceSettings(!showVoiceSettings)}
+                            variant="outline"
+                            size="sm"
                           >
-                            <p className="text-sm">{message.content}</p>
-                            <div className="flex justify-between items-center mt-1">
-                              <p className={`text-xs ${
-                                message.type === 'user' ? 'text-purple-100' : 'text-gray-500'
-                              }`}>
-                                {message.timestamp.toLocaleTimeString()}
-                              </p>
-                              {message.voiceTone && (
-                                <span className={`text-xs px-2 py-1 rounded-full ${
-                                  message.type === 'user' ? 'bg-purple-400 text-purple-100' : 'bg-gray-100 text-gray-600'
-                                }`}>
-                                  Tone: {message.voiceTone}
-                                </span>
-                              )}
-                            </div>
-                          </div>
+                            <Settings2 className="w-4 h-4" />
+                          </Button>
+                          <Button 
+                            onClick={() => setShowProfileManager(true)}
+                            variant="outline"
+                            size="sm"
+                          >
+                            <User className="w-4 h-4" />
+                          </Button>
+                          <Button 
+                            onClick={() => setSessionStarted(false)}
+                            variant="outline"
+                            size="sm"
+                          >
+                            New Session
+                          </Button>
                         </div>
-                      ))}
-                      
-                      {isTyping && (
-                        <div className="flex justify-start mb-4">
-                          <div className="bg-white border border-gray-200 rounded-lg px-4 py-2">
-                            <div className="flex space-x-1">
-                              <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                              <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
-                              <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="h-96 overflow-y-auto border border-gray-200 rounded-lg p-4 mb-4 bg-gray-50/50">
+                        {messages.map((message) => (
+                          <div
+                            key={message.id}
+                            className={`mb-4 flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
+                          >
+                            <div
+                              className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
+                                message.type === 'user'
+                                  ? 'bg-purple-500 text-white'
+                                  : 'bg-white border border-gray-200 text-gray-800'
+                              }`}
+                            >
+                              <p className="text-sm">{message.content}</p>
+                              <div className="flex justify-between items-center mt-1">
+                                <p className={`text-xs ${
+                                  message.type === 'user' ? 'text-purple-100' : 'text-gray-500'
+                                }`}>
+                                  {message.timestamp.toLocaleTimeString()}
+                                </p>
+                                {message.voiceTone && (
+                                  <span className={`text-xs px-2 py-1 rounded-full ${
+                                    message.type === 'user' ? 'bg-purple-400 text-purple-100' : 'bg-gray-100 text-gray-600'
+                                  }`}>
+                                    Tone: {message.voiceTone}
+                                  </span>
+                                )}
+                              </div>
                             </div>
                           </div>
+                        ))}
+                        
+                        {isTyping && (
+                          <div className="flex justify-start mb-4">
+                            <div className="bg-white border border-gray-200 rounded-lg px-4 py-2">
+                              <div className="flex space-x-1">
+                                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
+                                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                        
+                        <div ref={messagesEndRef} />
+                      </div>
+                      
+                      {/* Input Mode Selector */}
+                      {voiceSettings.enabled && (
+                        <div className="flex gap-2 mb-4">
+                          <Button
+                            onClick={() => setInputMode('text')}
+                            variant={inputMode === 'text' ? 'default' : 'outline'}
+                            size="sm"
+                            className="flex items-center gap-2"
+                          >
+                            <MessageSquare className="w-4 h-4" />
+                            Text
+                          </Button>
+                          <Button
+                            onClick={() => setInputMode('voice')}
+                            variant={inputMode === 'voice' ? 'default' : 'outline'}
+                            size="sm"
+                            className="flex items-center gap-2"
+                            disabled={!voiceSettings.voiceInput || hasAudioPermission !== true}
+                          >
+                            {isListening ? <Mic className="w-4 h-4" /> : <MicOff className="w-4 h-4" />}
+                            Voice
+                          </Button>
                         </div>
                       )}
                       
-                      <div ref={messagesEndRef} />
-                    </div>
-                    
-                    {/* Input Mode Selector */}
-                    {voiceSettings.enabled && (
-                      <div className="flex gap-2 mb-4">
-                        <Button
-                          onClick={() => setInputMode('text')}
-                          variant={inputMode === 'text' ? 'default' : 'outline'}
-                          size="sm"
-                          className="flex items-center gap-2"
-                        >
-                          <MessageSquare className="w-4 h-4" />
-                          Text
-                        </Button>
-                        <Button
-                          onClick={() => setInputMode('voice')}
-                          variant={inputMode === 'voice' ? 'default' : 'outline'}
-                          size="sm"
-                          className="flex items-center gap-2"
-                          disabled={!voiceSettings.voiceInput || hasAudioPermission !== true}
-                        >
-                          {isListening ? <Mic className="w-4 h-4" /> : <MicOff className="w-4 h-4" />}
-                          Voice
-                        </Button>
-                      </div>
-                    )}
-                    
-                    <div className="flex gap-2">
-                      <Textarea
-                        value={currentMessage}
-                        onChange={(e) => setCurrentMessage(e.target.value)}
-                        placeholder={inputMode === 'voice' ? "Speak your message..." : "Share your thoughts and feelings..."}
-                        className="flex-1 resize-none border-purple-200 focus:border-purple-400 focus:ring-purple-400"
-                        rows={2}
-                        onKeyPress={(e) => {
-                          if (e.key === 'Enter' && !e.shiftKey) {
-                            e.preventDefault();
-                            sendMessage();
-                          }
-                        }}
-                        disabled={inputMode === 'voice'}
-                      />
-                      <div className="flex flex-col gap-2">
-                        {inputMode === 'voice' && voiceSettings.enabled && (
+                      <div className="flex gap-2">
+                        <Textarea
+                          value={currentMessage}
+                          onChange={(e) => setCurrentMessage(e.target.value)}
+                          placeholder={inputMode === 'voice' ? "Speak your message..." : "Share your thoughts and feelings..."}
+                          className="flex-1 resize-none border-purple-200 focus:border-purple-400 focus:ring-purple-400"
+                          rows={2}
+                          onKeyPress={(e) => {
+                            if (e.key === 'Enter' && !e.shiftKey) {
+                              e.preventDefault();
+                              sendMessage();
+                            }
+                          }}
+                          disabled={inputMode === 'voice'}
+                        />
+                        <div className="flex flex-col gap-2">
+                          {inputMode === 'voice' && voiceSettings.enabled && (
+                            <Button
+                              onClick={toggleVoiceInput}
+                              variant={isListening ? 'destructive' : 'outline'}
+                              className="px-4"
+                              disabled={!voiceSettings.voiceInput || hasAudioPermission !== true}
+                            >
+                              {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+                            </Button>
+                          )}
+                          
+                          {isSpeaking && (
+                            <Button
+                              onClick={stopSpeaking}
+                              variant="outline"
+                              className="px-4"
+                            >
+                              <VolumeX className="w-4 h-4" />
+                            </Button>
+                          )}
+                          
                           <Button
-                            onClick={toggleVoiceInput}
-                            variant={isListening ? 'destructive' : 'outline'}
-                            className="px-4"
-                            disabled={!voiceSettings.voiceInput || hasAudioPermission !== true}
+                            onClick={sendMessage}
+                            disabled={!currentMessage.trim() || isTyping || (inputMode === 'voice' && isListening)}
+                            className="bg-purple-500 hover:bg-purple-600 text-white px-6"
                           >
-                            {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+                            Send
                           </Button>
-                        )}
-                        
-                        {isSpeaking && (
-                          <Button
-                            onClick={stopSpeaking}
-                            variant="outline"
-                            className="px-4"
-                          >
-                            <VolumeX className="w-4 h-4" />
-                          </Button>
-                        )}
-                        
-                        <Button
-                          onClick={sendMessage}
-                          disabled={!currentMessage.trim() || isTyping || (inputMode === 'voice' && isListening)}
-                          className="bg-purple-500 hover:bg-purple-600 text-white px-6"
-                        >
-                          Send
-                        </Button>
+                        </div>
                       </div>
-                    </div>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* Side Panel */}
+                <div className="lg:col-span-1 space-y-4">
+                  {/* Voice Tone Indicator */}
+                  <VoiceToneIndicator voiceTone={voiceTone} isListening={isListening} />
+                  
+                  {/* Voice Settings Panel */}
+                  {showVoiceSettings && (
+                    <VoiceSettings
+                      voiceSettings={voiceSettings}
+                      setVoiceSettings={setVoiceSettings}
+                      availableVoices={availableVoices}
+                      hasAudioPermission={hasAudioPermission}
+                      initAudioContext={initAudioContext}
+                      isListening={isListening}
+                      isSpeaking={isSpeaking}
+                    />
+                  )}
+                </div>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="trainer" className="mt-6">
+              <PersonalTrainer userProfile={userProfile} />
+            </TabsContent>
+
+            <TabsContent value="music" className="mt-6">
+              <MusicTherapy userProfile={userProfile} />
+            </TabsContent>
+
+            <TabsContent value="recorder" className="mt-6">
+              <SessionRecorder userProfile={userProfile} />
+            </TabsContent>
+
+            <TabsContent value="mindreader" className="mt-6">
+              <VirtualMindReader 
+                userProfile={userProfile}
+                currentText={currentMessage}
+                voiceTone={voiceTone.tone}
+              />
+            </TabsContent>
+
+            <TabsContent value="settings" className="mt-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <Card className="bg-white/80 backdrop-blur-sm border-purple-200 shadow-lg">
+                  <CardHeader>
+                    <CardTitle className="text-lg text-purple-800">Profile Settings</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <Button
+                      onClick={() => setShowProfileManager(true)}
+                      variant="outline"
+                      className="w-full"
+                    >
+                      <User className="w-4 h-4 mr-2" />
+                      {userProfile ? 'Edit Profile' : 'Create Profile'}
+                    </Button>
+                    <Button
+                      onClick={clearAllData}
+                      variant="outline"
+                      className="w-full text-red-600 hover:text-red-700"
+                    >
+                      <Trash2 className="w-4 h-4 mr-2" />
+                      Clear All Data
+                    </Button>
                   </CardContent>
                 </Card>
-              </div>
 
-              {/* Side Panel */}
-              <div className="lg:col-span-1 space-y-4">
-                {/* Voice Tone Indicator */}
-                <VoiceToneIndicator voiceTone={voiceTone} isListening={isListening} />
-                
-                {/* Voice Settings Panel */}
-                {showVoiceSettings && (
-                  <VoiceSettings
-                    voiceSettings={voiceSettings}
-                    setVoiceSettings={setVoiceSettings}
-                    availableVoices={availableVoices}
-                    hasAudioPermission={hasAudioPermission}
-                    initAudioContext={initAudioContext}
-                    isListening={isListening}
-                    isSpeaking={isSpeaking}
-                  />
-                )}
+                <VoiceSettings
+                  voiceSettings={voiceSettings}
+                  setVoiceSettings={setVoiceSettings}
+                  availableVoices={availableVoices}
+                  hasAudioPermission={hasAudioPermission}
+                  initAudioContext={initAudioContext}
+                  isListening={isListening}
+                  isSpeaking={isSpeaking}
+                />
               </div>
-            </div>
-          </div>
+            </TabsContent>
+          </Tabs>
         )}
       </div>
     </div>
