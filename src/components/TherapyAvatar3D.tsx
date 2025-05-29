@@ -1,8 +1,8 @@
 
 import React, { useRef, useMemo } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { Sphere, Text } from '@react-three/drei';
-import { Group, MathUtils } from 'three';
+import { Text } from '@react-three/drei';
+import { Group, MeshPhongMaterial, SphereGeometry, Mesh } from 'three';
 import { AvatarCharacter } from './AvatarSelector';
 
 interface TherapyAvatar3DProps {
@@ -19,9 +19,9 @@ const AvatarMesh: React.FC<{
   emotion: string;
 }> = ({ avatar, isActive, isSpeaking, emotion }) => {
   const groupRef = useRef<Group>(null);
-  const eyeLeftRef = useRef<any>(null);
-  const eyeRightRef = useRef<any>(null);
-  const mouthRef = useRef<any>(null);
+  const eyeLeftRef = useRef<Mesh>(null);
+  const eyeRightRef = useRef<Mesh>(null);
+  const mouthRef = useRef<Mesh>(null);
 
   // Animation
   useFrame((state) => {
@@ -82,43 +82,44 @@ const AvatarMesh: React.FC<{
   return (
     <group ref={groupRef}>
       {/* Main head */}
-      <Sphere args={[1, 32, 32]} position={[0, 0, 0]}>
+      <mesh position={[0, 0, 0]}>
+        <sphereGeometry args={[1, 32, 32]} />
         <meshPhongMaterial 
           color={avatarColor} 
           transparent 
           opacity={emotionIntensity}
         />
-      </Sphere>
+      </mesh>
 
       {/* Eyes */}
-      <Sphere ref={eyeLeftRef} args={[0.15, 16, 16]} position={[-0.3, 0.2, 0.8]}>
+      <mesh ref={eyeLeftRef} position={[-0.3, 0.2, 0.8]}>
+        <sphereGeometry args={[0.15, 16, 16]} />
         <meshPhongMaterial color="white" />
-      </Sphere>
-      <Sphere ref={eyeRightRef} args={[0.15, 16, 16]} position={[0.3, 0.2, 0.8]}>
+      </mesh>
+      <mesh ref={eyeRightRef} position={[0.3, 0.2, 0.8]}>
+        <sphereGeometry args={[0.15, 16, 16]} />
         <meshPhongMaterial color="white" />
-      </Sphere>
+      </mesh>
 
       {/* Eye pupils */}
-      <Sphere args={[0.08, 16, 16]} position={[-0.3, 0.2, 0.9]}>
+      <mesh position={[-0.3, 0.2, 0.9]}>
+        <sphereGeometry args={[0.08, 16, 16]} />
         <meshPhongMaterial color="#2D3748" />
-      </Sphere>
-      <Sphere args={[0.08, 16, 16]} position={[0.3, 0.2, 0.9]}>
+      </mesh>
+      <mesh position={[0.3, 0.2, 0.9]}>
+        <sphereGeometry args={[0.08, 16, 16]} />
         <meshPhongMaterial color="#2D3748" />
-      </Sphere>
+      </mesh>
 
       {/* Mouth */}
-      <Sphere 
-        ref={mouthRef} 
-        args={[0.2, 16, 8]} 
-        position={[0, -0.3, 0.7]}
-        rotation={[0, 0, 0]}
-      >
+      <mesh ref={mouthRef} position={[0, -0.3, 0.7]} rotation={[0, 0, 0]}>
+        <sphereGeometry args={[0.2, 16, 8]} />
         <meshPhongMaterial 
           color={isSpeaking ? "#FF6B6B" : "#4A5568"} 
           transparent 
           opacity={0.8}
         />
-      </Sphere>
+      </mesh>
 
       {/* Avatar name */}
       <Text
