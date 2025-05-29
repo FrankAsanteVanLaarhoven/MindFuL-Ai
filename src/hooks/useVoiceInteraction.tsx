@@ -41,12 +41,12 @@ declare global {
     readonly length: number;
     item(index: number): SpeechRecognitionAlternative;
     [index: number]: SpeechRecognitionAlternative;
-    isFinal: boolean;
+    readonly isFinal: boolean;
   }
 
   interface SpeechRecognitionAlternative {
-    transcript: string;
-    confidence: number;
+    readonly transcript: string;
+    readonly confidence: number;
   }
 
   const SpeechRecognition: {
@@ -62,6 +62,12 @@ interface VoiceToneData {
 }
 
 interface VoiceSettings {
+  enabled: boolean;
+  voiceOutput: boolean;
+  voiceInput: boolean;
+  voiceSpeed: number;
+  voicePitch: number;
+  selectedVoice: string;
   speechRate: number;
   speechPitch: number;
   speechVolume: number;
@@ -72,7 +78,10 @@ interface VoiceSettings {
 
 export const useVoiceInteraction = () => {
   const [isListening, setIsListening] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
   const [transcript, setTranscript] = useState('');
+  const [hasAudioPermission, setHasAudioPermission] = useState<boolean | null>(null);
+  const [availableVoices, setAvailableVoices] = useState<SpeechSynthesisVoice[]>([]);
   const [voiceTone, setVoiceTone] = useState<VoiceToneData>({
     tone: 'neutral',
     confidence: 0,
@@ -80,6 +89,12 @@ export const useVoiceInteraction = () => {
     pitch: 0
   });
   const [voiceSettings, setVoiceSettings] = useState<VoiceSettings>({
+    enabled: false,
+    voiceOutput: false,
+    voiceInput: false,
+    voiceSpeed: 1,
+    voicePitch: 1,
+    selectedVoice: '',
     speechRate: 1,
     speechPitch: 1,
     speechVolume: 1,
@@ -91,6 +106,42 @@ export const useVoiceInteraction = () => {
   const recognitionRef = useRef<SpeechRecognition | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
+
+  // Initialize audio context and get permission
+  const initAudioContext = useCallback(async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      setHasAudioPermission(true);
+      
+      // Initialize audio context for tone analysis
+      audioContextRef.current = new AudioContext();
+      analyserRef.current = audioContextRef.current.createAnalyser();
+      
+      // Clean up stream
+      stream.getTracks().forEach(track => track.stop());
+    } catch (error) {
+      console.error('Audio permission denied:', error);
+      setHasAudioPermission(false);
+    }
+  }, []);
+
+  // Load available voices
+  useEffect(() => {
+    const loadVoices = () => {
+      const voices = speechSynthesis.getVoices();
+      setAvailableVoices(voices);
+      if (voices.length > 0 && !voiceSettings.selectedVoice) {
+        setVoiceSettings(prev => ({ ...prev, selectedVoice: voices[0].name }));
+      }
+    };
+
+    loadVoices();
+    speechSynthesis.addEventListener('voiceschanged', loadVoices);
+    
+    return () => {
+      speechSynthesis.removeEventListener('voiceschanged', loadVoices);
+    };
+  }, [voiceSettings.selectedVoice]);
 
   // Initialize speech recognition
   const initializeRecognition = useCallback(() => {
@@ -191,20 +242,37 @@ export const useVoiceInteraction = () => {
   // Text to speech
   const speak = useCallback((text: string) => {
     if ('speechSynthesis' in window) {
+      setIsSpeaking(true);
       const utterance = new SpeechSynthesisUtterance(text);
-      const voices = speechSynthesis.getVoices();
       
-      if (voices.length > 0) {
-        utterance.voice = voices[Math.min(voiceSettings.voiceIndex, voices.length - 1)];
+      if (availableVoices.length > 0 && voiceSettings.selectedVoice) {
+        const selectedVoice = availableVoices.find(voice => voice.name === voiceSettings.selectedVoice);
+        if (selectedVoice) {
+          utterance.voice = selectedVoice;
+        }
       }
       
-      utterance.rate = voiceSettings.speechRate;
-      utterance.pitch = voiceSettings.speechPitch;
-      utterance.volume = voiceSettings.speechVolume;
+      utterance.rate = voiceSettings.voiceSpeed;
+      utterance.pitch = voiceSettings.voicePitch;
+      utterance.volume = 1;
+      
+      utterance.onend = () => setIsSpeaking(false);
+      utterance.onerror = () => setIsSpeaking(false);
       
       speechSynthesis.speak(utterance);
     }
-  }, [voiceSettings]);
+  }, [voiceSettings, availableVoices]);
+
+  // Stop speaking
+  const stopSpeaking = useCallback(() => {
+    speechSynthesis.cancel();
+    setIsSpeaking(false);
+  }, []);
+
+  // Clear transcript
+  const clearTranscript = useCallback(() => {
+    setTranscript('');
+  }, []);
 
   // Update voice settings
   const updateVoiceSettings = useCallback((newSettings: Partial<VoiceSettings>) => {
@@ -231,13 +299,20 @@ export const useVoiceInteraction = () => {
 
   return {
     isListening,
+    isSpeaking,
     transcript,
     voiceTone,
     voiceSettings,
+    hasAudioPermission,
+    availableVoices,
     startListening,
     stopListening,
     speak,
+    stopSpeaking,
+    clearTranscript,
     updateVoiceSettings,
+    setVoiceSettings,
+    initAudioContext,
     executeVoiceCommand,
     setTranscript
   };

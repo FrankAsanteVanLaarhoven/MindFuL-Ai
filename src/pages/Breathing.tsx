@@ -34,50 +34,6 @@ const Breathing = () => {
     }
   }, []);
 
-  const startExercise = () => {
-    setIsActive(true);
-    runCycle();
-  };
-
-  const stopExercise = () => {
-    setIsActive(false);
-    setCurrentPhase('inhale');
-  };
-
-  const runCycle = () => {
-    if (!isActive) return;
-
-    const cycle = cycles[selectedTechnique];
-    
-    setCurrentPhase('inhale');
-    setTimeout(() => {
-      if (!isActive) return;
-      setCurrentPhase('hold1');
-      
-      setTimeout(() => {
-        if (!isActive) return;
-        setCurrentPhase('exhale');
-        
-        setTimeout(() => {
-          if (!isActive) return;
-          if (cycle.hold2 > 0) {
-            setCurrentPhase('hold2');
-            setTimeout(() => {
-              if (isActive) runCycle();
-            }, cycle.hold2);
-          } else {
-            runCycle();
-          }
-        }, cycle.exhale);
-      }, cycle.hold1);
-    }, cycle.inhale);
-  };
-
-  const onSessionComplete = () => {
-    setIsActive(false);
-    // Could add session completion logic here
-  };
-
   const techniques = {
     box: {
       name: 'Box Breathing',
