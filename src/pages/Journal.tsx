@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useRef, useEffect } from 'react';
@@ -10,6 +9,9 @@ import { useToast } from '@/hooks/use-toast';
 import { gsap } from 'gsap';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { Mic, MicOff, Volume2, Settings } from 'lucide-react';
+import { useVoiceInteraction } from '@/hooks/useVoiceInteraction';
+import VoiceSettings from '@/components/VoiceSettings';
 
 interface JournalEntry {
   id: string;
@@ -26,10 +28,29 @@ const Journal = () => {
   const [selectedEntry, setSelectedEntry] = useState<JournalEntry | null>(null);
   const [isGeneratingInsight, setIsGeneratingInsight] = useState(false);
   const [showNewEntry, setShowNewEntry] = useState(false);
+  const [showVoiceSettings, setShowVoiceSettings] = useState(false);
+  const [isVoiceInputActive, setIsVoiceInputActive] = useState(false);
   
   const navigate = useNavigate();
   const { toast } = useToast();
   const containerRef = useRef<HTMLDivElement>(null);
+
+  const {
+    isListening,
+    isSpeaking,
+    transcript,
+    voiceSettings,
+    hasAudioPermission,
+    availableVoices,
+    startListening,
+    stopListening,
+    speak,
+    clearTranscript,
+    updateVoiceSettings,
+    setVoiceSettings,
+    initAudioContext,
+    setTranscript
+  } = useVoiceInteraction();
 
   useEffect(() => {
     // Load entries from localStorage
@@ -50,6 +71,49 @@ const Journal = () => {
       );
     }
   }, []);
+
+  // Handle voice input for content
+  useEffect(() => {
+    if (transcript && isVoiceInputActive && showNewEntry) {
+      setCurrentEntry(prev => ({ 
+        ...prev, 
+        content: prev.content + (prev.content ? ' ' : '') + transcript 
+      }));
+      clearTranscript();
+    }
+  }, [transcript, isVoiceInputActive, showNewEntry, clearTranscript]);
+
+  const toggleVoiceInput = () => {
+    if (!voiceSettings.enabled || !voiceSettings.voiceInput) {
+      toast({
+        title: "Voice input disabled",
+        description: "Please enable voice features in settings first.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (hasAudioPermission !== true) {
+      initAudioContext();
+      return;
+    }
+
+    setIsVoiceInputActive(!isVoiceInputActive);
+    
+    if (!isListening) {
+      startListening();
+      toast({
+        title: "Voice input started",
+        description: "Start speaking to add to your journal entry..."
+      });
+    } else {
+      stopListening();
+      toast({
+        title: "Voice input stopped",
+        description: "Voice input has been stopped."
+      });
+    }
+  };
 
   const saveEntry = async () => {
     if (!currentEntry.title.trim() || !currentEntry.content.trim()) {
@@ -87,11 +151,20 @@ const Journal = () => {
     
     setCurrentEntry({ title: '', content: '', mood: '' });
     setShowNewEntry(false);
+    setIsVoiceInputActive(false);
+    stopListening();
     
     toast({
       title: "Entry saved!",
       description: "Your journal entry has been saved with AI insights."
     });
+
+    // Read the insight aloud if voice output is enabled
+    if (voiceSettings.voiceOutput && newEntry.aiInsight) {
+      setTimeout(() => {
+        speak(`Your entry has been saved. Here's an AI insight: ${newEntry.aiInsight}`);
+      }, 1000);
+    }
   };
 
   const generateAIInsight = async (content: string): Promise<string> => {
@@ -142,21 +215,49 @@ const Journal = () => {
           transition={{ duration: 0.6 }}
           className="text-center py-8"
         >
-          <Button 
-            onClick={() => navigate('/')}
-            variant="outline"
-            className="mb-4"
-          >
-            ← Back to Dashboard
-          </Button>
+          <div className="flex justify-center gap-4 mb-4">
+            <Button 
+              onClick={() => navigate('/')}
+              variant="outline"
+            >
+              ← Back to Dashboard
+            </Button>
+            <Button
+              onClick={() => setShowVoiceSettings(!showVoiceSettings)}
+              variant="outline"
+              className="flex items-center gap-2"
+            >
+              <Settings className="w-4 h-4" />
+              Voice Settings
+            </Button>
+          </div>
           <h1 className="text-4xl font-bold text-orange-800 mb-4 flex items-center justify-center gap-3">
             <span className="text-5xl">📝</span>
             AI-Enhanced Journal
           </h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Write down your thoughts and feelings. Our AI provides gentle reflections to help you gain insights.
+            Write down your thoughts and feelings. Use voice dictation or type manually. Our AI provides gentle reflections to help you gain insights.
           </p>
         </motion.div>
+
+        {/* Voice Settings */}
+        {showVoiceSettings && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            transition={{ duration: 0.3 }}
+          >
+            <VoiceSettings
+              voiceSettings={voiceSettings}
+              setVoiceSettings={setVoiceSettings}
+              availableVoices={availableVoices}
+              hasAudioPermission={hasAudioPermission}
+              initAudioContext={initAudioContext}
+              isListening={isListening}
+              isSpeaking={isSpeaking}
+            />
+          </motion.div>
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* New Entry / Entry Form */}
@@ -184,7 +285,7 @@ const Journal = () => {
                 </div>
                 <CardDescription>
                   {showNewEntry 
-                    ? 'Express your thoughts and receive AI-powered insights'
+                    ? 'Express your thoughts through typing or voice dictation and receive AI-powered insights'
                     : 'Your recent journal entries and reflections'
                   }
                 </CardDescription>
@@ -226,15 +327,55 @@ const Journal = () => {
                     </div>
                     
                     <div>
-                      <label className="text-sm font-medium text-gray-700 mb-2 block">
-                        Your Thoughts
-                      </label>
+                      <div className="flex justify-between items-center mb-2">
+                        <label className="text-sm font-medium text-gray-700">
+                          Your Thoughts
+                        </label>
+                        <div className="flex items-center gap-2">
+                          {voiceSettings.enabled && voiceSettings.voiceInput && (
+                            <Button
+                              onClick={toggleVoiceInput}
+                              variant={isVoiceInputActive ? "default" : "outline"}
+                              size="sm"
+                              className={`transition-all duration-200 ${
+                                isVoiceInputActive 
+                                  ? 'bg-red-500 hover:bg-red-600 text-white animate-pulse' 
+                                  : 'border-orange-300 hover:bg-orange-50'
+                              }`}
+                            >
+                              {isListening ? (
+                                <>
+                                  <MicOff className="w-4 h-4 mr-1" />
+                                  Stop Recording
+                                </>
+                              ) : (
+                                <>
+                                  <Mic className="w-4 h-4 mr-1" />
+                                  Start Voice Input
+                                </>
+                              )}
+                            </Button>
+                          )}
+                          {isSpeaking && (
+                            <div className="flex items-center text-blue-600 text-sm">
+                              <Volume2 className="w-4 h-4 mr-1 animate-pulse" />
+                              Speaking...
+                            </div>
+                          )}
+                        </div>
+                      </div>
                       <Textarea
                         value={currentEntry.content}
                         onChange={(e) => setCurrentEntry(prev => ({ ...prev, content: e.target.value }))}
-                        placeholder="What's on your mind today? Share your thoughts, feelings, experiences, or anything you'd like to reflect on..."
+                        placeholder="What's on your mind today? Share your thoughts, feelings, experiences, or anything you'd like to reflect on... You can also use voice input!"
                         className="resize-none border-orange-200 focus:border-orange-400 focus:ring-orange-400 min-h-[200px]"
                       />
+                      {isVoiceInputActive && (
+                        <p className="text-xs text-orange-600 mt-1 flex items-center gap-1">
+                          <Mic className="w-3 h-3" />
+                          Voice input is active. Speak to add to your entry.
+                        </p>
+                      )}
                     </div>
                     
                     <div className="flex gap-3">
@@ -256,7 +397,11 @@ const Journal = () => {
                         )}
                       </Button>
                       <Button
-                        onClick={() => setShowNewEntry(false)}
+                        onClick={() => {
+                          setShowNewEntry(false);
+                          setIsVoiceInputActive(false);
+                          stopListening();
+                        }}
                         variant="outline"
                         className="px-6"
                       >
@@ -352,10 +497,24 @@ const Journal = () => {
                   
                   {selectedEntry.aiInsight && (
                     <div className="p-4 bg-gradient-to-br from-orange-50 to-amber-50 rounded-lg border border-orange-200">
-                      <h4 className="font-semibold text-orange-800 mb-2 flex items-center gap-2">
-                        <span>🤖</span>
-                        AI Reflection
-                      </h4>
+                      <div className="flex justify-between items-start mb-2">
+                        <h4 className="font-semibold text-orange-800 flex items-center gap-2">
+                          <span>🤖</span>
+                          AI Reflection
+                        </h4>
+                        {voiceSettings.voiceOutput && (
+                          <Button
+                            onClick={() => speak(selectedEntry.aiInsight!)}
+                            variant="outline"
+                            size="sm"
+                            disabled={isSpeaking}
+                            className="text-xs"
+                          >
+                            <Volume2 className="w-3 h-3 mr-1" />
+                            Read Aloud
+                          </Button>
+                        )}
+                      </div>
                       <p className="text-orange-700 text-sm">
                         {selectedEntry.aiInsight}
                       </p>
