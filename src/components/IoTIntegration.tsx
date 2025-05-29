@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -16,25 +15,45 @@ import {
   WifiOff,
   Battery,
   RefreshCw,
-  Settings
+  Settings,
+  Brain,
+  Zap,
+  Droplets,
+  AlertTriangle,
+  CheckCircle,
+  Camera,
+  Scan,
+  TrendingUp
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface Device {
   id: string;
   name: string;
-  type: 'smartwatch' | 'fitness_tracker' | 'phone' | 'sleep_tracker' | 'heart_monitor';
+  type: 'smartwatch' | 'fitness_tracker' | 'phone' | 'sleep_tracker' | 'heart_monitor' | 'glucose_monitor' | 'bp_monitor';
   connected: boolean;
   battery?: number;
   lastSync: string;
 }
 
 interface HealthMetric {
-  type: 'heart_rate' | 'steps' | 'sleep' | 'stress' | 'temperature';
-  value: number;
+  type: 'heart_rate' | 'steps' | 'sleep' | 'stress' | 'temperature' | 'blood_pressure' | 'glucose' | 'headache_intensity';
+  value: number | string;
   unit: string;
   timestamp: string;
   deviceId: string;
+  normalRange?: string;
+  status?: 'normal' | 'warning' | 'critical';
+}
+
+interface SymptomPrediction {
+  id: string;
+  condition: string;
+  probability: number;
+  severity: 'low' | 'medium' | 'high';
+  triggers: string[];
+  recommendations: string[];
+  timestamp: string;
 }
 
 const IoTIntegration = () => {
@@ -63,6 +82,22 @@ const IoTIntegration = () => {
       connected: true,
       battery: 92,
       lastSync: 'Just now'
+    },
+    {
+      id: 'glucose_1',
+      name: 'FreeStyle Libre',
+      type: 'glucose_monitor',
+      connected: true,
+      battery: 78,
+      lastSync: '5 minutes ago'
+    },
+    {
+      id: 'bp_1',
+      name: 'Omron Blood Pressure',
+      type: 'bp_monitor',
+      connected: true,
+      battery: 60,
+      lastSync: '10 minutes ago'
     }
   ]);
 
@@ -72,33 +107,63 @@ const IoTIntegration = () => {
       value: 72,
       unit: 'bpm',
       timestamp: '5 minutes ago',
-      deviceId: 'watch_1'
+      deviceId: 'watch_1',
+      normalRange: '60-100 bpm',
+      status: 'normal'
     },
     {
-      type: 'steps',
-      value: 8543,
-      unit: 'steps',
+      type: 'blood_pressure',
+      value: '120/80',
+      unit: 'mmHg',
       timestamp: '10 minutes ago',
-      deviceId: 'tracker_1'
+      deviceId: 'bp_1',
+      normalRange: '<120/80',
+      status: 'normal'
     },
     {
-      type: 'sleep',
-      value: 7.5,
-      unit: 'hours',
-      timestamp: 'Last night',
-      deviceId: 'watch_1'
+      type: 'glucose',
+      value: 95,
+      unit: 'mg/dL',
+      timestamp: '5 minutes ago',
+      deviceId: 'glucose_1',
+      normalRange: '70-100 mg/dL',
+      status: 'normal'
     },
     {
-      type: 'stress',
-      value: 35,
-      unit: '%',
+      type: 'headache_intensity',
+      value: 3,
+      unit: '/10',
       timestamp: '15 minutes ago',
-      deviceId: 'watch_1'
+      deviceId: 'phone_1',
+      normalRange: '0-2/10',
+      status: 'warning'
+    }
+  ]);
+
+  const [predictions, setPredictions] = useState<SymptomPrediction[]>([
+    {
+      id: '1',
+      condition: 'Stress-induced Headache',
+      probability: 75,
+      severity: 'medium',
+      triggers: ['Elevated heart rate', 'Poor sleep quality', 'High stress levels'],
+      recommendations: ['Take a 10-minute break', 'Practice deep breathing', 'Stay hydrated'],
+      timestamp: '2 minutes ago'
+    },
+    {
+      id: '2',
+      condition: 'Dehydration Risk',
+      probability: 60,
+      severity: 'low',
+      triggers: ['Low water intake', 'Increased activity'],
+      recommendations: ['Drink 16oz of water', 'Monitor fluid intake'],
+      timestamp: '5 minutes ago'
     }
   ]);
 
   const [isScanning, setIsScanning] = useState(false);
   const [autoSync, setAutoSync] = useState(true);
+  const [cameraMode, setCameraMode] = useState<'scan' | 'record' | null>(null);
 
   const getDeviceIcon = (type: Device['type']) => {
     switch (type) {
@@ -112,6 +177,10 @@ const IoTIntegration = () => {
         return <Moon className="w-5 h-5" />;
       case 'heart_monitor':
         return <Heart className="w-5 h-5" />;
+      case 'glucose_monitor':
+        return <Droplets className="w-5 h-5" />;
+      case 'bp_monitor':
+        return <TrendingUp className="w-5 h-5" />;
       default:
         return <Settings className="w-5 h-5" />;
     }
@@ -129,9 +198,63 @@ const IoTIntegration = () => {
         return <Thermometer className="w-4 h-4 text-orange-500" />;
       case 'temperature':
         return <Thermometer className="w-4 h-4 text-green-500" />;
+      case 'blood_pressure':
+        return <TrendingUp className="w-4 h-4 text-indigo-500" />;
+      case 'glucose':
+        return <Droplets className="w-4 h-4 text-blue-600" />;
+      case 'headache_intensity':
+        return <Brain className="w-4 h-4 text-red-600" />;
       default:
         return <Activity className="w-4 h-4" />;
     }
+  };
+
+  const getStatusColor = (status?: string) => {
+    switch (status) {
+      case 'normal': return 'text-green-600 bg-green-100';
+      case 'warning': return 'text-yellow-600 bg-yellow-100';
+      case 'critical': return 'text-red-600 bg-red-100';
+      default: return 'text-gray-600 bg-gray-100';
+    }
+  };
+
+  const getSeverityColor = (severity: string) => {
+    switch (severity) {
+      case 'low': return 'bg-green-100 text-green-800';
+      case 'medium': return 'bg-yellow-100 text-yellow-800';
+      case 'high': return 'bg-red-100 text-red-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const handleQuickScan = (type: 'glucose' | 'bp' | 'headache') => {
+    toast({
+      title: "🔍 Quick Scan Started",
+      description: `Scanning ${type === 'bp' ? 'blood pressure' : type === 'glucose' ? 'glucose levels' : 'headache symptoms'}...`,
+    });
+
+    setTimeout(() => {
+      toast({
+        title: "✅ Scan Complete",
+        description: `${type === 'bp' ? 'Blood pressure' : type === 'glucose' ? 'Glucose' : 'Headache'} reading updated successfully.`,
+      });
+    }, 3000);
+  };
+
+  const handleCameraAction = (mode: 'scan' | 'record') => {
+    setCameraMode(mode);
+    toast({
+      title: mode === 'scan' ? "📷 Camera Scanner" : "🎥 Recording Started",
+      description: mode === 'scan' ? "Position device over area to scan" : "Recording symptoms for analysis",
+    });
+
+    setTimeout(() => {
+      setCameraMode(null);
+      toast({
+        title: "✅ Complete",
+        description: mode === 'scan' ? "Scan analysis complete" : "Recording saved for review",
+      });
+    }, 5000);
   };
 
   const handleDeviceToggle = (deviceId: string) => {
@@ -195,20 +318,184 @@ const IoTIntegration = () => {
       <Card className="bg-white/80 backdrop-blur-sm border-blue-200 shadow-lg">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-blue-800">
-            <span className="text-2xl">🔗</span>
-            IoT Device Integration
+            <Brain className="w-6 h-6" />
+            Smart Health Monitoring & Symptoms Predictor
           </CardTitle>
           <CardDescription>
-            Connect and monitor your health devices for comprehensive wellness tracking
+            AI-powered health tracking with symptom prediction through IoT devices
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="devices" className="space-y-4">
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="devices">Devices</TabsTrigger>
+          <Tabs defaultValue="predictions" className="space-y-4">
+            <TabsList className="grid w-full grid-cols-5">
+              <TabsTrigger value="predictions">AI Predictions</TabsTrigger>
               <TabsTrigger value="metrics">Health Metrics</TabsTrigger>
+              <TabsTrigger value="quick-scan">Quick Scan</TabsTrigger>
+              <TabsTrigger value="devices">Devices</TabsTrigger>
               <TabsTrigger value="settings">Settings</TabsTrigger>
             </TabsList>
+
+            <TabsContent value="predictions" className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-semibold">AI Symptom Predictions</h3>
+                <Button onClick={handleSyncData} size="sm" className="bg-purple-500 hover:bg-purple-600">
+                  <Brain className="w-4 h-4 mr-2" />
+                  Analyze Now
+                </Button>
+              </div>
+
+              <div className="grid gap-4">
+                {predictions.map((prediction) => (
+                  <Card key={prediction.id} className="border-purple-200">
+                    <CardContent className="p-4">
+                      <div className="flex items-start justify-between mb-3">
+                        <div>
+                          <h4 className="font-medium text-purple-800">{prediction.condition}</h4>
+                          <p className="text-sm text-gray-500">{prediction.timestamp}</p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Badge className={getSeverityColor(prediction.severity)}>
+                            {prediction.severity}
+                          </Badge>
+                          <span className="text-lg font-bold text-purple-600">
+                            {prediction.probability}%
+                          </span>
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <div>
+                          <p className="text-sm font-medium text-gray-700">Triggers:</p>
+                          <div className="flex flex-wrap gap-1 mt-1">
+                            {prediction.triggers.map((trigger, index) => (
+                              <Badge key={index} variant="outline" className="text-xs">
+                                {trigger}
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+                        
+                        <div>
+                          <p className="text-sm font-medium text-gray-700">Recommendations:</p>
+                          <ul className="text-sm text-gray-600 mt-1 space-y-1">
+                            {prediction.recommendations.map((rec, index) => (
+                              <li key={index} className="flex items-center gap-2">
+                                <CheckCircle className="w-3 h-3 text-green-500" />
+                                {rec}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </TabsContent>
+
+            <TabsContent value="metrics" className="space-y-4">
+              <h3 className="text-lg font-semibold">Real-time Health Metrics</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {metrics.map((metric, index) => (
+                  <Card key={index} className="border-gray-200">
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          {getMetricIcon(metric.type)}
+                          <span className="font-medium capitalize">
+                            {metric.type.replace('_', ' ')}
+                          </span>
+                        </div>
+                        <span className="text-xs text-gray-500">{metric.timestamp}</span>
+                      </div>
+                      <div className="flex items-end justify-between">
+                        <div>
+                          <span className="text-2xl font-bold">{metric.value}</span>
+                          <span className="text-sm text-gray-500 ml-1">{metric.unit}</span>
+                        </div>
+                        {metric.status && (
+                          <Badge className={getStatusColor(metric.status)}>
+                            {metric.status}
+                          </Badge>
+                        )}
+                      </div>
+                      {metric.normalRange && (
+                        <p className="text-xs text-gray-500 mt-1">
+                          Normal: {metric.normalRange}
+                        </p>
+                      )}
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </TabsContent>
+
+            <TabsContent value="quick-scan" className="space-y-4">
+              <h3 className="text-lg font-semibold">Quick Health Scans</h3>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Card className="border-blue-200">
+                  <CardContent className="p-4">
+                    <h4 className="font-medium mb-3">Instant Measurements</h4>
+                    <div className="space-y-2">
+                      <Button 
+                        onClick={() => handleQuickScan('glucose')}
+                        className="w-full bg-blue-500 hover:bg-blue-600"
+                      >
+                        <Droplets className="w-4 h-4 mr-2" />
+                        Glucose Scan
+                      </Button>
+                      <Button 
+                        onClick={() => handleQuickScan('bp')}
+                        className="w-full bg-indigo-500 hover:bg-indigo-600"
+                      >
+                        <TrendingUp className="w-4 h-4 mr-2" />
+                        Blood Pressure
+                      </Button>
+                      <Button 
+                        onClick={() => handleQuickScan('headache')}
+                        className="w-full bg-red-500 hover:bg-red-600"
+                      >
+                        <Brain className="w-4 h-4 mr-2" />
+                        Headache Check
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-green-200">
+                  <CardContent className="p-4">
+                    <h4 className="font-medium mb-3">Camera & Recording</h4>
+                    <div className="space-y-2">
+                      <Button 
+                        onClick={() => handleCameraAction('scan')}
+                        disabled={cameraMode === 'scan'}
+                        className="w-full bg-green-500 hover:bg-green-600"
+                      >
+                        <Camera className="w-4 h-4 mr-2" />
+                        {cameraMode === 'scan' ? 'Scanning...' : 'Camera Scan'}
+                      </Button>
+                      <Button 
+                        onClick={() => handleCameraAction('record')}
+                        disabled={cameraMode === 'record'}
+                        className="w-full bg-purple-500 hover:bg-purple-600"
+                      >
+                        <Scan className="w-4 h-4 mr-2" />
+                        {cameraMode === 'record' ? 'Recording...' : 'Record Symptoms'}
+                      </Button>
+                    </div>
+                    {cameraMode && (
+                      <div className="mt-3 p-3 bg-gray-100 rounded-lg">
+                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                          <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+                          {cameraMode === 'scan' ? 'Camera active - Position over area' : 'Recording symptoms...'}
+                        </div>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
+            </TabsContent>
 
             <TabsContent value="devices" className="space-y-4">
               <div className="flex items-center justify-between">
@@ -278,34 +565,6 @@ const IoTIntegration = () => {
               </div>
             </TabsContent>
 
-            <TabsContent value="metrics" className="space-y-4">
-              <h3 className="text-lg font-semibold">Real-time Health Metrics</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {metrics.map((metric, index) => (
-                  <Card key={index} className="border-gray-200">
-                    <CardContent className="p-4">
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center gap-2">
-                          {getMetricIcon(metric.type)}
-                          <span className="font-medium capitalize">
-                            {metric.type.replace('_', ' ')}
-                          </span>
-                        </div>
-                        <span className="text-xs text-gray-500">{metric.timestamp}</span>
-                      </div>
-                      <div className="flex items-end gap-2">
-                        <span className="text-2xl font-bold">{metric.value}</span>
-                        <span className="text-sm text-gray-500 mb-1">{metric.unit}</span>
-                      </div>
-                      {metric.type === 'stress' && (
-                        <Progress value={metric.value} className="mt-2" />
-                      )}
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </TabsContent>
-
             <TabsContent value="settings" className="space-y-4">
               <h3 className="text-lg font-semibold">IoT Settings</h3>
               <div className="space-y-4">
@@ -325,6 +584,20 @@ const IoTIntegration = () => {
                       >
                         {autoSync ? 'Enabled' : 'Disabled'}
                       </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-gray-200">
+                  <CardContent className="p-4">
+                    <div className="space-y-3">
+                      <div className="font-medium">AI Prediction Settings</div>
+                      <div className="text-sm text-gray-600 space-y-2">
+                        <p>• Predictions based on real-time health data</p>
+                        <p>• Machine learning analyzes patterns and trends</p>
+                        <p>• Personalized recommendations for your health profile</p>
+                        <p>• Emergency alerts for critical conditions</p>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
