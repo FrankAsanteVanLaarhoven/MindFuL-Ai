@@ -32,34 +32,43 @@ const Index = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-teal-50 via-blue-50 to-mint-50">
+    <div className="min-h-screen w-full bg-gradient-to-br from-teal-50 via-blue-50 to-mint-50 safe-area-top safe-area-bottom">
       <NavigationBar />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12">
+      <div className="responsive-container device-padding py-6 sm:py-8 lg:py-12">
         <HeroSection />
 
-        {/* Dashboard Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 mb-8 sm:mb-12">
-          {/* Current Mood - Takes up 1 column */}
-          <div ref={el => { if (el) cardsRef.current[0] = el; }}>
+        {/* Dashboard Grid - Responsive layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 mb-8 sm:mb-12 tablet-grid desktop-grid">
+          {/* Current Mood - Touch-friendly */}
+          <div 
+            ref={el => { if (el) cardsRef.current[0] = el; }}
+            className="mobile-card touch-target gpu-accelerated"
+          >
             <CurrentMoodSummary />
           </div>
 
-          {/* Real-time Mood Chart - Takes up 2 columns */}
-          <div ref={el => { if (el) cardsRef.current[1] = el; }} className="lg:col-span-2">
+          {/* Real-time Mood Chart - Responsive span */}
+          <div 
+            ref={el => { if (el) cardsRef.current[1] = el; }} 
+            className="lg:col-span-2 mobile-card touch-target gpu-accelerated"
+          >
             <RealTimeMoodChart />
           </div>
         </div>
 
-        {/* Quick Actions */}
-        <div ref={el => { if (el) cardsRef.current[2] = el; }} className="mb-8 sm:mb-12">
+        {/* Quick Actions - Enhanced touch targets */}
+        <div 
+          ref={el => { if (el) cardsRef.current[2] = el; }} 
+          className="mb-8 sm:mb-12 mobile-card desktop-hover"
+        >
           <QuickActionsCard />
         </div>
 
-        {/* Features Grid */}
+        {/* Features Grid - Adaptive layout */}
         <FeaturesGrid />
 
-        {/* Testimonials Section */}
+        {/* Testimonials Section - Device-optimized */}
         <TestimonialsSection />
       </div>
 

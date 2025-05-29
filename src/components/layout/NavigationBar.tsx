@@ -33,13 +33,13 @@ const NavigationBar = () => {
   ];
 
   return (
-    <nav className="bg-white/80 backdrop-blur-sm border-b border-teal-200 sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          {/* Logo */}
-          <div className="flex items-center gap-2 sm:gap-3">
+    <nav className="bg-white/80 backdrop-blur-sm border-b border-teal-200 sticky top-0 z-50 safe-area-top">
+      <div className="responsive-container">
+        <div className="flex justify-between items-center h-16 tablet-nav desktop-nav">
+          {/* Logo - Touch-friendly */}
+          <div className="flex items-center gap-2 sm:gap-3 touch-target">
             <span className="text-xl sm:text-2xl">🧠</span>
-            <span className="text-lg sm:text-xl font-bold text-teal-800">Mindful AI</span>
+            <span className="adaptive-text font-bold text-teal-800">Mindful AI</span>
             <div className="hidden sm:block bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-medium ml-2">
               🟢 24/7 AI Available
             </div>
@@ -51,16 +51,16 @@ const NavigationBar = () => {
               <NavigationMenuList className="flex items-center space-x-6">
                 {/* Instant Access */}
                 <NavigationMenuItem>
-                  <NavigationMenuTrigger className="text-gray-600 hover:text-teal-600">
+                  <NavigationMenuTrigger className="text-gray-600 hover:text-teal-600 mobile-friendly-button">
                     ⚡ Instant Access
                   </NavigationMenuTrigger>
                   <NavigationMenuContent>
-                    <div className="grid w-[400px] gap-3 p-4">
+                    <div className="grid w-[400px] gap-3 p-4 bg-white/95 backdrop-blur-sm">
                       {quickActions.map((action) => (
                         <button
                           key={action.title}
                           onClick={() => navigate(action.href)}
-                          className="flex items-center gap-3 p-3 rounded-lg hover:bg-teal-50 transition-colors"
+                          className="flex items-center gap-3 p-3 rounded-lg hover:bg-teal-50 transition-colors mobile-friendly-button desktop-hover focus-visible"
                         >
                           {typeof action.icon === 'string' ? (
                             <span className="text-lg">{action.icon}</span>
@@ -68,7 +68,7 @@ const NavigationBar = () => {
                             <action.icon className={`w-5 h-5 ${action.color}`} />
                           )}
                           <div className="text-left">
-                            <div className="font-medium">{action.title}</div>
+                            <div className="font-medium adaptive-text">{action.title}</div>
                             <div className="text-sm text-gray-600">{action.desc}</div>
                           </div>
                         </button>
@@ -79,22 +79,22 @@ const NavigationBar = () => {
 
                 {/* Resources */}
                 <NavigationMenuItem>
-                  <NavigationMenuTrigger className="text-gray-600 hover:text-teal-600">
+                  <NavigationMenuTrigger className="text-gray-600 hover:text-teal-600 mobile-friendly-button">
                     📚 Resources
                   </NavigationMenuTrigger>
                   <NavigationMenuContent>
-                    <div className="w-[800px] p-4">
-                      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                    <div className="w-[800px] p-4 bg-white/95 backdrop-blur-sm">
+                      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 ipad-layout">
                         <div className="space-y-3">
                           {resources.map((resource) => (
                             <button
                               key={resource.title}
                               onClick={() => navigate(resource.href)}
-                              className="flex items-center gap-3 p-3 rounded-lg hover:bg-teal-50 transition-colors w-full"
+                              className="flex items-center gap-3 p-3 rounded-lg hover:bg-teal-50 transition-colors w-full mobile-friendly-button desktop-hover focus-visible"
                             >
                               <resource.icon className={`w-5 h-5 ${resource.color}`} />
                               <div className="text-left">
-                                <div className="font-medium">{resource.title}</div>
+                                <div className="font-medium adaptive-text">{resource.title}</div>
                                 <div className="text-sm text-gray-600">{resource.desc}</div>
                               </div>
                             </button>
@@ -119,11 +119,11 @@ const NavigationBar = () => {
                   </NavigationMenuContent>
                 </NavigationMenuItem>
 
-                {/* Regular Navigation */}
+                {/* Regular Navigation - Touch-friendly */}
                 <NavigationMenuItem>
                   <button
                     onClick={() => navigate('/journal')}
-                    className="text-gray-600 hover:text-teal-600 transition-colors duration-200 text-sm font-medium"
+                    className="text-gray-600 hover:text-teal-600 transition-colors duration-200 text-sm font-medium mobile-friendly-button focus-visible"
                   >
                     📝 Journal
                   </button>
@@ -132,7 +132,7 @@ const NavigationBar = () => {
                 <NavigationMenuItem>
                   <button
                     onClick={() => navigate('/wellness-dashboard')}
-                    className="text-gray-600 hover:text-teal-600 transition-colors duration-200 text-sm font-medium"
+                    className="text-gray-600 hover:text-teal-600 transition-colors duration-200 text-sm font-medium mobile-friendly-button focus-visible"
                   >
                     📊 Dashboard
                   </button>
@@ -141,24 +141,24 @@ const NavigationBar = () => {
             </NavigationMenu>
           </div>
 
-          {/* Mobile Menu Button */}
+          {/* Mobile Menu Button - Enhanced touch target */}
           <Button
             variant="ghost"
             size="sm"
-            className="lg:hidden"
+            className="lg:hidden mobile-friendly-button focus-visible"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
             {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </Button>
         </div>
 
-        {/* Mobile Menu */}
+        {/* Mobile Menu - Enhanced for touch */}
         {mobileMenuOpen && (
-          <div className="lg:hidden absolute top-16 left-0 right-0 bg-white/95 backdrop-blur-sm border-b border-teal-200 shadow-lg">
-            <div className="px-4 py-6 space-y-6">
+          <div className="lg:hidden absolute top-16 left-0 right-0 bg-white/95 backdrop-blur-sm border-b border-teal-200 shadow-lg safe-area-left safe-area-right">
+            <div className="device-padding py-6 space-y-6">
               {/* Quick Actions */}
               <div>
-                <h3 className="font-semibold text-teal-800 mb-3 flex items-center gap-2">
+                <h3 className="font-semibold text-teal-800 mb-3 flex items-center gap-2 adaptive-text">
                   ⚡ Instant Access
                 </h3>
                 <div className="space-y-2">
@@ -169,7 +169,7 @@ const NavigationBar = () => {
                         navigate(action.href);
                         setMobileMenuOpen(false);
                       }}
-                      className="flex items-center gap-3 p-3 rounded-lg hover:bg-teal-50 transition-colors w-full"
+                      className="flex items-center gap-3 p-3 rounded-lg hover:bg-teal-50 transition-colors w-full mobile-nav-item mobile-friendly-button focus-visible"
                     >
                       {typeof action.icon === 'string' ? (
                         <span className="text-lg">{action.icon}</span>
@@ -177,7 +177,7 @@ const NavigationBar = () => {
                         <action.icon className={`w-5 h-5 ${action.color}`} />
                       )}
                       <div className="text-left">
-                        <div className="font-medium text-sm">{action.title}</div>
+                        <div className="font-medium adaptive-text">{action.title}</div>
                         <div className="text-xs text-gray-600">{action.desc}</div>
                       </div>
                     </button>
@@ -187,7 +187,7 @@ const NavigationBar = () => {
 
               {/* Resources */}
               <div>
-                <h3 className="font-semibold text-teal-800 mb-3 flex items-center gap-2">
+                <h3 className="font-semibold text-teal-800 mb-3 flex items-center gap-2 adaptive-text">
                   📚 Resources
                 </h3>
                 <div className="space-y-2">
@@ -198,11 +198,11 @@ const NavigationBar = () => {
                         navigate(resource.href);
                         setMobileMenuOpen(false);
                       }}
-                      className="flex items-center gap-3 p-3 rounded-lg hover:bg-teal-50 transition-colors w-full"
+                      className="flex items-center gap-3 p-3 rounded-lg hover:bg-teal-50 transition-colors w-full mobile-nav-item mobile-friendly-button focus-visible"
                     >
                       <resource.icon className={`w-5 h-5 ${resource.color}`} />
                       <div className="text-left">
-                        <div className="font-medium text-sm">{resource.title}</div>
+                        <div className="font-medium adaptive-text">{resource.title}</div>
                         <div className="text-xs text-gray-600">{resource.desc}</div>
                       </div>
                     </button>
@@ -217,26 +217,26 @@ const NavigationBar = () => {
                     navigate('/journal');
                     setMobileMenuOpen(false);
                   }}
-                  className="flex items-center gap-3 p-3 rounded-lg hover:bg-teal-50 transition-colors w-full"
+                  className="flex items-center gap-3 p-3 rounded-lg hover:bg-teal-50 transition-colors w-full mobile-nav-item mobile-friendly-button focus-visible"
                 >
                   <span className="text-lg">📝</span>
-                  <span className="font-medium text-sm">Journal</span>
+                  <span className="font-medium adaptive-text">Journal</span>
                 </button>
                 <button
                   onClick={() => {
                     navigate('/wellness-dashboard');
                     setMobileMenuOpen(false);
                   }}
-                  className="flex items-center gap-3 p-3 rounded-lg hover:bg-teal-50 transition-colors w-full"
+                  className="flex items-center gap-3 p-3 rounded-lg hover:bg-teal-50 transition-colors w-full mobile-nav-item mobile-friendly-button focus-visible"
                 >
                   <span className="text-lg">📊</span>
-                  <span className="font-medium text-sm">Dashboard</span>
+                  <span className="font-medium adaptive-text">Dashboard</span>
                 </button>
               </div>
 
               {/* API Configuration */}
               <div className="border-t border-teal-200 pt-4">
-                <h3 className="font-semibold text-teal-800 mb-3 flex items-center gap-2">
+                <h3 className="font-semibold text-teal-800 mb-3 flex items-center gap-2 adaptive-text">
                   <Key className="w-4 h-4" />
                   AI Configuration
                 </h3>
