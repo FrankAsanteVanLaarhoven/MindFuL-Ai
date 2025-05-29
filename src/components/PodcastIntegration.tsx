@@ -1,8 +1,8 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Podcast, Search } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Podcast, Search, ExternalLink, BookOpen } from 'lucide-react';
 import { PodcastShow, PodcastEpisode } from './podcast/types';
 import PodcastPlayer from './podcast/PodcastPlayer';
 import FavoritesSection from './podcast/FavoritesSection';
@@ -105,6 +105,29 @@ const PodcastIntegration = () => {
 
   const favoritePodcasts = podcasts.filter(podcast => podcast.isFavorite);
 
+  const cbtResources = [
+    {
+      title: "CBT Podcasts Directory",
+      description: "Comprehensive list of CBT-focused podcasts",
+      url: "https://podcast.feedspot.com/cbt_podcasts/"
+    },
+    {
+      title: "Unplug Anxiety",
+      description: "CBT and anxiety management resources",
+      url: "https://unpluganxiety.com/"
+    },
+    {
+      title: "BABCP Podcasts",
+      description: "British Association for Behavioural & Cognitive Psychotherapies",
+      url: "https://babcp.com/Podcasts"
+    },
+    {
+      title: "Top CBT Shows",
+      description: "Top 100 CBT podcasts ranked by popularity",
+      url: "https://goodpods.com/leaderboard/top-100-shows-by-category/other/cbt"
+    }
+  ];
+
   return (
     <div className="space-y-6">
       <Card className="bg-white/80 backdrop-blur-sm border-purple-200 shadow-lg">
@@ -135,6 +158,38 @@ const PodcastIntegration = () => {
             isPlaying={isPlaying}
             onTogglePlayPause={togglePlayPause}
           />
+
+          {/* CBT Resources Section */}
+          <Card className="mb-6 bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200">
+            <CardHeader>
+              <CardTitle className="text-lg text-blue-800 flex items-center gap-2">
+                <BookOpen className="w-5 h-5" />
+                CBT Podcast Resources
+              </CardTitle>
+              <CardDescription>
+                External directories and collections of CBT-focused podcasts
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid md:grid-cols-2 gap-4">
+                {cbtResources.map((resource, index) => (
+                  <div key={index} className="border border-blue-200 rounded-lg p-4 bg-white/60">
+                    <h4 className="font-semibold text-gray-800 mb-2">{resource.title}</h4>
+                    <p className="text-sm text-gray-600 mb-3">{resource.description}</p>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => window.open(resource.url, '_blank')}
+                      className="w-full"
+                    >
+                      <ExternalLink className="w-3 h-3 mr-2" />
+                      Visit Resource
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
 
           {/* Favorites Section */}
           <FavoritesSection 
