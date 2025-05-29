@@ -20,6 +20,7 @@ import PersonalTrainer from '@/components/PersonalTrainer';
 import MusicTherapy from '@/components/MusicTherapy';
 import SessionRecorder from '@/components/SessionRecorder';
 import VirtualMindReader from '@/components/VirtualMindReader';
+import ResourcesPanel from '@/components/ResourcesPanel';
 import { UserProfile } from '@/types/UserProfile';
 
 interface Message {
@@ -816,6 +817,9 @@ const TherapyBot = () => {
                 <div className="lg:col-span-1 space-y-4">
                   {/* Voice Tone Indicator */}
                   <VoiceToneIndicator voiceTone={voiceTone} isListening={isListening} />
+                  
+                  {/* Resources Panel */}
+                  <ResourcesPanel />
                   
                   {/* Voice Settings Panel */}
                   {showVoiceSettings && (
