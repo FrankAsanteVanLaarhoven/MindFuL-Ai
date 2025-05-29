@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useRef, useEffect } from 'react';
@@ -8,11 +9,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import BreathingSphere3D from '@/components/breathing-exercises/breathing-sphere-3d';
 import RealTimeBreathingSphere from '@/components/breathing-exercises/real-time-breathing-sphere';
 import EnhancedRealTimeBreathingSphere from '@/components/breathing-exercises/enhanced-breathing-sphere';
+import BreathingCircle2D from '@/components/breathing-exercises/breathing-circle-2d';
 import { gsap } from 'gsap';
 import { useNavigate } from 'react-router-dom';
 
 type BreathingTechnique = 'box' | '4-7-8' | 'triangle';
-type ExerciseMode = 'guided' | 'realtime' | 'enhanced';
+type ExerciseMode = 'guided' | 'guided-2d' | 'realtime' | 'enhanced';
 
 const Breathing = () => {
   const [selectedTechnique, setSelectedTechnique] = useState<BreathingTechnique>('box');
@@ -101,8 +103,14 @@ const Breathing = () => {
   };
 
   const modes = {
+    'guided-2d': {
+      name: 'Simple 2D Guide',
+      description: 'Clean, simple breathing circle - perfect for focus',
+      icon: '⭕',
+      component: BreathingCircle2D
+    },
     guided: {
-      name: 'Guided Practice',
+      name: 'Guided 3D Practice',
       description: 'Follow the animated sphere with breathing prompts',
       icon: '🧘‍♀️',
       component: BreathingSphere3D
@@ -129,6 +137,49 @@ const Breathing = () => {
 
   const SelectedComponent = modes[selectedMode].component;
 
+  const startExercise = () => {
+    setIsActive(true);
+    runCycle();
+  };
+
+  const stopExercise = () => {
+    setIsActive(false);
+    setCurrentPhase('inhale');
+  };
+
+  const runCycle = () => {
+    if (!isActive) return;
+
+    const cycle = cycles[selectedTechnique];
+    
+    setCurrentPhase('inhale');
+    setTimeout(() => {
+      if (!isActive) return;
+      setCurrentPhase('hold1');
+      
+      setTimeout(() => {
+        if (!isActive) return;
+        setCurrentPhase('exhale');
+        
+        setTimeout(() => {
+          if (!isActive) return;
+          if (cycle.hold2 > 0) {
+            setCurrentPhase('hold2');
+            setTimeout(() => {
+              if (isActive) runCycle();
+            }, cycle.hold2);
+          } else {
+            runCycle();
+          }
+        }, cycle.exhale);
+      }, cycle.hold1);
+    }, cycle.inhale);
+  };
+
+  const onSessionComplete = () => {
+    setIsActive(false);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-teal-50 via-blue-50 to-indigo-50 p-4">
       <div ref={cardRef} className="max-w-6xl mx-auto space-y-8">
@@ -146,7 +197,7 @@ const Breathing = () => {
             Breathing Exercises
           </h1>
           <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-            Practice guided breathing exercises with interactive 3D visualizations and real-time feedback.
+            Practice guided breathing exercises with interactive visualizations and real-time feedback.
           </p>
         </div>
 
@@ -158,11 +209,11 @@ const Breathing = () => {
           </CardHeader>
           <CardContent>
             <Tabs value={selectedMode} onValueChange={(value) => setSelectedMode(value as ExerciseMode)}>
-              <TabsList className="grid w-full grid-cols-3">
+              <TabsList className="grid w-full grid-cols-4">
                 {Object.entries(modes).map(([key, mode]) => (
-                  <TabsTrigger key={key} value={key} className="flex items-center gap-2">
+                  <TabsTrigger key={key} value={key} className="flex items-center gap-2 text-xs">
                     <span>{mode.icon}</span>
-                    {mode.name}
+                    <span className="hidden sm:inline">{mode.name}</span>
                   </TabsTrigger>
                 ))}
               </TabsList>
@@ -176,8 +227,8 @@ const Breathing = () => {
           </CardContent>
         </Card>
 
-        {/* Technique Selection - Only show for guided mode */}
-        {selectedMode === 'guided' && (
+        {/* Technique Selection - Show for guided modes */}
+        {(selectedMode === 'guided' || selectedMode === 'guided-2d') && (
           <Card className="bg-white/80 backdrop-blur-sm border-teal-200 shadow-lg">
             <CardHeader>
               <CardTitle className="text-xl text-teal-800">Choose Your Technique</CardTitle>
@@ -217,13 +268,13 @@ const Breathing = () => {
         {/* Breathing Exercise Component */}
         <SelectedComponent
           technique={selectedTechnique}
-          isActive={selectedMode === 'guided' ? isActive : undefined}
-          currentPhase={selectedMode === 'guided' ? currentPhase : undefined}
+          isActive={(selectedMode === 'guided' || selectedMode === 'guided-2d') ? isActive : undefined}
+          currentPhase={(selectedMode === 'guided' || selectedMode === 'guided-2d') ? currentPhase : undefined}
           onSessionComplete={onSessionComplete}
         />
 
-        {/* Guided Controls - Only show for guided mode */}
-        {selectedMode === 'guided' && (
+        {/* Guided Controls - Show for guided modes */}
+        {(selectedMode === 'guided' || selectedMode === 'guided-2d') && (
           <div className="flex justify-center gap-4">
             <Button
               onClick={isActive ? stopExercise : startExercise}
