@@ -12,7 +12,7 @@ interface AnalysisFormProps {
   onAnalyze: () => void;
   apiKey: string | null;
   onCameraChange: (hasCamera: boolean, stream: MediaStream | null) => void;
-  onFrameCapture: () => string | null;
+  onFrameCapture: (captureFunc: () => string | null) => void;
 }
 
 const AnalysisForm: React.FC<AnalysisFormProps> = ({

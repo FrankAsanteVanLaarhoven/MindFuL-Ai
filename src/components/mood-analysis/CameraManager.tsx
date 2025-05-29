@@ -5,7 +5,7 @@ import { useToast } from '@/hooks/use-toast';
 
 interface CameraManagerProps {
   onCameraChange: (hasCamera: boolean, stream: MediaStream | null) => void;
-  onFrameCapture: () => string | null;
+  onFrameCapture: (captureFunc: () => string | null) => void;
 }
 
 const CameraManager: React.FC<CameraManagerProps> = ({ onCameraChange, onFrameCapture }) => {
@@ -167,7 +167,9 @@ const CameraManager: React.FC<CameraManagerProps> = ({ onCameraChange, onFrameCa
   };
 
   // Expose captureFrame function to parent
-  React.useImperativeHandle(onFrameCapture, () => captureFrame, [hasCamera]);
+  useEffect(() => {
+    onFrameCapture(captureFrame);
+  }, [hasCamera, onFrameCapture]);
 
   return (
     <div>

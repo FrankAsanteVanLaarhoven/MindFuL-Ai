@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { gsap } from 'gsap';
@@ -83,6 +83,10 @@ const MoodAnalysis = () => {
   const handleCameraChange = (cameraActive: boolean, mediaStream: MediaStream | null) => {
     setHasCamera(cameraActive);
     setStream(mediaStream);
+  };
+
+  const handleFrameCapture = (captureFunc: () => string | null) => {
+    captureFrameRef.current = captureFunc;
   };
 
   const captureFrame = () => {
@@ -281,10 +285,7 @@ const MoodAnalysis = () => {
               onAnalyze={analyzeMood}
               apiKey={apiKey}
               onCameraChange={handleCameraChange}
-              onFrameCapture={(captureFunc) => {
-                captureFrameRef.current = captureFunc;
-                return null;
-              }}
+              onFrameCapture={handleFrameCapture}
             />
             <CardContent>
               <AnalysisResults analysisResult={analysisResult} />
