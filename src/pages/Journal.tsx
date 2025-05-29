@@ -13,6 +13,7 @@ import { Mic, MicOff, Volume2, Settings, Hand } from 'lucide-react';
 import { useVoiceInteraction } from '@/hooks/useVoiceInteraction';
 import VoiceSettings from '@/components/VoiceSettings';
 import JournalAudioPlayer from '@/components/JournalAudioPlayer';
+import VoiceSentimentAnalysis from '@/components/VoiceSentimentAnalysis';
 
 interface JournalEntry {
   id: string;
@@ -34,6 +35,8 @@ const Journal = () => {
   const [isVoiceInputActive, setIsVoiceInputActive] = useState(false);
   const [voiceInputMode, setVoiceInputMode] = useState<'toggle' | 'hold'>('toggle');
   const [isHolding, setIsHolding] = useState(false);
+  const [showSentimentAnalysis, setShowSentimentAnalysis] = useState(false);
+  const [currentSentiment, setCurrentSentiment] = useState<any>(null);
   
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -273,6 +276,33 @@ const Journal = () => {
     'peaceful': '☮️'
   };
 
+  const handleSentimentDetected = (sentimentResult: any) => {
+    setCurrentSentiment(sentimentResult);
+    
+    // Auto-suggest mood based on sentiment
+    if (sentimentResult.sentiment === 'positive') {
+      if (sentimentResult.emotion === 'joy') {
+        setCurrentEntry(prev => ({ ...prev, mood: 'happy' }));
+      } else if (sentimentResult.emotion === 'surprise') {
+        setCurrentEntry(prev => ({ ...prev, mood: 'excited' }));
+      }
+    } else if (sentimentResult.sentiment === 'negative') {
+      if (sentimentResult.emotion === 'sadness') {
+        setCurrentEntry(prev => ({ ...prev, mood: 'sad' }));
+      } else if (sentimentResult.emotion === 'anger') {
+        setCurrentEntry(prev => ({ ...prev, mood: 'angry' }));
+      }
+    } else {
+      setCurrentEntry(prev => ({ ...prev, mood: 'neutral' }));
+    }
+
+    // Provide voice feedback if enabled
+    if (voiceSettings.voiceOutput) {
+      const feedback = `I detected ${sentimentResult.sentiment} sentiment with ${sentimentResult.emotion} emotion. Confidence: ${Math.round(sentimentResult.confidence * 100)}%`;
+      speak(feedback);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 p-4">
       <div ref={containerRef} className="max-w-6xl mx-auto space-y-8">
@@ -306,13 +336,21 @@ const Journal = () => {
               <Volume2 className="w-4 h-4" />
               Audio Player
             </Button>
+            <Button
+              onClick={() => setShowSentimentAnalysis(!showSentimentAnalysis)}
+              variant={showSentimentAnalysis ? "default" : "outline"}
+              className="flex items-center gap-2"
+            >
+              <Mic className="w-4 h-4" />
+              Voice Sentiment
+            </Button>
           </div>
           <h1 className="text-4xl font-bold text-orange-800 mb-4 flex items-center justify-center gap-3">
             <span className="text-5xl">📝</span>
             AI-Enhanced Journal
           </h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Write down your thoughts and feelings. Use voice dictation or type manually. Our AI provides gentle reflections to help you gain insights.
+            Write down your thoughts and feelings. Use voice dictation or advanced voice sentiment analysis. Our AI provides gentle reflections to help you gain insights.
           </p>
         </motion.div>
 
@@ -350,6 +388,22 @@ const Journal = () => {
           </motion.div>
         )}
 
+        {/* Voice Sentiment Analysis */}
+        {showSentimentAnalysis && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            transition={{ duration: 0.3 }}
+          >
+            <VoiceSentimentAnalysis
+              onSentimentDetected={handleSentimentDetected}
+              enableAspectBased={true}
+              enableMultiSpeaker={false}
+              language="en-US"
+            />
+          </motion.div>
+        )}
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* New Entry / Entry Form */}
           <motion.div
@@ -376,7 +430,7 @@ const Journal = () => {
                 </div>
                 <CardDescription>
                   {showNewEntry 
-                    ? 'Express your thoughts through typing or voice dictation and receive AI-powered insights'
+                    ? 'Express your thoughts through typing, voice dictation, or real-time sentiment analysis and receive AI-powered insights'
                     : 'Your recent journal entries and reflections'
                   }
                 </CardDescription>
@@ -384,6 +438,29 @@ const Journal = () => {
               <CardContent>
                 {showNewEntry ? (
                   <div className="space-y-6">
+                    {/* Current Sentiment Display */}
+                    {currentSentiment && (
+                      <div className="p-3 bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg border border-purple-200">
+                        <h4 className="text-sm font-medium text-purple-800 mb-2">
+                          Live Sentiment Analysis
+                        </h4>
+                        <div className="flex items-center gap-2">
+                          <span className="text-lg">
+                            {currentSentiment.emotion === 'joy' && '😃'}
+                            {currentSentiment.emotion === 'anger' && '😠'}
+                            {currentSentiment.emotion === 'sadness' && '😢'}
+                            {currentSentiment.emotion === 'fear' && '😰'}
+                            {currentSentiment.emotion === 'surprise' && '😲'}
+                            {!['joy', 'anger', 'sadness', 'fear', 'surprise'].includes(currentSentiment.emotion) && '😐'}
+                          </span>
+                          <span className="text-sm text-purple-700">
+                            {currentSentiment.sentiment} - {currentSentiment.emotion} 
+                            ({Math.round(currentSentiment.confidence * 100)}% confident)
+                          </span>
+                        </div>
+                      </div>
+                    )}
+
                     <div>
                       <label className="text-sm font-medium text-gray-700 mb-2 block">
                         Entry Title
@@ -532,7 +609,7 @@ const Journal = () => {
                         ) : (
                           <div className="flex items-center justify-center gap-2">
                             <span>💾</span>
-                            Save Entry
+                            Save Entry with Sentiment
                           </div>
                         )}
                       </Button>
@@ -541,6 +618,7 @@ const Journal = () => {
                           setShowNewEntry(false);
                           setIsVoiceInputActive(false);
                           setIsHolding(false);
+                          setCurrentSentiment(null);
                           stopListening();
                         }}
                         variant="outline"
