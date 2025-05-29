@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Calendar, Clock, Target, TrendingUp } from 'lucide-react';
+import { getBreathingStats, resetDailyStats } from '@/lib/breathing-storage';
 
 interface BreathingStats {
   currentStreak: number;
@@ -30,12 +31,35 @@ const BreathingProgress: React.FC<BreathingProgressProps> = ({ className }) => {
     thisWeekSessions: 0
   });
 
+  const loadStats = () => {
+    resetDailyStats();
+    const currentStats = getBreathingStats();
+    setStats(currentStats);
+  };
+
   useEffect(() => {
-    // Load stats from localStorage
-    const savedStats = localStorage.getItem('breathingStats');
-    if (savedStats) {
-      setStats(JSON.parse(savedStats));
-    }
+    loadStats();
+    
+    // Listen for breathing session updates
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'breathingStats' || e.key === 'breathingSessions') {
+        loadStats();
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    
+    // Also listen for custom events from the same tab
+    const handleCustomUpdate = () => {
+      loadStats();
+    };
+    
+    window.addEventListener('breathingStatsUpdated', handleCustomUpdate);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('breathingStatsUpdated', handleCustomUpdate);
+    };
   }, []);
 
   const dailyProgress = Math.min((stats.todaySessions / stats.dailyGoal) * 100, 100);

@@ -7,6 +7,8 @@ import * as THREE from 'three';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useBreathDetection } from '@/hooks/useBreathDetection';
+import { addBreathingSession } from '@/lib/breathing-storage';
+import { toast } from '@/hooks/use-toast';
 
 interface RealTimeBreathingSphereProps {
   technique: 'box' | '4-7-8' | 'triangle';
@@ -194,6 +196,7 @@ const RealTimeBreathingSphere: React.FC<RealTimeBreathingSphereProps> = ({
 
   const [sessionDuration, setSessionDuration] = useState(0);
   const [score, setScore] = useState(0);
+  const [sessionStartTime, setSessionStartTime] = useState<number | null>(null);
 
   // Session timer
   useEffect(() => {
@@ -212,6 +215,38 @@ const RealTimeBreathingSphere: React.FC<RealTimeBreathingSphereProps> = ({
       setScore(prev => prev + Math.floor(breathIntensity * 10));
     }
   }, [isBreathing, breathIntensity]);
+
+  const handleStartListening = () => {
+    setSessionStartTime(Date.now());
+    startListening();
+  };
+
+  const handleStopListening = () => {
+    stopListening();
+    
+    // Track session if it was running for at least 30 seconds
+    if (sessionStartTime && sessionDuration >= 30) {
+      const duration = Math.round(sessionDuration / 60); // Convert to minutes
+      addBreathingSession(Math.max(1, duration), 'Real-Time Detection');
+      
+      // Dispatch custom event to update progress in real-time
+      window.dispatchEvent(new CustomEvent('breathingStatsUpdated'));
+      
+      toast({
+        title: "Real-Time Session Complete! 🎉",
+        description: `Amazing! You practiced for ${Math.max(1, duration)} minute${duration !== 1 ? 's' : ''} with a score of ${score}.`,
+      });
+    }
+    
+    setSessionStartTime(null);
+  };
+
+  const handleCompleteSession = () => {
+    if (onSessionComplete) {
+      onSessionComplete();
+    }
+    handleStopListening();
+  };
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -303,7 +338,7 @@ const RealTimeBreathingSphere: React.FC<RealTimeBreathingSphereProps> = ({
                 <h3 className="text-2xl font-bold mb-2">Real-Time Breath Detection</h3>
                 <p className="text-lg mb-6">Click start to begin live breathing analysis</p>
                 <Button 
-                  onClick={startListening}
+                  onClick={handleStartListening}
                   size="lg"
                   className="bg-teal-500 hover:bg-teal-600"
                 >
@@ -319,7 +354,7 @@ const RealTimeBreathingSphere: React.FC<RealTimeBreathingSphereProps> = ({
       <div className="flex justify-center gap-4">
         {isListening ? (
           <Button 
-            onClick={stopListening}
+            onClick={handleStopListening}
             variant="destructive"
             size="lg"
           >
@@ -327,7 +362,7 @@ const RealTimeBreathingSphere: React.FC<RealTimeBreathingSphereProps> = ({
           </Button>
         ) : (
           <Button 
-            onClick={startListening}
+            onClick={handleStartListening}
             size="lg"
             className="bg-teal-500 hover:bg-teal-600"
           >
@@ -337,7 +372,7 @@ const RealTimeBreathingSphere: React.FC<RealTimeBreathingSphereProps> = ({
         
         {sessionDuration > 0 && (
           <Button 
-            onClick={onSessionComplete}
+            onClick={handleCompleteSession}
             variant="outline"
             size="lg"
           >

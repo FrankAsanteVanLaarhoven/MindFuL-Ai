@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useRef, useEffect } from 'react';
@@ -15,6 +14,8 @@ import BreathingAchievements from '@/components/breathing-exercises/breathing-ac
 import BreathingProgress from '@/components/breathing-exercises/breathing-progress';
 import { gsap } from 'gsap';
 import { useNavigate } from 'react-router-dom';
+import { addBreathingSession } from '@/lib/breathing-storage';
+import { toast } from '@/hooks/use-toast';
 
 type BreathingTechnique = 'box' | '4-7-8' | 'triangle';
 type ExerciseMode = 'guided' | 'guided-2d' | 'realtime' | 'enhanced' | 'challenge';
@@ -25,6 +26,7 @@ const Breathing = () => {
   const [selectedChallenge, setSelectedChallenge] = useState<Challenge | null>(null);
   const [isActive, setIsActive] = useState(false);
   const [currentPhase, setCurrentPhase] = useState<'inhale' | 'hold1' | 'exhale' | 'hold2'>('inhale');
+  const [sessionStartTime, setSessionStartTime] = useState<number | null>(null);
   
   const cardRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
@@ -105,12 +107,33 @@ const Breathing = () => {
 
   const startExercise = () => {
     setIsActive(true);
+    setSessionStartTime(Date.now());
     runCycle();
   };
 
   const stopExercise = () => {
     setIsActive(false);
     setCurrentPhase('inhale');
+    
+    // Track session if it was running for at least 30 seconds
+    if (sessionStartTime && Date.now() - sessionStartTime >= 30000) {
+      const duration = Math.round((Date.now() - sessionStartTime) / 60000); // Convert to minutes
+      const technique = selectedMode === 'challenge' && selectedChallenge 
+        ? selectedChallenge.name 
+        : techniques[selectedTechnique].name;
+      
+      addBreathingSession(Math.max(1, duration), technique);
+      
+      // Dispatch custom event to update progress in real-time
+      window.dispatchEvent(new CustomEvent('breathingStatsUpdated'));
+      
+      toast({
+        title: "Session Complete! 🎉",
+        description: `Great job! You practiced for ${Math.max(1, duration)} minute${duration !== 1 ? 's' : ''}.`,
+      });
+    }
+    
+    setSessionStartTime(null);
   };
 
   const runCycle = () => {
@@ -118,7 +141,6 @@ const Breathing = () => {
 
     let cycle;
     if (selectedMode === 'challenge' && selectedChallenge) {
-      // Use challenge pattern
       cycle = {
         inhale: selectedChallenge.pattern.inhale * 1000,
         hold1: selectedChallenge.pattern.hold1 * 1000,
@@ -155,6 +177,26 @@ const Breathing = () => {
 
   const onSessionComplete = () => {
     setIsActive(false);
+    
+    // Track the session
+    if (sessionStartTime) {
+      const duration = Math.round((Date.now() - sessionStartTime) / 60000);
+      const technique = selectedMode === 'challenge' && selectedChallenge 
+        ? selectedChallenge.name 
+        : techniques[selectedTechnique].name;
+      
+      addBreathingSession(Math.max(1, duration), technique);
+      
+      // Dispatch custom event to update progress in real-time
+      window.dispatchEvent(new CustomEvent('breathingStatsUpdated'));
+      
+      toast({
+        title: "Session Complete! 🎉",
+        description: `Excellent work! You practiced for ${Math.max(1, duration)} minute${duration !== 1 ? 's' : ''}.`,
+      });
+    }
+    
+    setSessionStartTime(null);
   };
 
   const handleChallengeSelect = (challenge: Challenge) => {
