@@ -6,8 +6,9 @@ import CrisisSupport from '@/components/CrisisSupport';
 import ProgressAnalytics from '@/components/ProgressAnalytics';
 import GoalSetting from '@/components/GoalSetting';
 import PodcastIntegration from '@/components/PodcastIntegration';
+import IoTIntegration from '@/components/IoTIntegration';
 import RealTimeMoodChart from '@/components/dashboard/real-time-mood-chart';
-import { BarChart3, Target, AlertTriangle, TrendingUp, Podcast } from 'lucide-react';
+import { BarChart3, Target, AlertTriangle, TrendingUp, Podcast, Smartphone } from 'lucide-react';
 
 const WellnessDashboard = () => {
   return (
@@ -21,7 +22,7 @@ const WellnessDashboard = () => {
         </div>
 
         <Tabs defaultValue="analytics" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5 lg:w-auto lg:grid-cols-5">
+          <TabsList className="grid w-full grid-cols-6 lg:w-auto lg:grid-cols-6">
             <TabsTrigger value="analytics" className="flex items-center gap-2">
               <BarChart3 className="w-4 h-4" />
               <span className="hidden sm:inline">Analytics</span>
@@ -38,9 +39,13 @@ const WellnessDashboard = () => {
               <Podcast className="w-4 h-4" />
               <span className="hidden sm:inline">Podcasts</span>
             </TabsTrigger>
+            <TabsTrigger value="iot" className="flex items-center gap-2">
+              <Smartphone className="w-4 h-4" />
+              <span className="hidden sm:inline">IoT</span>
+            </TabsTrigger>
             <TabsTrigger value="crisis" className="flex items-center gap-2">
               <AlertTriangle className="w-4 h-4" />
-              <span className="hidden sm:inline">Crisis Support</span>
+              <span className="hidden sm:inline">Crisis</span>
             </TabsTrigger>
           </TabsList>
 
@@ -58,6 +63,10 @@ const WellnessDashboard = () => {
 
           <TabsContent value="podcasts" className="space-y-6">
             <PodcastIntegration />
+          </TabsContent>
+
+          <TabsContent value="iot" className="space-y-6">
+            <IoTIntegration />
           </TabsContent>
 
           <TabsContent value="crisis" className="space-y-6">
