@@ -86,9 +86,13 @@
     @apply bg-background text-foreground;
   }
   
+  /* Smooth scrolling */
+  html {
+    scroll-behavior: smooth;
+  }
+  
   /* Enhanced touch targets */
   button, a, [role="button"] {
-    @apply touch-target focus-visible;
     min-height: 44px;
     min-width: 44px;
   }
@@ -102,27 +106,154 @@
   .btn-group > * + * {
     margin-left: 8px;
   }
-  
-  /* Performance optimizations */
-  img, video {
-    @apply gpu-accelerated;
-  }
 }
 
 @layer components {
+  /* Touch-friendly interactive elements */
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+    padding: 12px;
+    margin: 8px 0;
+  }
+
+  /* Focus improvements for accessibility */
+  .focus-visible:focus-visible {
+    outline: 3px solid #2563eb;
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  /* Performance optimizations */
+  .gpu-accelerated {
+    transform: translateZ(0);
+    will-change: transform;
+  }
+
+  /* Container classes */
+  .mindful-container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 16px;
+  }
+
   .responsive-container {
     @apply mindful-container;
   }
   
+  /* Responsive images */
+  .responsive-img {
+    max-width: 100%;
+    height: auto;
+    object-fit: cover;
+  }
+
+  /* Mobile button styles */
+  .mobile-button {
+    min-height: 48px;
+    padding: 12px 16px;
+    font-size: 16px;
+    border-radius: 8px;
+  }
+
+  /* Desktop hover effects */
+  .desktop-hover:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+  }
+
   .mobile-friendly-button {
-    @apply mobile-button desktop-hover focus-visible;
+    @apply mobile-button focus-visible;
   }
   
+  /* Typography classes */
+  .mobile-text-sm {
+    font-size: 14px;
+    line-height: 1.4;
+  }
+  
+  .tablet-text-base {
+    font-size: 16px;
+    line-height: 1.5;
+  }
+  
+  .desktop-text-lg {
+    font-size: 20px;
+    line-height: 1.6;
+  }
+
   .adaptive-text {
-    @apply mobile-text-sm tablet-text-base desktop-text-lg;
+    @apply mobile-text-sm;
   }
   
+  /* Padding classes */
+  .mobile-padding {
+    padding: 12px;
+  }
+  
+  .tablet-padding {
+    padding: 16px;
+  }
+  
+  .desktop-padding {
+    padding: 24px;
+  }
+
   .device-padding {
-    @apply mobile-padding tablet-padding desktop-padding;
+    @apply mobile-padding;
+  }
+
+  /* Card styles */
+  .mobile-card {
+    margin: 8px 0;
+    border-radius: 12px;
+  }
+
+  /* Navigation styles */
+  .mobile-nav-item {
+    padding: 16px 12px;
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  .tablet-nav {
+    padding: 8px 16px;
+  }
+
+  .desktop-nav {
+    padding: 12px 24px;
+  }
+
+  /* Touch gesture support */
+  .touch-pan-y {
+    touch-action: pan-y;
+  }
+
+  .touch-pan-x {
+    touch-action: pan-x;
+  }
+
+  .touch-none {
+    touch-action: none;
+  }
+}
+
+@layer utilities {
+  /* Safe area support for notched devices */
+  .safe-area-top {
+    padding-top: max(16px, env(safe-area-inset-top));
+  }
+  
+  .safe-area-bottom {
+    padding-bottom: max(16px, env(safe-area-inset-bottom));
+  }
+  
+  .safe-area-left {
+    padding-left: max(16px, env(safe-area-inset-left));
+  }
+  
+  .safe-area-right {
+    padding-right: max(16px, env(safe-area-inset-right));
   }
 }
