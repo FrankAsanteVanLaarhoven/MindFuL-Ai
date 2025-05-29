@@ -2,7 +2,7 @@
 import React, { useRef, useMemo } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { Sphere, Text } from '@react-three/drei';
-import { Mesh, MathUtils } from 'three';
+import { Group, MathUtils } from 'three';
 import { AvatarCharacter } from './AvatarSelector';
 
 interface TherapyAvatar3DProps {
@@ -18,21 +18,21 @@ const AvatarMesh: React.FC<{
   isSpeaking: boolean;
   emotion: string;
 }> = ({ avatar, isActive, isSpeaking, emotion }) => {
-  const meshRef = useRef<Mesh>(null);
-  const eyeLeftRef = useRef<Mesh>(null);
-  const eyeRightRef = useRef<Mesh>(null);
-  const mouthRef = useRef<Mesh>(null);
+  const groupRef = useRef<Group>(null);
+  const eyeLeftRef = useRef<any>(null);
+  const eyeRightRef = useRef<any>(null);
+  const mouthRef = useRef<any>(null);
 
   // Animation
   useFrame((state) => {
-    if (!meshRef.current) return;
+    if (!groupRef.current) return;
 
     // Gentle floating animation
-    meshRef.current.position.y = Math.sin(state.clock.elapsedTime * 0.5) * 0.1;
+    groupRef.current.position.y = Math.sin(state.clock.elapsedTime * 0.5) * 0.1;
     
     // Breathing-like scale animation
     const breathScale = 1 + Math.sin(state.clock.elapsedTime * 0.8) * 0.02;
-    meshRef.current.scale.setScalar(breathScale);
+    groupRef.current.scale.setScalar(breathScale);
 
     // Speaking animation
     if (isSpeaking && mouthRef.current) {
@@ -56,17 +56,17 @@ const AvatarMesh: React.FC<{
   // Color based on avatar type and emotion
   const avatarColor = useMemo(() => {
     const baseColors = {
-      therapist: '#4F46E5',
-      grandma: '#EC4899',
-      grandpa: '#F59E0B',
-      aunt: '#8B5CF6',
-      uncle: '#10B981',
-      sibling: '#06B6D4',
-      teacher: '#3B82F6',
-      friend: '#F59E0B'
+      therapist: avatar.skinTone || '#4F46E5',
+      grandma: avatar.skinTone || '#EC4899',
+      grandpa: avatar.skinTone || '#F59E0B',
+      aunt: avatar.skinTone || '#8B5CF6',
+      uncle: avatar.skinTone || '#10B981',
+      sibling: avatar.skinTone || '#06B6D4',
+      teacher: avatar.skinTone || '#3B82F6',
+      friend: avatar.skinTone || '#F59E0B'
     };
-    return baseColors[avatar.type] || '#6B7280';
-  }, [avatar.type]);
+    return baseColors[avatar.type] || avatar.skinTone || '#6B7280';
+  }, [avatar.type, avatar.skinTone]);
 
   const emotionIntensity = useMemo(() => {
     const intensities = {
@@ -80,7 +80,7 @@ const AvatarMesh: React.FC<{
   }, [emotion]);
 
   return (
-    <group ref={meshRef}>
+    <group ref={groupRef}>
       {/* Main head */}
       <Sphere args={[1, 32, 32]} position={[0, 0, 0]}>
         <meshPhongMaterial 
