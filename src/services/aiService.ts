@@ -31,7 +31,7 @@ export class AIService {
     const openaiKey = localStorage.getItem('openaiApiKey');
     if (openaiKey) {
       try {
-        return await this.analyzeWithOpenAI(textInput, imageData, openaiKey);
+        return await this.analyzeWithOpenAI(textInput, openaiKey, imageData);
       } catch (error) {
         console.error('OpenAI analysis failed:', error);
       }
@@ -41,8 +41,8 @@ export class AIService {
     return this.generateMockAnalysis(textInput);
   }
 
-  private async analyzeWithOpenAI(textInput: string, imageData?: string, apiKey: string): Promise<AIResponse> {
-    const messages = [
+  private async analyzeWithOpenAI(textInput: string, apiKey: string, imageData?: string): Promise<AIResponse> {
+    const messages: any[] = [
       {
         role: 'system',
         content: 'You are a mood analysis AI. Analyze the user input and respond with a JSON object containing mood, confidence (0-1), emotions (happiness, sadness, anxiety, anger as 0-1 values), and suggestions array.'
