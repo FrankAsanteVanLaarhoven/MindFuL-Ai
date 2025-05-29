@@ -1,7 +1,9 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
+import TherapyAvatar3D from '../TherapyAvatar3D';
 
 interface MoodDataPoint {
   timestamp: string;
@@ -16,10 +18,27 @@ const chartConfig = {
   },
 };
 
+const getMoodEmotion = (moodValue: number): 'neutral' | 'happy' | 'concerned' | 'encouraging' | 'thoughtful' => {
+  if (moodValue >= 8) return 'happy';
+  if (moodValue >= 6) return 'encouraging';
+  if (moodValue >= 4) return 'neutral';
+  if (moodValue >= 2) return 'thoughtful';
+  return 'concerned';
+};
+
 const RealTimeMoodChart = () => {
   const [moodData, setMoodData] = useState<MoodDataPoint[]>([]);
   const [isActive, setIsActive] = useState(false);
+  const [currentEmotion, setCurrentEmotion] = useState<'neutral' | 'happy' | 'concerned' | 'encouraging' | 'thoughtful'>('neutral');
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  const monitorAvatar = {
+    id: 'mood-monitor',
+    type: 'friend' as const,
+    name: 'Live Monitor',
+    personality: 'Attentive and responsive',
+    skinTone: '#06B6D4'
+  };
 
   // Generate realistic mood data with some variation
   const generateMoodValue = () => {
@@ -31,9 +50,10 @@ const RealTimeMoodChart = () => {
 
   const addDataPoint = () => {
     const now = new Date();
+    const moodValue = generateMoodValue();
     const newPoint: MoodDataPoint = {
       timestamp: now.toISOString(),
-      mood: generateMoodValue(),
+      mood: moodValue,
       time: now.toLocaleTimeString('en-US', { 
         hour12: false, 
         hour: '2-digit', 
@@ -47,6 +67,9 @@ const RealTimeMoodChart = () => {
       // Keep only last 20 data points for smooth visualization
       return updated.slice(-20);
     });
+
+    // Update avatar emotion based on current mood
+    setCurrentEmotion(getMoodEmotion(moodValue));
   };
 
   const startMeasurement = () => {
@@ -60,6 +83,7 @@ const RealTimeMoodChart = () => {
       clearInterval(intervalRef.current);
       intervalRef.current = null;
     }
+    setCurrentEmotion('neutral');
   };
 
   const clearData = () => {
@@ -97,97 +121,126 @@ const RealTimeMoodChart = () => {
           Real-Time Mood Monitor
         </CardTitle>
         <CardDescription>
-          Live mood measurement tracking with time series visualization
+          Live mood measurement tracking with interactive AI companion
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        {/* Controls */}
-        <div className="flex items-center justify-between">
-          <div className="flex gap-2">
-            <button
-              onClick={isActive ? stopMeasurement : startMeasurement}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
-                isActive 
-                  ? 'bg-red-500 hover:bg-red-600 text-white' 
-                  : 'bg-teal-500 hover:bg-teal-600 text-white'
-              }`}
-            >
-              {isActive ? '⏸️ Stop' : '▶️ Start'} Monitoring
-            </button>
-            <button
-              onClick={clearData}
-              className="px-4 py-2 rounded-full text-sm font-medium bg-gray-500 hover:bg-gray-600 text-white transition-all duration-200"
-            >
-              🗑️ Clear
-            </button>
-          </div>
-          
-          {/* Current Reading */}
-          <div className="text-right">
-            <div className="text-2xl font-bold text-teal-600">
-              {getCurrentMood()}
-            </div>
-            <div className="text-xs text-gray-500">
-              {moodData.length > 0 ? getMoodLabel(Number(getCurrentMood())) : 'Waiting...'}
-            </div>
-          </div>
-        </div>
-
-        {/* Status Indicator */}
-        <div className="flex items-center gap-2">
-          <div className={`w-3 h-3 rounded-full ${isActive ? 'bg-green-500 animate-pulse' : 'bg-gray-400'}`} />
-          <span className="text-sm text-gray-600">
-            {isActive ? 'Recording live data...' : 'Measurement stopped'}
-          </span>
-          {moodData.length > 0 && (
-            <span className="text-xs text-gray-500 ml-auto">
-              {moodData.length} data points
-            </span>
-          )}
-        </div>
-
-        {/* Chart */}
-        <div className="h-64">
-          {moodData.length > 0 ? (
-            <ChartContainer config={chartConfig}>
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={moodData} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                  <XAxis 
-                    dataKey="time" 
-                    tick={{ fontSize: 10 }}
-                    stroke="#6b7280"
-                    interval="preserveStartEnd"
-                  />
-                  <YAxis 
-                    domain={[0, 10]}
-                    tick={{ fontSize: 10 }}
-                    stroke="#6b7280"
-                  />
-                  <ChartTooltip 
-                    content={<ChartTooltipContent />}
-                  />
-                  <Line 
-                    type="monotone" 
-                    dataKey="mood" 
-                    stroke="var(--color-mood)"
-                    strokeWidth={2}
-                    dot={{ fill: "var(--color-mood)", strokeWidth: 2, r: 3 }}
-                    activeDot={{ r: 5, stroke: "var(--color-mood)", strokeWidth: 2 }}
-                    connectNulls={false}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            </ChartContainer>
-          ) : (
-            <div className="flex items-center justify-center h-full text-gray-500">
-              <div className="text-center">
-                <div className="text-4xl mb-2">📈</div>
-                <p>Click "Start Monitoring" to begin tracking</p>
-                <p className="text-sm mt-1">Real-time mood data will appear here</p>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Left side - Controls and Chart */}
+          <div className="space-y-4">
+            {/* Controls */}
+            <div className="flex items-center justify-between">
+              <div className="flex gap-2">
+                <button
+                  onClick={isActive ? stopMeasurement : startMeasurement}
+                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
+                    isActive 
+                      ? 'bg-red-500 hover:bg-red-600 text-white' 
+                      : 'bg-teal-500 hover:bg-teal-600 text-white'
+                  }`}
+                >
+                  {isActive ? '⏸️ Stop' : '▶️ Start'} Monitoring
+                </button>
+                <button
+                  onClick={clearData}
+                  className="px-4 py-2 rounded-full text-sm font-medium bg-gray-500 hover:bg-gray-600 text-white transition-all duration-200"
+                >
+                  🗑️ Clear
+                </button>
+              </div>
+              
+              {/* Current Reading */}
+              <div className="text-right">
+                <div className="text-2xl font-bold text-teal-600">
+                  {getCurrentMood()}
+                </div>
+                <div className="text-xs text-gray-500">
+                  {moodData.length > 0 ? getMoodLabel(Number(getCurrentMood())) : 'Waiting...'}
+                </div>
               </div>
             </div>
-          )}
+
+            {/* Status Indicator */}
+            <div className="flex items-center gap-2">
+              <div className={`w-3 h-3 rounded-full ${isActive ? 'bg-green-500 animate-pulse' : 'bg-gray-400'}`} />
+              <span className="text-sm text-gray-600">
+                {isActive ? 'Recording live data...' : 'Measurement stopped'}
+              </span>
+              {moodData.length > 0 && (
+                <span className="text-xs text-gray-500 ml-auto">
+                  {moodData.length} data points
+                </span>
+              )}
+            </div>
+
+            {/* Chart */}
+            <div className="h-48">
+              {moodData.length > 0 ? (
+                <ChartContainer config={chartConfig}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={moodData} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                      <XAxis 
+                        dataKey="time" 
+                        tick={{ fontSize: 10 }}
+                        stroke="#6b7280"
+                        interval="preserveStartEnd"
+                      />
+                      <YAxis 
+                        domain={[0, 10]}
+                        tick={{ fontSize: 10 }}
+                        stroke="#6b7280"
+                      />
+                      <ChartTooltip 
+                        content={<ChartTooltipContent />}
+                      />
+                      <Line 
+                        type="monotone" 
+                        dataKey="mood" 
+                        stroke="var(--color-mood)"
+                        strokeWidth={2}
+                        dot={{ fill: "var(--color-mood)", strokeWidth: 2, r: 3 }}
+                        activeDot={{ r: 5, stroke: "var(--color-mood)", strokeWidth: 2 }}
+                        connectNulls={false}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </ChartContainer>
+              ) : (
+                <div className="flex items-center justify-center h-full text-gray-500">
+                  <div className="text-center">
+                    <div className="text-4xl mb-2">📈</div>
+                    <p>Click "Start Monitoring" to begin tracking</p>
+                    <p className="text-sm mt-1">Real-time mood data will appear here</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Right side - 3D Avatar */}
+          <div className="space-y-4">
+            <div className="text-center">
+              <h3 className="text-lg font-semibold text-gray-800 mb-2">Live Mood Companion</h3>
+              <p className="text-sm text-gray-600 mb-4">
+                Watch your AI companion react to your mood changes in real-time
+              </p>
+            </div>
+            <TherapyAvatar3D
+              avatar={monitorAvatar}
+              isActive={isActive}
+              isSpeaking={isActive}
+              emotion={currentEmotion}
+            />
+            <div className="text-center">
+              <div className="inline-flex items-center gap-2 px-3 py-1 bg-teal-50 rounded-full">
+                <div className={`w-2 h-2 rounded-full ${isActive ? 'bg-green-500' : 'bg-gray-400'}`} />
+                <span className="text-sm font-medium text-gray-700">
+                  {isActive ? 'Monitoring Active' : 'Standby Mode'}
+                </span>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Data Summary */}
