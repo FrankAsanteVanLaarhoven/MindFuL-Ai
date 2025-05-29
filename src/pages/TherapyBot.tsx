@@ -12,6 +12,8 @@ import { Mic, MicOff, Volume2, VolumeX, MessageSquare, Settings2 } from 'lucide-
 import { useVoiceInteraction } from '@/hooks/useVoiceInteraction';
 import VoiceSettings from '@/components/VoiceSettings';
 import VoiceToneIndicator from '@/components/VoiceToneIndicator';
+import AvatarSelector, { AvatarCharacter } from '@/components/AvatarSelector';
+import TherapyAvatar3D from '@/components/TherapyAvatar3D';
 
 interface Message {
   id: string;
@@ -29,6 +31,8 @@ const TherapyBot = () => {
   const [sessionStarted, setSessionStarted] = useState(false);
   const [inputMode, setInputMode] = useState<'text' | 'voice'>('text');
   const [showVoiceSettings, setShowVoiceSettings] = useState(false);
+  const [selectedAvatar, setSelectedAvatar] = useState<AvatarCharacter | null>(null);
+  const [avatarEmotion, setAvatarEmotion] = useState<'neutral' | 'happy' | 'concerned' | 'encouraging' | 'thoughtful'>('neutral');
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
@@ -49,7 +53,8 @@ const TherapyBot = () => {
     stopSpeaking,
     clearTranscript,
     setVoiceSettings,
-    initAudioContext
+    initAudioContext,
+    setTranscript
   } = useVoiceInteraction();
 
   useEffect(() => {
@@ -101,6 +106,34 @@ const TherapyBot = () => {
     }
   };
 
+  // Updated setTranscript to use current message when voice input is active
+  useEffect(() => {
+    if (inputMode === 'voice' && transcript) {
+      setCurrentMessage(transcript);
+    }
+  }, [transcript, inputMode]);
+
+  // Avatar emotion based on conversation context
+  const updateAvatarEmotion = (messageContent: string, isUserMessage: boolean) => {
+    if (isUserMessage) {
+      // React to user's message tone
+      const lowerContent = messageContent.toLowerCase();
+      if (lowerContent.includes('sad') || lowerContent.includes('depressed') || lowerContent.includes('down')) {
+        setAvatarEmotion('concerned');
+      } else if (lowerContent.includes('happy') || lowerContent.includes('good') || lowerContent.includes('better')) {
+        setAvatarEmotion('happy');
+      } else if (lowerContent.includes('anxious') || lowerContent.includes('worried') || lowerContent.includes('stressed')) {
+        setAvatarEmotion('concerned');
+      } else {
+        setAvatarEmotion('thoughtful');
+      }
+    } else {
+      // Bot's response emotion
+      setAvatarEmotion('encouraging');
+      setTimeout(() => setAvatarEmotion('neutral'), 3000);
+    }
+  };
+
   const sendMessage = async () => {
     if (!currentMessage.trim()) return;
 
@@ -113,6 +146,7 @@ const TherapyBot = () => {
     };
 
     setMessages(prev => [...prev, userMessage]);
+    updateAvatarEmotion(currentMessage, true);
     setCurrentMessage('');
     clearTranscript();
     setIsTyping(true);
@@ -124,7 +158,7 @@ const TherapyBot = () => {
 
     // Simulate bot response
     setTimeout(async () => {
-      const botResponse = await generateBotResponse(currentMessage, therapyType, voiceTone.tone);
+      const botResponse = await generateBotResponse(currentMessage, therapyType, voiceTone.tone, selectedAvatar);
       const botMessage: Message = {
         id: crypto.randomUUID(),
         type: 'bot',
@@ -133,16 +167,27 @@ const TherapyBot = () => {
       };
       
       setMessages(prev => [...prev, botMessage]);
+      updateAvatarEmotion(botResponse, false);
       setIsTyping(false);
 
       // Speak bot response if voice output is enabled
-      if (voiceSettings.enabled && voiceSettings.voiceOutput) {
+      if (voiceSettings.enabled && voiceSettings.voiceOutput && selectedAvatar) {
+        // Use avatar's specific voice
+        const originalVoice = voiceSettings.selectedVoice;
+        setVoiceSettings(prev => ({ ...prev, selectedVoice: selectedAvatar.voiceId }));
         speak(botResponse);
+        // Restore original voice setting after speaking
+        setTimeout(() => {
+          setVoiceSettings(prev => ({ ...prev, selectedVoice: originalVoice }));
+        }, 1000);
       }
     }, 1500);
   };
 
-  const generateBotResponse = async (userInput: string, type: string, tone?: string): Promise<string> => {
+  const generateBotResponse = async (userInput: string, type: string, tone?: string, avatar?: AvatarCharacter | null): Promise<string> => {
+    // Avatar-specific response styling
+    const avatarPersonality = avatar ? avatar.personality.toLowerCase() : '';
+    
     // Enhanced responses that consider voice tone
     const toneAwareResponses = {
       CBT: {
@@ -211,7 +256,36 @@ const TherapyBot = () => {
     };
 
     const typeResponses = responses[type as keyof typeof responses] || responses.general;
-    return typeResponses[Math.floor(Math.random() * typeResponses.length)];
+    let response = '';
+
+    // Get base response from existing logic
+    if (tone && toneAwareResponses[type as keyof typeof toneAwareResponses]) {
+      const toneResponses = toneAwareResponses[type as keyof typeof toneAwareResponses][tone as keyof typeof toneAwareResponses.CBT];
+      if (toneResponses && toneResponses.length > 0) {
+        response = toneResponses[Math.floor(Math.random() * toneResponses.length)];
+      }
+    }
+
+    if (!response) {
+      response = typeResponses[Math.floor(Math.random() * typeResponses.length)];
+    }
+
+    // Modify response based on avatar personality
+    if (avatar) {
+      if (avatarPersonality.includes('nurturing') || avatar.type === 'grandma') {
+        response = `Oh dear, ${response.toLowerCase()} Remember, I'm here for you, just like family.`;
+      } else if (avatarPersonality.includes('wise') || avatar.type === 'grandpa') {
+        response = `You know, in my experience, ${response.toLowerCase()} Life has taught me that these feelings pass.`;
+      } else if (avatar.type === 'sibling' || avatar.type === 'friend') {
+        response = `Hey, ${response.toLowerCase().replace('i hear', 'i totally get')} We're in this together.`;
+      } else if (avatar.type === 'teacher') {
+        response = `Let's think about this step by step. ${response} This is a learning process, and that's okay.`;
+      } else if (avatarPersonality.includes('professional')) {
+        response = `${response} Based on evidence-based approaches, we can work through this systematically.`;
+      }
+    }
+
+    return response;
   };
 
   const toggleVoiceInput = () => {
@@ -239,7 +313,7 @@ const TherapyBot = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-rose-50 p-4">
-      <div className="max-w-4xl mx-auto space-y-6">
+      <div className="max-w-6xl mx-auto space-y-6">
         {/* Header */}
         <div className="text-center py-6">
           <Button 
@@ -261,6 +335,13 @@ const TherapyBot = () => {
         {!sessionStarted ? (
           /* Session Setup */
           <div ref={chatContainerRef} className="space-y-6">
+            {/* Avatar Selection */}
+            <AvatarSelector
+              selectedAvatar={selectedAvatar}
+              onAvatarSelect={setSelectedAvatar}
+            />
+
+            {/* Session Configuration */}
             <Card className="bg-white/80 backdrop-blur-sm border-purple-200 shadow-lg">
               <CardHeader>
                 <CardTitle className="text-xl text-purple-800 flex items-center gap-2">
@@ -310,9 +391,10 @@ const TherapyBot = () => {
                 
                 <Button
                   onClick={startSession}
-                  className="w-full bg-purple-500 hover:bg-purple-600 text-white font-medium py-3 rounded-full transition-all duration-200 transform hover:scale-105"
+                  disabled={!selectedAvatar}
+                  className="w-full bg-purple-500 hover:bg-purple-600 text-white font-medium py-3 rounded-full transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Start Therapy Session
+                  {selectedAvatar ? 'Start Therapy Session' : 'Please Select an Avatar First'}
                 </Button>
               </CardContent>
             </Card>
@@ -331,7 +413,28 @@ const TherapyBot = () => {
         ) : (
           /* Chat Interface */
           <div ref={chatContainerRef} className="space-y-4">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+              {/* Avatar Display */}
+              <div className="lg:col-span-1">
+                {selectedAvatar && (
+                  <Card className="bg-white/80 backdrop-blur-sm border-purple-200 shadow-lg">
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm text-purple-800 text-center">
+                        Your Therapy Companion
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="pt-0">
+                      <TherapyAvatar3D
+                        avatar={selectedAvatar}
+                        isActive={sessionStarted}
+                        isSpeaking={isSpeaking}
+                        emotion={avatarEmotion}
+                      />
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
+
               {/* Main Chat */}
               <div className="lg:col-span-2">
                 <Card className="bg-white/80 backdrop-blur-sm border-purple-200 shadow-lg">
@@ -483,7 +586,7 @@ const TherapyBot = () => {
               </div>
 
               {/* Side Panel */}
-              <div className="space-y-4">
+              <div className="lg:col-span-1 space-y-4">
                 {/* Voice Tone Indicator */}
                 <VoiceToneIndicator voiceTone={voiceTone} isListening={isListening} />
                 
