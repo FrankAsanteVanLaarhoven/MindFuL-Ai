@@ -10,15 +10,19 @@ import BreathingSphere3D from '@/components/breathing-exercises/breathing-sphere
 import RealTimeBreathingSphere from '@/components/breathing-exercises/real-time-breathing-sphere';
 import EnhancedRealTimeBreathingSphere from '@/components/breathing-exercises/enhanced-breathing-sphere';
 import BreathingCircle2D from '@/components/breathing-exercises/breathing-circle-2d';
+import BreathingChallenges, { Challenge } from '@/components/breathing-exercises/breathing-challenges';
+import BreathingAchievements from '@/components/breathing-exercises/breathing-achievements';
+import BreathingProgress from '@/components/breathing-exercises/breathing-progress';
 import { gsap } from 'gsap';
 import { useNavigate } from 'react-router-dom';
 
 type BreathingTechnique = 'box' | '4-7-8' | 'triangle';
-type ExerciseMode = 'guided' | 'guided-2d' | 'realtime' | 'enhanced';
+type ExerciseMode = 'guided' | 'guided-2d' | 'realtime' | 'enhanced' | 'challenge';
 
 const Breathing = () => {
   const [selectedTechnique, setSelectedTechnique] = useState<BreathingTechnique>('box');
   const [selectedMode, setSelectedMode] = useState<ExerciseMode>('enhanced');
+  const [selectedChallenge, setSelectedChallenge] = useState<Challenge | null>(null);
   const [isActive, setIsActive] = useState(false);
   const [currentPhase, setCurrentPhase] = useState<'inhale' | 'hold1' | 'exhale' | 'hold2'>('inhale');
   
@@ -82,6 +86,12 @@ const Breathing = () => {
       description: 'Immersive visuals with trails, rings, and dynamic colors',
       icon: '✨',
       component: EnhancedRealTimeBreathingSphere
+    },
+    challenge: {
+      name: 'Challenge Mode',
+      description: 'Complete structured breathing challenges',
+      icon: '🏆',
+      component: BreathingSphere3D // Use 3D sphere for challenges
     }
   };
 
@@ -106,7 +116,18 @@ const Breathing = () => {
   const runCycle = () => {
     if (!isActive) return;
 
-    const cycle = cycles[selectedTechnique];
+    let cycle;
+    if (selectedMode === 'challenge' && selectedChallenge) {
+      // Use challenge pattern
+      cycle = {
+        inhale: selectedChallenge.pattern.inhale * 1000,
+        hold1: selectedChallenge.pattern.hold1 * 1000,
+        exhale: selectedChallenge.pattern.exhale * 1000,
+        hold2: selectedChallenge.pattern.hold2 * 1000
+      };
+    } else {
+      cycle = cycles[selectedTechnique];
+    }
     
     setCurrentPhase('inhale');
     setTimeout(() => {
@@ -136,6 +157,11 @@ const Breathing = () => {
     setIsActive(false);
   };
 
+  const handleChallengeSelect = (challenge: Challenge) => {
+    setSelectedChallenge(challenge);
+    setSelectedMode('challenge');
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-teal-50 via-blue-50 to-indigo-50 p-4">
       <div ref={cardRef} className="max-w-6xl mx-auto space-y-8">
@@ -157,6 +183,18 @@ const Breathing = () => {
           </p>
         </div>
 
+        {/* Progress and Achievements Row */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <BreathingProgress />
+          <BreathingAchievements />
+        </div>
+
+        {/* Breathing Challenges */}
+        <BreathingChallenges 
+          onSelectChallenge={handleChallengeSelect}
+          selectedChallenge={selectedChallenge}
+        />
+
         {/* Mode Selection */}
         <Card className="bg-white/80 backdrop-blur-sm border-teal-200 shadow-lg">
           <CardHeader>
@@ -165,7 +203,7 @@ const Breathing = () => {
           </CardHeader>
           <CardContent>
             <Tabs value={selectedMode} onValueChange={(value) => setSelectedMode(value as ExerciseMode)}>
-              <TabsList className="grid w-full grid-cols-4">
+              <TabsList className="grid w-full grid-cols-5">
                 {Object.entries(modes).map(([key, mode]) => (
                   <TabsTrigger key={key} value={key} className="flex items-center gap-2 text-xs">
                     <span>{mode.icon}</span>
@@ -177,6 +215,17 @@ const Breathing = () => {
               {Object.entries(modes).map(([key, mode]) => (
                 <TabsContent key={key} value={key} className="mt-4">
                   <p className="text-gray-600">{mode.description}</p>
+                  {key === 'challenge' && selectedChallenge && (
+                    <div className="mt-2 p-3 bg-teal-50 rounded-lg">
+                      <p className="font-medium text-teal-800">
+                        Selected Challenge: {selectedChallenge.name}
+                      </p>
+                      <p className="text-sm text-teal-600">
+                        Pattern: {selectedChallenge.pattern.inhale}-{selectedChallenge.pattern.hold1}-{selectedChallenge.pattern.exhale}
+                        {selectedChallenge.pattern.hold2 > 0 && `-${selectedChallenge.pattern.hold2}`} • {selectedChallenge.duration} minutes
+                      </p>
+                    </div>
+                  )}
                 </TabsContent>
               ))}
             </Tabs>
@@ -223,14 +272,14 @@ const Breathing = () => {
 
         {/* Breathing Exercise Component */}
         <SelectedComponent
-          technique={selectedTechnique}
-          isActive={(selectedMode === 'guided' || selectedMode === 'guided-2d') ? isActive : undefined}
-          currentPhase={(selectedMode === 'guided' || selectedMode === 'guided-2d') ? currentPhase : undefined}
+          technique={selectedMode === 'challenge' && selectedChallenge ? 'box' : selectedTechnique}
+          isActive={(selectedMode === 'guided' || selectedMode === 'guided-2d' || selectedMode === 'challenge') ? isActive : undefined}
+          currentPhase={(selectedMode === 'guided' || selectedMode === 'guided-2d' || selectedMode === 'challenge') ? currentPhase : undefined}
           onSessionComplete={onSessionComplete}
         />
 
-        {/* Guided Controls - Show for guided modes */}
-        {(selectedMode === 'guided' || selectedMode === 'guided-2d') && (
+        {/* Guided Controls - Show for guided modes and challenges */}
+        {(selectedMode === 'guided' || selectedMode === 'guided-2d' || selectedMode === 'challenge') && (
           <div className="flex justify-center gap-4">
             <Button
               onClick={isActive ? stopExercise : startExercise}
@@ -240,6 +289,7 @@ const Breathing = () => {
                   ? 'bg-red-500 hover:bg-red-600' 
                   : 'bg-teal-500 hover:bg-teal-600'
               } text-white font-medium`}
+              disabled={selectedMode === 'challenge' && !selectedChallenge}
             >
               {isActive ? '⏸️ Stop Exercise' : '▶️ Start Exercise'}
             </Button>
