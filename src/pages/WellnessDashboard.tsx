@@ -5,8 +5,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import CrisisSupport from '@/components/CrisisSupport';
 import ProgressAnalytics from '@/components/ProgressAnalytics';
 import GoalSetting from '@/components/GoalSetting';
+import PodcastIntegration from '@/components/PodcastIntegration';
 import RealTimeMoodChart from '@/components/dashboard/real-time-mood-chart';
-import { BarChart3, Target, AlertTriangle, TrendingUp } from 'lucide-react';
+import { BarChart3, Target, AlertTriangle, TrendingUp, Podcast } from 'lucide-react';
 
 const WellnessDashboard = () => {
   return (
@@ -20,7 +21,7 @@ const WellnessDashboard = () => {
         </div>
 
         <Tabs defaultValue="analytics" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4 lg:w-auto lg:grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5 lg:w-auto lg:grid-cols-5">
             <TabsTrigger value="analytics" className="flex items-center gap-2">
               <BarChart3 className="w-4 h-4" />
               <span className="hidden sm:inline">Analytics</span>
@@ -32,6 +33,10 @@ const WellnessDashboard = () => {
             <TabsTrigger value="mood-tracking" className="flex items-center gap-2">
               <TrendingUp className="w-4 h-4" />
               <span className="hidden sm:inline">Mood</span>
+            </TabsTrigger>
+            <TabsTrigger value="podcasts" className="flex items-center gap-2">
+              <Podcast className="w-4 h-4" />
+              <span className="hidden sm:inline">Podcasts</span>
             </TabsTrigger>
             <TabsTrigger value="crisis" className="flex items-center gap-2">
               <AlertTriangle className="w-4 h-4" />
@@ -49,6 +54,10 @@ const WellnessDashboard = () => {
 
           <TabsContent value="mood-tracking" className="space-y-6">
             <RealTimeMoodChart />
+          </TabsContent>
+
+          <TabsContent value="podcasts" className="space-y-6">
+            <PodcastIntegration />
           </TabsContent>
 
           <TabsContent value="crisis" className="space-y-6">
