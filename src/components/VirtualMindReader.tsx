@@ -78,7 +78,7 @@ const VirtualMindReader: React.FC<VirtualMindReaderProps> = ({
     
     // Cognitive load
     const complexWords = text.split(' ').filter(word => word.length > 8).length;
-    const cognitiveLoad = Math.min(30 + (complexWords * 5), 100);
+    let cognitiveLoad = Math.min(30 + (complexWords * 5), 100);
     
     // Engagement level
     const questionMarks = (text.match(/\?/g) || []).length;
