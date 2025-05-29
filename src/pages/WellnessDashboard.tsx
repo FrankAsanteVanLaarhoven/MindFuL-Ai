@@ -8,7 +8,11 @@ import GoalSetting from '@/components/GoalSetting';
 import PodcastIntegration from '@/components/PodcastIntegration';
 import IoTIntegration from '@/components/IoTIntegration';
 import RealTimeMoodChart from '@/components/dashboard/real-time-mood-chart';
-import { BarChart3, Target, AlertTriangle, TrendingUp, Podcast, Smartphone } from 'lucide-react';
+import Localization from '@/components/Localization';
+import Weather from '@/components/Weather';
+import WorldClock from '@/components/WorldClock';
+import InstantTranslation from '@/components/InstantTranslation';
+import { BarChart3, Target, AlertTriangle, TrendingUp, Podcast, Smartphone, Globe, CloudSun, Clock, Translate } from 'lucide-react';
 
 const WellnessDashboard = () => {
   return (
@@ -22,7 +26,7 @@ const WellnessDashboard = () => {
         </div>
 
         <Tabs defaultValue="analytics" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-6 lg:w-auto lg:grid-cols-6">
+          <TabsList className="grid w-full grid-cols-10 lg:w-auto lg:grid-cols-10">
             <TabsTrigger value="analytics" className="flex items-center gap-2">
               <BarChart3 className="w-4 h-4" />
               <span className="hidden sm:inline">Analytics</span>
@@ -46,6 +50,22 @@ const WellnessDashboard = () => {
             <TabsTrigger value="crisis" className="flex items-center gap-2">
               <AlertTriangle className="w-4 h-4" />
               <span className="hidden sm:inline">Crisis</span>
+            </TabsTrigger>
+            <TabsTrigger value="localization" className="flex items-center gap-2">
+              <Globe className="w-4 h-4" />
+              <span className="hidden sm:inline">Language</span>
+            </TabsTrigger>
+            <TabsTrigger value="weather" className="flex items-center gap-2">
+              <CloudSun className="w-4 h-4" />
+              <span className="hidden sm:inline">Weather</span>
+            </TabsTrigger>
+            <TabsTrigger value="worldclock" className="flex items-center gap-2">
+              <Clock className="w-4 h-4" />
+              <span className="hidden sm:inline">Clock</span>
+            </TabsTrigger>
+            <TabsTrigger value="translation" className="flex items-center gap-2">
+              <Translate className="w-4 h-4" />
+              <span className="hidden sm:inline">Translate</span>
             </TabsTrigger>
           </TabsList>
 
@@ -71,6 +91,22 @@ const WellnessDashboard = () => {
 
           <TabsContent value="crisis" className="space-y-6">
             <CrisisSupport />
+          </TabsContent>
+
+          <TabsContent value="localization" className="space-y-6">
+            <Localization />
+          </TabsContent>
+
+          <TabsContent value="weather" className="space-y-6">
+            <Weather />
+          </TabsContent>
+
+          <TabsContent value="worldclock" className="space-y-6">
+            <WorldClock />
+          </TabsContent>
+
+          <TabsContent value="translation" className="space-y-6">
+            <InstantTranslation />
           </TabsContent>
         </Tabs>
       </div>
