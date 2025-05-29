@@ -27,8 +27,11 @@ const Breathing = () => {
   const [isActive, setIsActive] = useState(false);
   const [currentPhase, setCurrentPhase] = useState<'inhale' | 'hold1' | 'exhale' | 'hold2'>('inhale');
   const [sessionStartTime, setSessionStartTime] = useState<number | null>(null);
+  const [challengeProgress, setChallengeProgress] = useState(0);
+  const [challengeTimeRemaining, setChallengeTimeRemaining] = useState(0);
   
   const cardRef = useRef<HTMLDivElement>(null);
+  const challengeTimerRef = useRef<NodeJS.Timeout | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -39,6 +42,36 @@ const Breathing = () => {
       );
     }
   }, []);
+
+  // Challenge timer effect
+  useEffect(() => {
+    if (selectedMode === 'challenge' && selectedChallenge && isActive) {
+      const totalDuration = selectedChallenge.duration * 60; // Convert to seconds
+      setChallengeTimeRemaining(totalDuration);
+      
+      challengeTimerRef.current = setInterval(() => {
+        setChallengeTimeRemaining(prev => {
+          const newTime = prev - 1;
+          const progress = ((totalDuration - newTime) / totalDuration) * 100;
+          setChallengeProgress(progress);
+          
+          if (newTime <= 0) {
+            handleChallengeComplete();
+            return 0;
+          }
+          
+          return newTime;
+        });
+      }, 1000);
+    }
+
+    return () => {
+      if (challengeTimerRef.current) {
+        clearInterval(challengeTimerRef.current);
+        challengeTimerRef.current = null;
+      }
+    };
+  }, [selectedMode, selectedChallenge, isActive]);
 
   const techniques = {
     box: {
@@ -105,10 +138,54 @@ const Breathing = () => {
 
   const SelectedComponent = modes[selectedMode].component;
 
+  const handleChallengeComplete = () => {
+    if (!selectedChallenge) return;
+    
+    setIsActive(false);
+    setCurrentPhase('inhale');
+    setChallengeProgress(100);
+    
+    // Track the completed challenge session
+    if (sessionStartTime) {
+      const duration = selectedChallenge.duration;
+      addBreathingSession(duration, selectedChallenge.name);
+      
+      // Mark challenge as completed
+      const completedChallenges = JSON.parse(localStorage.getItem('completedChallenges') || '[]');
+      if (!completedChallenges.includes(selectedChallenge.id)) {
+        completedChallenges.push(selectedChallenge.id);
+        localStorage.setItem('completedChallenges', JSON.stringify(completedChallenges));
+      }
+      
+      // Dispatch custom event to update progress in real-time
+      window.dispatchEvent(new CustomEvent('breathingStatsUpdated'));
+      
+      toast({
+        title: "Challenge Complete! 🏆",
+        description: `Congratulations! You completed the ${selectedChallenge.name} challenge in ${duration} minutes.`,
+      });
+    }
+    
+    setSessionStartTime(null);
+    setChallengeProgress(0);
+    setChallengeTimeRemaining(0);
+    
+    if (challengeTimerRef.current) {
+      clearInterval(challengeTimerRef.current);
+      challengeTimerRef.current = null;
+    }
+  };
+
   const startExercise = () => {
     setIsActive(true);
     setSessionStartTime(Date.now());
-    runCycle();
+    setChallengeProgress(0);
+    
+    if (selectedMode === 'challenge' && selectedChallenge) {
+      setChallengeTimeRemaining(selectedChallenge.duration * 60);
+    } else {
+      runCycle();
+    }
   };
 
   const stopExercise = () => {
@@ -134,6 +211,13 @@ const Breathing = () => {
     }
     
     setSessionStartTime(null);
+    setChallengeProgress(0);
+    setChallengeTimeRemaining(0);
+    
+    if (challengeTimerRef.current) {
+      clearInterval(challengeTimerRef.current);
+      challengeTimerRef.current = null;
+    }
   };
 
   const runCycle = () => {
@@ -204,6 +288,12 @@ const Breathing = () => {
     setSelectedMode('challenge');
   };
 
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-teal-50 via-blue-50 to-indigo-50 p-4">
       <div ref={cardRef} className="max-w-6xl mx-auto space-y-8">
@@ -236,6 +326,31 @@ const Breathing = () => {
           onSelectChallenge={handleChallengeSelect}
           selectedChallenge={selectedChallenge}
         />
+
+        {/* Challenge Progress - Show when challenge is active */}
+        {selectedMode === 'challenge' && selectedChallenge && isActive && (
+          <Card className="bg-white/90 backdrop-blur-sm border-teal-200">
+            <CardHeader>
+              <CardTitle className="text-lg text-teal-800 flex items-center gap-2">
+                🏆 {selectedChallenge.name} Challenge
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-medium">Progress</span>
+                  <span className="text-sm text-gray-600">{formatTime(challengeTimeRemaining)} remaining</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-3">
+                  <div 
+                    className="bg-teal-500 h-3 rounded-full transition-all duration-1000 ease-linear"
+                    style={{ width: `${challengeProgress}%` }}
+                  />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Mode Selection */}
         <Card className="bg-white/80 backdrop-blur-sm border-teal-200 shadow-lg">

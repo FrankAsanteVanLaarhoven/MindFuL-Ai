@@ -1,105 +1,178 @@
 
+"use client";
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Trophy, Target, Zap, Brain, Heart } from 'lucide-react';
+import { Clock, Trophy, Target, Flame, CheckCircle } from 'lucide-react';
+import { getBreathingStats, addBreathingSession } from '@/lib/breathing-storage';
+import { toast } from '@/hooks/use-toast';
 
 export interface Challenge {
   id: string;
   name: string;
   description: string;
-  goal: 'stress-relief' | 'energy-boost' | 'focus' | 'sleep';
+  duration: number; // in minutes
   pattern: {
     inhale: number;
     hold1: number;
     exhale: number;
     hold2: number;
   };
-  duration: number; // in minutes
-  icon: React.ReactNode;
-  color: string;
   difficulty: 'beginner' | 'intermediate' | 'advanced';
-  targetSessions: number;
-  completedSessions: number;
+  benefits: string[];
+  icon: string;
+  color: string;
+  requiredSessions?: number;
+  unlocked?: boolean;
 }
 
 interface BreathingChallengesProps {
   onSelectChallenge: (challenge: Challenge) => void;
-  selectedChallenge?: Challenge;
+  selectedChallenge: Challenge | null;
 }
 
 const BreathingChallenges: React.FC<BreathingChallengesProps> = ({
   onSelectChallenge,
   selectedChallenge
 }) => {
-  const [challenges, setChallenges] = useState<Challenge[]>([
+  const [stats, setStats] = useState(getBreathingStats());
+  const [completedChallenges, setCompletedChallenges] = useState<string[]>([]);
+
+  const challenges: Challenge[] = [
     {
-      id: 'stress-buster',
-      name: 'Stress Buster',
-      description: 'Extended exhales to activate relaxation response',
-      goal: 'stress-relief',
-      pattern: { inhale: 4, hold1: 4, exhale: 8, hold2: 0 },
+      id: 'beginner-calm',
+      name: 'Calm Beginner',
+      description: 'Perfect for starting your breathing journey',
       duration: 5,
-      icon: <Heart className="w-5 h-5" />,
-      color: 'from-blue-500 to-teal-500',
+      pattern: { inhale: 4, hold1: 2, exhale: 4, hold2: 2 },
       difficulty: 'beginner',
-      targetSessions: 7,
-      completedSessions: 0
+      benefits: ['Reduces stress', 'Easy to follow'],
+      icon: '🌱',
+      color: 'from-green-400 to-green-600',
+      unlocked: true
     },
     {
-      id: 'energy-ignite',
-      name: 'Energy Ignite',
-      description: 'Quick rhythmic breathing to boost alertness',
-      goal: 'energy-boost',
-      pattern: { inhale: 3, hold1: 3, exhale: 3, hold2: 0 },
-      duration: 3,
-      icon: <Zap className="w-5 h-5" />,
-      color: 'from-orange-500 to-red-500',
-      difficulty: 'intermediate',
-      targetSessions: 5,
-      completedSessions: 0
-    },
-    {
-      id: 'focus-master',
-      name: 'Focus Master',
-      description: 'Balanced breathing for sustained concentration',
-      goal: 'focus',
-      pattern: { inhale: 6, hold1: 6, exhale: 6, hold2: 6 },
-      duration: 10,
-      icon: <Brain className="w-5 h-5" />,
-      color: 'from-purple-500 to-indigo-500',
-      difficulty: 'advanced',
-      targetSessions: 14,
-      completedSessions: 0
-    },
-    {
-      id: 'sleep-prep',
-      name: 'Sleep Preparation',
-      description: 'Deep, slow breathing for bedtime relaxation',
-      goal: 'sleep',
-      pattern: { inhale: 6, hold1: 2, exhale: 10, hold2: 2 },
+      id: 'focus-builder',
+      name: 'Focus Builder',
+      description: 'Build concentration with structured breathing',
       duration: 7,
-      icon: <Target className="w-5 h-5" />,
-      color: 'from-indigo-500 to-purple-500',
+      pattern: { inhale: 4, hold1: 4, exhale: 4, hold2: 4 },
       difficulty: 'beginner',
-      targetSessions: 10,
-      completedSessions: 0
+      benefits: ['Improves focus', 'Calms mind'],
+      icon: '🎯',
+      color: 'from-blue-400 to-blue-600',
+      requiredSessions: 3,
+      unlocked: stats.totalSessions >= 3
+    },
+    {
+      id: 'sleep-helper',
+      name: 'Sleep Helper',
+      description: 'Prepare your body for restful sleep',
+      duration: 10,
+      pattern: { inhale: 4, hold1: 7, exhale: 8, hold2: 0 },
+      difficulty: 'intermediate',
+      benefits: ['Promotes sleep', 'Reduces anxiety'],
+      icon: '😴',
+      color: 'from-purple-400 to-purple-600',
+      requiredSessions: 5,
+      unlocked: stats.totalSessions >= 5
+    },
+    {
+      id: 'energy-boost',
+      name: 'Energy Boost',
+      description: 'Energize your body and mind',
+      duration: 8,
+      pattern: { inhale: 3, hold1: 1, exhale: 3, hold2: 1 },
+      difficulty: 'intermediate',
+      benefits: ['Increases energy', 'Improves alertness'],
+      icon: '⚡',
+      color: 'from-orange-400 to-orange-600',
+      requiredSessions: 7,
+      unlocked: stats.totalSessions >= 7
+    },
+    {
+      id: 'stress-warrior',
+      name: 'Stress Warrior',
+      description: 'Advanced technique for deep stress relief',
+      duration: 15,
+      pattern: { inhale: 6, hold1: 6, exhale: 6, hold2: 6 },
+      difficulty: 'advanced',
+      benefits: ['Deep relaxation', 'Stress mastery'],
+      icon: '🧘‍♂️',
+      color: 'from-indigo-400 to-indigo-600',
+      requiredSessions: 15,
+      unlocked: stats.totalSessions >= 15
+    },
+    {
+      id: 'master-breath',
+      name: 'Master Breath',
+      description: 'Ultimate breathing challenge for experts',
+      duration: 20,
+      pattern: { inhale: 8, hold1: 8, exhale: 8, hold2: 8 },
+      difficulty: 'advanced',
+      benefits: ['Complete mastery', 'Peak performance'],
+      icon: '👑',
+      color: 'from-yellow-400 to-yellow-600',
+      requiredSessions: 25,
+      unlocked: stats.totalSessions >= 25
     }
-  ]);
+  ];
 
   useEffect(() => {
-    // Load progress from localStorage
-    const savedProgress = localStorage.getItem('breathingChallengeProgress');
-    if (savedProgress) {
-      const progress = JSON.parse(savedProgress);
-      setChallenges(prev => prev.map(challenge => ({
-        ...challenge,
-        completedSessions: progress[challenge.id] || 0
-      })));
+    const updateStats = () => {
+      const currentStats = getBreathingStats();
+      setStats(currentStats);
+    };
+
+    updateStats();
+    
+    // Listen for stats updates
+    const handleStatsUpdate = () => {
+      updateStats();
+    };
+
+    window.addEventListener('breathingStatsUpdated', handleStatsUpdate);
+    window.addEventListener('storage', handleStatsUpdate);
+
+    // Load completed challenges from localStorage
+    const completed = localStorage.getItem('completedChallenges');
+    if (completed) {
+      setCompletedChallenges(JSON.parse(completed));
     }
+
+    return () => {
+      window.removeEventListener('breathingStatsUpdated', handleStatsUpdate);
+      window.removeEventListener('storage', handleStatsUpdate);
+    };
   }, []);
+
+  const handleChallengeSelect = (challenge: Challenge) => {
+    if (!challenge.unlocked) {
+      toast({
+        title: "Challenge Locked 🔒",
+        description: `Complete ${challenge.requiredSessions} total sessions to unlock this challenge.`,
+        variant: "destructive"
+      });
+      return;
+    }
+
+    onSelectChallenge(challenge);
+    toast({
+      title: "Challenge Selected! 🎯",
+      description: `Starting ${challenge.name} - ${challenge.duration} minute challenge.`,
+    });
+  };
+
+  const markChallengeComplete = (challengeId: string) => {
+    const newCompleted = [...completedChallenges, challengeId];
+    setCompletedChallenges(newCompleted);
+    localStorage.setItem('completedChallenges', JSON.stringify(newCompleted));
+    
+    window.dispatchEvent(new CustomEvent('breathingStatsUpdated'));
+  };
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
@@ -110,9 +183,8 @@ const BreathingChallenges: React.FC<BreathingChallengesProps> = ({
     }
   };
 
-  const getProgressPercentage = (challenge: Challenge) => {
-    return Math.min((challenge.completedSessions / challenge.targetSessions) * 100, 100);
-  };
+  const unlockedChallenges = challenges.filter(c => c.unlocked).length;
+  const completedCount = completedChallenges.length;
 
   return (
     <Card className="bg-white/80 backdrop-blur-sm border-teal-200 shadow-lg">
@@ -122,66 +194,124 @@ const BreathingChallenges: React.FC<BreathingChallengesProps> = ({
           Breathing Challenges
         </CardTitle>
         <CardDescription>
-          Complete structured challenges to build consistent breathing practice
+          Complete structured breathing challenges to improve your practice
         </CardDescription>
+        
+        {/* Progress overview */}
+        <div className="flex items-center gap-4 mt-4">
+          <div className="flex items-center gap-2">
+            <Target className="w-4 h-4 text-teal-600" />
+            <span className="text-sm font-medium">{unlockedChallenges}/{challenges.length} Unlocked</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <CheckCircle className="w-4 h-4 text-green-600" />
+            <span className="text-sm font-medium">{completedCount} Completed</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Flame className="w-4 h-4 text-orange-600" />
+            <span className="text-sm font-medium">Streak: {stats.currentStreak}</span>
+          </div>
+        </div>
+        
+        <Progress value={(completedCount / challenges.length) * 100} className="h-2" />
       </CardHeader>
+      
       <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {challenges.map((challenge) => {
+            const isCompleted = completedChallenges.includes(challenge.id);
             const isSelected = selectedChallenge?.id === challenge.id;
-            const isCompleted = challenge.completedSessions >= challenge.targetSessions;
             
             return (
               <div
                 key={challenge.id}
-                onClick={() => onSelectChallenge(challenge)}
-                className={`p-4 rounded-lg border-2 cursor-pointer transition-all duration-200 ${
+                onClick={() => handleChallengeSelect(challenge)}
+                className={`relative p-4 rounded-lg border-2 cursor-pointer transition-all duration-200 ${
                   isSelected
-                    ? 'border-teal-500 bg-teal-50'
-                    : 'border-gray-200 hover:border-teal-300'
-                } ${isCompleted ? 'ring-2 ring-yellow-400' : ''}`}
+                    ? 'border-teal-500 bg-teal-50 scale-105'
+                    : challenge.unlocked
+                    ? 'border-gray-200 hover:border-teal-300 hover:scale-102'
+                    : 'border-gray-100 bg-gray-50 cursor-not-allowed opacity-60'
+                } ${isCompleted ? 'ring-2 ring-green-400' : ''}`}
               >
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    <div className={`p-2 rounded-lg bg-gradient-to-r ${challenge.color}`}>
-                      <div className="text-white">
-                        {challenge.icon}
-                      </div>
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-gray-800 flex items-center gap-2">
-                        {challenge.name}
-                        {isCompleted && <Trophy className="w-4 h-4 text-yellow-500" />}
-                      </h3>
-                      <p className="text-sm text-gray-600">{challenge.description}</p>
-                    </div>
+                {/* Challenge completion indicator */}
+                {isCompleted && (
+                  <div className="absolute -top-2 -right-2 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
+                    <CheckCircle className="w-4 h-4 text-white" />
                   </div>
+                )}
+                
+                {/* Lock indicator */}
+                {!challenge.unlocked && (
+                  <div className="absolute -top-2 -right-2 w-6 h-6 bg-gray-500 rounded-full flex items-center justify-center">
+                    <span className="text-white text-xs">🔒</span>
+                  </div>
+                )}
+                
+                <div className={`w-full h-24 rounded-lg bg-gradient-to-br ${challenge.color} flex items-center justify-center mb-3`}>
+                  <span className="text-4xl">{challenge.icon}</span>
                 </div>
                 
                 <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-sm">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-semibold text-gray-800">{challenge.name}</h3>
                     <Badge className={getDifficultyColor(challenge.difficulty)}>
                       {challenge.difficulty}
                     </Badge>
-                    <span className="text-gray-600">{challenge.duration} min</span>
-                    <span className="text-gray-600">
-                      {challenge.pattern.inhale}-{challenge.pattern.hold1}-{challenge.pattern.exhale}
-                      {challenge.pattern.hold2 > 0 && `-${challenge.pattern.hold2}`}
-                    </span>
                   </div>
                   
-                  <div className="space-y-1">
-                    <div className="flex justify-between text-sm">
-                      <span>Progress</span>
-                      <span>{challenge.completedSessions}/{challenge.targetSessions}</span>
+                  <p className="text-sm text-gray-600">{challenge.description}</p>
+                  
+                  <div className="flex items-center gap-4 text-xs text-gray-500">
+                    <div className="flex items-center gap-1">
+                      <Clock className="w-3 h-3" />
+                      {challenge.duration}m
                     </div>
-                    <Progress value={getProgressPercentage(challenge)} className="h-2" />
+                    <div>
+                      {challenge.pattern.inhale}-{challenge.pattern.hold1}-{challenge.pattern.exhale}
+                      {challenge.pattern.hold2 > 0 && `-${challenge.pattern.hold2}`}
+                    </div>
                   </div>
+                  
+                  <div className="flex flex-wrap gap-1">
+                    {challenge.benefits.map((benefit, index) => (
+                      <Badge key={index} variant="secondary" className="text-xs">
+                        {benefit}
+                      </Badge>
+                    ))}
+                  </div>
+                  
+                  {!challenge.unlocked && (
+                    <p className="text-xs text-gray-500 mt-2">
+                      Complete {challenge.requiredSessions} sessions to unlock
+                    </p>
+                  )}
                 </div>
               </div>
             );
           })}
         </div>
+        
+        {selectedChallenge && (
+          <div className="mt-6 p-4 bg-teal-50 rounded-lg border border-teal-200">
+            <h4 className="font-semibold text-teal-800 mb-2">Selected Challenge</h4>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+              <div>
+                <span className="font-medium">Name:</span> {selectedChallenge.name}
+              </div>
+              <div>
+                <span className="font-medium">Duration:</span> {selectedChallenge.duration} minutes
+              </div>
+              <div>
+                <span className="font-medium">Pattern:</span> {selectedChallenge.pattern.inhale}-{selectedChallenge.pattern.hold1}-{selectedChallenge.pattern.exhale}
+                {selectedChallenge.pattern.hold2 > 0 && `-${selectedChallenge.pattern.hold2}`}
+              </div>
+              <div>
+                <span className="font-medium">Difficulty:</span> {selectedChallenge.difficulty}
+              </div>
+            </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
