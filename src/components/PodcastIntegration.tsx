@@ -1,31 +1,13 @@
 
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Podcast, Play, Pause, Heart, Search, Plus, ExternalLink } from 'lucide-react';
-
-interface PodcastEpisode {
-  id: string;
-  title: string;
-  description: string;
-  duration: string;
-  date: string;
-  audioUrl?: string;
-}
-
-interface PodcastShow {
-  id: string;
-  name: string;
-  host: string;
-  category: 'mental-health' | 'meditation' | 'therapy' | 'wellness' | 'self-help';
-  description: string;
-  imageUrl?: string;
-  isFavorite: boolean;
-  episodes: PodcastEpisode[];
-  websiteUrl?: string;
-}
+import { Podcast, Search } from 'lucide-react';
+import { PodcastShow, PodcastEpisode } from './podcast/types';
+import PodcastPlayer from './podcast/PodcastPlayer';
+import FavoritesSection from './podcast/FavoritesSection';
+import PodcastList from './podcast/PodcastList';
+import EpisodeList from './podcast/EpisodeList';
 
 const PodcastIntegration = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -115,17 +97,6 @@ const PodcastIntegration = () => {
     setIsPlaying(!isPlaying);
   };
 
-  const getCategoryColor = (category: string) => {
-    switch (category) {
-      case 'mental-health': return 'bg-blue-100 text-blue-800';
-      case 'meditation': return 'bg-green-100 text-green-800';
-      case 'therapy': return 'bg-purple-100 text-purple-800';
-      case 'wellness': return 'bg-orange-100 text-orange-800';
-      case 'self-help': return 'bg-pink-100 text-pink-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
-
   const filteredPodcasts = podcasts.filter(podcast =>
     podcast.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     podcast.host.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -159,163 +130,33 @@ const PodcastIntegration = () => {
           </div>
 
           {/* Current Episode Player */}
-          {currentEpisode && (
-            <div className="bg-purple-50 rounded-lg p-4 mb-6">
-              <h3 className="font-semibold text-purple-800 mb-1">Now Playing</h3>
-              <p className="text-sm text-purple-600 mb-2">{currentEpisode.title}</p>
-              <div className="flex items-center gap-3">
-                <Button
-                  onClick={togglePlayPause}
-                  size="sm"
-                  className="bg-purple-500 hover:bg-purple-600"
-                >
-                  {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
-                </Button>
-                <span className="text-sm text-purple-600">{currentEpisode.duration}</span>
-              </div>
-            </div>
-          )}
+          <PodcastPlayer 
+            currentEpisode={currentEpisode}
+            isPlaying={isPlaying}
+            onTogglePlayPause={togglePlayPause}
+          />
 
           {/* Favorites Section */}
-          {favoritePodcasts.length > 0 && (
-            <div className="mb-6">
-              <h3 className="text-lg font-semibold text-gray-800 mb-3 flex items-center gap-2">
-                <Heart className="w-4 h-4 text-red-500" />
-                Your Favorites
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {favoritePodcasts.map((podcast) => (
-                  <Card key={podcast.id} className="hover:shadow-md transition-shadow">
-                    <CardHeader className="pb-2">
-                      <div className="flex justify-between items-start">
-                        <div className="flex-1">
-                          <CardTitle className="text-sm">{podcast.name}</CardTitle>
-                          <p className="text-xs text-gray-600">by {podcast.host}</p>
-                        </div>
-                        <Badge className={getCategoryColor(podcast.category)}>
-                          {podcast.category}
-                        </Badge>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="pt-0">
-                      <p className="text-xs text-gray-600 mb-2">{podcast.description}</p>
-                      <div className="flex gap-2">
-                        <Button 
-                          size="sm" 
-                          variant="outline"
-                          onClick={() => setSelectedPodcast(podcast)}
-                        >
-                          Episodes
-                        </Button>
-                        {podcast.websiteUrl && (
-                          <Button 
-                            size="sm" 
-                            variant="ghost"
-                            onClick={() => window.open(podcast.websiteUrl, '_blank')}
-                          >
-                            <ExternalLink className="w-3 h-3" />
-                          </Button>
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </div>
-          )}
+          <FavoritesSection 
+            favoritePodcasts={favoritePodcasts}
+            onSelectPodcast={setSelectedPodcast}
+          />
 
           {/* All Podcasts */}
-          <div>
-            <h3 className="text-lg font-semibold text-gray-800 mb-3">Discover Podcasts</h3>
-            <div className="space-y-4">
-              {filteredPodcasts.map((podcast) => (
-                <div key={podcast.id} className="border border-gray-200 rounded-lg p-4">
-                  <div className="flex justify-between items-start mb-2">
-                    <div>
-                      <h4 className="font-semibold text-gray-800">{podcast.name}</h4>
-                      <p className="text-sm text-gray-600">by {podcast.host}</p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Badge className={getCategoryColor(podcast.category)}>
-                        {podcast.category}
-                      </Badge>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => toggleFavorite(podcast.id)}
-                      >
-                        <Heart 
-                          className={`w-4 h-4 ${podcast.isFavorite ? 'fill-red-500 text-red-500' : 'text-gray-400'}`}
-                        />
-                      </Button>
-                    </div>
-                  </div>
-                  <p className="text-sm text-gray-600 mb-3">{podcast.description}</p>
-                  <div className="flex gap-2">
-                    <Button 
-                      size="sm"
-                      onClick={() => setSelectedPodcast(podcast)}
-                    >
-                      View Episodes
-                    </Button>
-                    {podcast.websiteUrl && (
-                      <Button 
-                        size="sm" 
-                        variant="outline"
-                        onClick={() => window.open(podcast.websiteUrl, '_blank')}
-                      >
-                        <ExternalLink className="w-3 h-3 mr-1" />
-                        Website
-                      </Button>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+          <PodcastList 
+            podcasts={filteredPodcasts}
+            onSelectPodcast={setSelectedPodcast}
+            onToggleFavorite={toggleFavorite}
+          />
         </CardContent>
       </Card>
 
       {/* Episode List Modal/Panel */}
-      {selectedPodcast && (
-        <Card className="bg-white/80 backdrop-blur-sm border-purple-200 shadow-lg">
-          <CardHeader>
-            <div className="flex justify-between items-start">
-              <div>
-                <CardTitle className="text-xl text-purple-800">{selectedPodcast.name}</CardTitle>
-                <CardDescription>Episodes by {selectedPodcast.host}</CardDescription>
-              </div>
-              <Button variant="ghost" onClick={() => setSelectedPodcast(null)}>
-                ✕
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {selectedPodcast.episodes.map((episode) => (
-                <div key={episode.id} className="border border-gray-200 rounded-lg p-4">
-                  <div className="flex justify-between items-start mb-2">
-                    <h4 className="font-semibold text-gray-800">{episode.title}</h4>
-                    <span className="text-sm text-gray-500">{episode.duration}</span>
-                  </div>
-                  <p className="text-sm text-gray-600 mb-2">{episode.description}</p>
-                  <div className="flex justify-between items-center">
-                    <span className="text-xs text-gray-500">{episode.date}</span>
-                    <Button
-                      size="sm"
-                      onClick={() => playEpisode(episode)}
-                      className="bg-purple-500 hover:bg-purple-600"
-                    >
-                      <Play className="w-3 h-3 mr-1" />
-                      Play
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
+      <EpisodeList 
+        selectedPodcast={selectedPodcast}
+        onClose={() => setSelectedPodcast(null)}
+        onPlayEpisode={playEpisode}
+      />
     </div>
   );
 };
