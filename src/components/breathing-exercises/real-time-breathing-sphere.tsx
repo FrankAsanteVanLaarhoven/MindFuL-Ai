@@ -13,17 +13,115 @@ interface RealTimeBreathingSphereProps {
   onSessionComplete?: () => void;
 }
 
+const NetworkParticles = ({ isBreathing }: { isBreathing: boolean }) => {
+  const pointsRef = useRef<THREE.Points>(null);
+  const lineRef = useRef<THREE.LineSegments>(null);
+  const particleCount = 20;
+  const maxDistance = 2;
+
+  // Create particles in a sphere formation
+  const particles = React.useMemo(() => {
+    const positions = new Float32Array(particleCount * 3);
+    for (let i = 0; i < particleCount; i++) {
+      const phi = Math.random() * Math.PI * 2;
+      const costheta = Math.random() * 2 - 1;
+      const u = Math.random();
+      const theta = Math.acos(costheta);
+      const r = 2 * Math.cbrt(u);
+      
+      positions[i * 3] = r * Math.sin(theta) * Math.cos(phi);
+      positions[i * 3 + 1] = r * Math.sin(theta) * Math.sin(phi);
+      positions[i * 3 + 2] = r * Math.cos(theta);
+    }
+    return positions;
+  }, []);
+
+  // Create connections between nearby particles
+  const connections = React.useMemo(() => {
+    const linePositions = [];
+    for (let i = 0; i < particleCount; i++) {
+      for (let j = i + 1; j < particleCount; j++) {
+        const x1 = particles[i * 3];
+        const y1 = particles[i * 3 + 1];
+        const z1 = particles[i * 3 + 2];
+        const x2 = particles[j * 3];
+        const y2 = particles[j * 3 + 1];
+        const z2 = particles[j * 3 + 2];
+        
+        const distance = Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2 + (z2 - z1) ** 2);
+        
+        if (distance < maxDistance) {
+          linePositions.push(x1, y1, z1, x2, y2, z2);
+        }
+      }
+    }
+    return new Float32Array(linePositions);
+  }, [particles]);
+
+  useFrame((state) => {
+    if (pointsRef.current && lineRef.current) {
+      // Very slow rotation
+      const rotationSpeed = isBreathing ? 0.002 : 0.001;
+      pointsRef.current.rotation.y += rotationSpeed;
+      pointsRef.current.rotation.x += rotationSpeed * 0.5;
+      
+      lineRef.current.rotation.y += rotationSpeed;
+      lineRef.current.rotation.x += rotationSpeed * 0.5;
+
+      // Subtle floating effect
+      const floatY = Math.sin(state.clock.elapsedTime * 0.3) * 0.05;
+      pointsRef.current.position.y = floatY;
+      lineRef.current.position.y = floatY;
+    }
+  });
+
+  return (
+    <group>
+      {/* Network lines */}
+      <lineSegments ref={lineRef}>
+        <bufferGeometry>
+          <bufferAttribute
+            attach="attributes-position"
+            args={[connections, 3]}
+          />
+        </bufferGeometry>
+        <lineBasicMaterial
+          color="#ffffff"
+          transparent
+          opacity={isBreathing ? 0.15 : 0.05}
+        />
+      </lineSegments>
+      
+      {/* Network nodes */}
+      <points ref={pointsRef}>
+        <bufferGeometry>
+          <bufferAttribute
+            attach="attributes-position"
+            args={[particles, 3]}
+          />
+        </bufferGeometry>
+        <pointsMaterial
+          size={0.03}
+          color="#ffffff"
+          transparent
+          opacity={isBreathing ? 0.4 : 0.1}
+          sizeAttenuation
+        />
+      </points>
+    </group>
+  );
+};
+
 const LiveBreathingSphere = ({ breathIntensity, isInhaling, isBreathing }: { 
   breathIntensity: number;
   isInhaling: boolean;
   isBreathing: boolean;
 }) => {
   const meshRef = useRef<THREE.Mesh>(null);
-  const particlesRef = useRef<THREE.Points>(null);
 
-  // More noticeable scaling for balloon expansion - scale based on breathing
+  // Balloon expansion - scale based on breathing
   const baseScale = 1;
-  const targetScale = isBreathing ? baseScale + (breathIntensity * 1.5) : baseScale; // Expand up to 2.5x when breathing deeply
+  const targetScale = isBreathing ? baseScale + (breathIntensity * 1.5) : baseScale;
   
   // Dynamic color based on breathing state
   const getBreathColor = () => {
@@ -36,7 +134,7 @@ const LiveBreathingSphere = ({ breathIntensity, isInhaling, isBreathing }: {
     if (meshRef.current) {
       // Smooth scale animation - balloon expansion/contraction
       const currentScale = meshRef.current.scale.x;
-      const newScale = THREE.MathUtils.lerp(currentScale, targetScale, delta * 2); // Responsive scaling
+      const newScale = THREE.MathUtils.lerp(currentScale, targetScale, delta * 2);
       meshRef.current.scale.setScalar(newScale);
 
       // Very gentle rotation - always slow
@@ -58,23 +156,6 @@ const LiveBreathingSphere = ({ breathIntensity, isInhaling, isBreathing }: {
         meshRef.current.material.color.lerp(targetColor, delta * 2);
       }
     }
-
-    // Animate particles based on breathing - MUCH SLOWER NOW
-    if (particlesRef.current) {
-      if (isBreathing) {
-        particlesRef.current.rotation.x = state.clock.elapsedTime * 0.003;
-        particlesRef.current.rotation.y = state.clock.elapsedTime * 0.005;
-        
-        // Make particles scale with breathing but keep it subtle
-        const breathEffect = 1 + breathIntensity * 0.1;
-        particlesRef.current.scale.setScalar(breathEffect);
-      } else {
-        // Keep particles still when not breathing
-        const currentScale = particlesRef.current.scale.x;
-        const newScale = THREE.MathUtils.lerp(currentScale, 1, delta * 2);
-        particlesRef.current.scale.setScalar(newScale);
-      }
-    }
   });
 
   return (
@@ -90,22 +171,8 @@ const LiveBreathingSphere = ({ breathIntensity, isInhaling, isBreathing }: {
         />
       </mesh>
       
-      {/* Breathing particles - MUCH SLOWER */}
-      <points ref={particlesRef}>
-        <bufferGeometry>
-          <bufferAttribute
-            attach="attributes-position"
-            args={[new Float32Array(Array.from({ length: 200 }, () => (Math.random() - 0.5) * 8)), 3]}
-          />
-        </bufferGeometry>
-        <pointsMaterial
-          size={0.02}
-          color="#ffffff"
-          transparent
-          opacity={isBreathing ? 0.3 : 0.05}
-          sizeAttenuation
-        />
-      </points>
+      {/* Network particles */}
+      <NetworkParticles isBreathing={isBreathing} />
     </>
   );
 };
