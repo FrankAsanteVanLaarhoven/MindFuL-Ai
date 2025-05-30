@@ -7,7 +7,7 @@ export const useUserProfile = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Simulate loading user profile from storage/API
+    // Load user profile from storage/API instantly
     const loadUserProfile = () => {
       const savedProfile = localStorage.getItem('wellness-user-profile');
       if (savedProfile) {
@@ -16,8 +16,8 @@ export const useUserProfile = () => {
       setLoading(false);
     };
 
-    const timer = setTimeout(loadUserProfile, 1000);
-    return () => clearTimeout(timer);
+    // Load immediately instead of with a 1 second delay
+    loadUserProfile();
   }, []);
 
   const saveUserProfile = (profile: UserProfile) => {
