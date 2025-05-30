@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useRef, useEffect } from 'react';
@@ -9,7 +10,9 @@ import BreathingSphere3D from '@/components/breathing-exercises/breathing-sphere
 import RealTimeBreathingSphere from '@/components/breathing-exercises/real-time-breathing-sphere';
 import EnhancedRealTimeBreathingSphere from '@/components/breathing-exercises/enhanced-breathing-sphere';
 import BreathingCircle2D from '@/components/breathing-exercises/breathing-circle-2d';
-import BreathingChallenges, { Challenge } from '@/components/breathing-exercises/breathing-challenges';
+import VirtualCoach3D from '@/components/breathing-exercises/virtual-coach-3d';
+import BiofeedbackCamera from '@/components/breathing-exercises/biofeedback-camera';
+import MultimodalSensing from '@/components/breathing-exercises/multimodal-sensing';
 import BreathingAchievements from '@/components/breathing-exercises/breathing-achievements';
 import BreathingProgress from '@/components/breathing-exercises/breathing-progress';
 import { gsap } from 'gsap';
@@ -18,20 +21,16 @@ import { addBreathingSession } from '@/lib/breathing-storage';
 import { toast } from '@/hooks/use-toast';
 
 type BreathingTechnique = 'box' | '4-7-8' | 'triangle';
-type ExerciseMode = 'guided' | 'guided-2d' | 'realtime' | 'enhanced' | 'challenge';
+type ExerciseMode = 'guided-2d' | 'guided-3d' | 'realtime' | 'enhanced' | 'virtual-coach' | 'biofeedback' | 'multimodal';
 
 const Breathing = () => {
   const [selectedTechnique, setSelectedTechnique] = useState<BreathingTechnique>('box');
-  const [selectedMode, setSelectedMode] = useState<ExerciseMode>('enhanced');
-  const [selectedChallenge, setSelectedChallenge] = useState<Challenge | null>(null);
+  const [selectedMode, setSelectedMode] = useState<ExerciseMode>('virtual-coach');
   const [isActive, setIsActive] = useState(false);
   const [currentPhase, setCurrentPhase] = useState<'inhale' | 'hold1' | 'exhale' | 'hold2'>('inhale');
   const [sessionStartTime, setSessionStartTime] = useState<number | null>(null);
-  const [challengeProgress, setChallengeProgress] = useState(0);
-  const [challengeTimeRemaining, setChallengeTimeRemaining] = useState(0);
   
   const cardRef = useRef<HTMLDivElement>(null);
-  const challengeTimerRef = useRef<NodeJS.Timeout | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -42,36 +41,6 @@ const Breathing = () => {
       );
     }
   }, []);
-
-  // Challenge timer effect
-  useEffect(() => {
-    if (selectedMode === 'challenge' && selectedChallenge && isActive) {
-      const totalDuration = selectedChallenge.duration * 60; // Convert to seconds
-      setChallengeTimeRemaining(totalDuration);
-      
-      challengeTimerRef.current = setInterval(() => {
-        setChallengeTimeRemaining(prev => {
-          const newTime = prev - 1;
-          const progress = ((totalDuration - newTime) / totalDuration) * 100;
-          setChallengeProgress(progress);
-          
-          if (newTime <= 0) {
-            handleChallengeComplete();
-            return 0;
-          }
-          
-          return newTime;
-        });
-      }, 1000);
-    }
-
-    return () => {
-      if (challengeTimerRef.current) {
-        clearInterval(challengeTimerRef.current);
-        challengeTimerRef.current = null;
-      }
-    };
-  }, [selectedMode, selectedChallenge, isActive]);
 
   const techniques = {
     box: {
@@ -102,31 +71,50 @@ const Breathing = () => {
       name: 'Simple 2D Guide',
       description: 'Clean, simple breathing circle - perfect for focus',
       icon: '⭕',
-      component: BreathingCircle2D
+      component: BreathingCircle2D,
+      level: 'Beginner'
     },
-    guided: {
+    'guided-3d': {
       name: 'Guided 3D Practice',
       description: 'Follow the animated sphere with breathing prompts',
       icon: '🧘‍♀️',
-      component: BreathingSphere3D
+      component: BreathingSphere3D,
+      level: 'Beginner'
+    },
+    'virtual-coach': {
+      name: '3D Virtual Coach',
+      description: 'AI coach with realistic breathing movements and voice guidance',
+      icon: '🤖',
+      component: VirtualCoach3D,
+      level: 'Expert'
+    },
+    'biofeedback': {
+      name: 'Biofeedback Camera',
+      description: 'AI camera analysis with real-time vital signs and mood detection',
+      icon: '📹',
+      component: BiofeedbackCamera,
+      level: 'Expert'
+    },
+    'multimodal': {
+      name: 'Multimodal Sensing',
+      description: 'Advanced fusion of camera, microphone, and motion sensors',
+      icon: '🔬',
+      component: MultimodalSensing,
+      level: 'Expert'
     },
     realtime: {
       name: 'Real-Time Detection',
       description: 'AI analyzes your actual breathing patterns',
       icon: '🎤',
-      component: RealTimeBreathingSphere
+      component: RealTimeBreathingSphere,
+      level: 'Intermediate'
     },
     enhanced: {
       name: 'Enhanced Experience',
       description: 'Immersive visuals with trails, rings, and dynamic colors',
       icon: '✨',
-      component: EnhancedRealTimeBreathingSphere
-    },
-    challenge: {
-      name: 'Challenge Mode',
-      description: 'Complete structured breathing challenges',
-      icon: '🏆',
-      component: BreathingSphere3D // Use 3D sphere for challenges
+      component: EnhancedRealTimeBreathingSphere,
+      level: 'Intermediate'
     }
   };
 
@@ -138,54 +126,10 @@ const Breathing = () => {
 
   const SelectedComponent = modes[selectedMode].component;
 
-  const handleChallengeComplete = () => {
-    if (!selectedChallenge) return;
-    
-    setIsActive(false);
-    setCurrentPhase('inhale');
-    setChallengeProgress(100);
-    
-    // Track the completed challenge session
-    if (sessionStartTime) {
-      const duration = selectedChallenge.duration;
-      addBreathingSession(duration, selectedChallenge.name);
-      
-      // Mark challenge as completed
-      const completedChallenges = JSON.parse(localStorage.getItem('completedChallenges') || '[]');
-      if (!completedChallenges.includes(selectedChallenge.id)) {
-        completedChallenges.push(selectedChallenge.id);
-        localStorage.setItem('completedChallenges', JSON.stringify(completedChallenges));
-      }
-      
-      // Dispatch custom event to update progress in real-time
-      window.dispatchEvent(new CustomEvent('breathingStatsUpdated'));
-      
-      toast({
-        title: "Challenge Complete! 🏆",
-        description: `Congratulations! You completed the ${selectedChallenge.name} challenge in ${duration} minutes.`,
-      });
-    }
-    
-    setSessionStartTime(null);
-    setChallengeProgress(0);
-    setChallengeTimeRemaining(0);
-    
-    if (challengeTimerRef.current) {
-      clearInterval(challengeTimerRef.current);
-      challengeTimerRef.current = null;
-    }
-  };
-
   const startExercise = () => {
     setIsActive(true);
     setSessionStartTime(Date.now());
-    setChallengeProgress(0);
-    
-    if (selectedMode === 'challenge' && selectedChallenge) {
-      setChallengeTimeRemaining(selectedChallenge.duration * 60);
-    } else {
-      runCycle();
-    }
+    runCycle();
   };
 
   const stopExercise = () => {
@@ -195,11 +139,9 @@ const Breathing = () => {
     // Track session if it was running for at least 30 seconds
     if (sessionStartTime && Date.now() - sessionStartTime >= 30000) {
       const duration = Math.round((Date.now() - sessionStartTime) / 60000); // Convert to minutes
-      const technique = selectedMode === 'challenge' && selectedChallenge 
-        ? selectedChallenge.name 
-        : techniques[selectedTechnique].name;
+      const technique = techniques[selectedTechnique].name;
       
-      addBreathingSession(Math.max(1, duration), technique);
+      addBreathingSession(Math.max(1, duration), `${modes[selectedMode].name} - ${technique}`);
       
       // Dispatch custom event to update progress in real-time
       window.dispatchEvent(new CustomEvent('breathingStatsUpdated'));
@@ -211,29 +153,12 @@ const Breathing = () => {
     }
     
     setSessionStartTime(null);
-    setChallengeProgress(0);
-    setChallengeTimeRemaining(0);
-    
-    if (challengeTimerRef.current) {
-      clearInterval(challengeTimerRef.current);
-      challengeTimerRef.current = null;
-    }
   };
 
   const runCycle = () => {
     if (!isActive) return;
 
-    let cycle;
-    if (selectedMode === 'challenge' && selectedChallenge) {
-      cycle = {
-        inhale: selectedChallenge.pattern.inhale * 1000,
-        hold1: selectedChallenge.pattern.hold1 * 1000,
-        exhale: selectedChallenge.pattern.exhale * 1000,
-        hold2: selectedChallenge.pattern.hold2 * 1000
-      };
-    } else {
-      cycle = cycles[selectedTechnique];
-    }
+    const cycle = cycles[selectedTechnique];
     
     setCurrentPhase('inhale');
     setTimeout(() => {
@@ -265,11 +190,9 @@ const Breathing = () => {
     // Track the session
     if (sessionStartTime) {
       const duration = Math.round((Date.now() - sessionStartTime) / 60000);
-      const technique = selectedMode === 'challenge' && selectedChallenge 
-        ? selectedChallenge.name 
-        : techniques[selectedTechnique].name;
+      const technique = techniques[selectedTechnique].name;
       
-      addBreathingSession(Math.max(1, duration), technique);
+      addBreathingSession(Math.max(1, duration), `${modes[selectedMode].name} - ${technique}`);
       
       // Dispatch custom event to update progress in real-time
       window.dispatchEvent(new CustomEvent('breathingStatsUpdated'));
@@ -283,15 +206,13 @@ const Breathing = () => {
     setSessionStartTime(null);
   };
 
-  const handleChallengeSelect = (challenge: Challenge) => {
-    setSelectedChallenge(challenge);
-    setSelectedMode('challenge');
-  };
-
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  const getLevelColor = (level: string) => {
+    switch (level) {
+      case 'Beginner': return 'bg-green-100 text-green-800';
+      case 'Intermediate': return 'bg-yellow-100 text-yellow-800';
+      case 'Expert': return 'bg-red-100 text-red-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
   };
 
   return (
@@ -308,10 +229,10 @@ const Breathing = () => {
           </Button>
           <h1 className="text-4xl font-bold text-teal-800 mb-4 flex items-center justify-center gap-3">
             <span className="text-5xl">🫁</span>
-            Breathing Exercises
+            Advanced Breathing Exercises
           </h1>
           <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-            Practice guided breathing exercises with interactive visualizations and real-time feedback.
+            Experience world-leading breathing exercises with AI-driven biofeedback, virtual coaching, and multimodal sensing technology.
           </p>
         </div>
 
@@ -321,68 +242,38 @@ const Breathing = () => {
           <BreathingAchievements />
         </div>
 
-        {/* Breathing Challenges */}
-        <BreathingChallenges 
-          onSelectChallenge={handleChallengeSelect}
-          selectedChallenge={selectedChallenge}
-        />
-
-        {/* Challenge Progress - Show when challenge is active */}
-        {selectedMode === 'challenge' && selectedChallenge && isActive && (
-          <Card className="bg-white/90 backdrop-blur-sm border-teal-200">
-            <CardHeader>
-              <CardTitle className="text-lg text-teal-800 flex items-center gap-2">
-                🏆 {selectedChallenge.name} Challenge
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm font-medium">Progress</span>
-                  <span className="text-sm text-gray-600">{formatTime(challengeTimeRemaining)} remaining</span>
-                </div>
-                <div className="w-full bg-gray-200 rounded-full h-3">
-                  <div 
-                    className="bg-teal-500 h-3 rounded-full transition-all duration-1000 ease-linear"
-                    style={{ width: `${challengeProgress}%` }}
-                  />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
         {/* Mode Selection */}
         <Card className="bg-white/80 backdrop-blur-sm border-teal-200 shadow-lg">
           <CardHeader>
-            <CardTitle className="text-xl text-teal-800">Choose Your Experience</CardTitle>
-            <CardDescription>Select how you'd like to practice breathing</CardDescription>
+            <CardTitle className="text-xl text-teal-800">Choose Your Experience Level</CardTitle>
+            <CardDescription>Select from beginner-friendly to expert-level breathing technologies</CardDescription>
           </CardHeader>
           <CardContent>
             <Tabs value={selectedMode} onValueChange={(value) => setSelectedMode(value as ExerciseMode)}>
-              <TabsList className="grid w-full grid-cols-5">
+              <TabsList className="grid w-full grid-cols-4 lg:grid-cols-7">
                 {Object.entries(modes).map(([key, mode]) => (
-                  <TabsTrigger key={key} value={key} className="flex items-center gap-2 text-xs">
-                    <span>{mode.icon}</span>
-                    <span className="hidden sm:inline">{mode.name}</span>
+                  <TabsTrigger key={key} value={key} className="flex flex-col items-center gap-1 text-xs p-2">
+                    <span className="text-lg">{mode.icon}</span>
+                    <span className="hidden sm:inline font-medium">{mode.name}</span>
+                    <Badge variant="outline" className={`text-xs ${getLevelColor(mode.level)}`}>
+                      {mode.level}
+                    </Badge>
                   </TabsTrigger>
                 ))}
               </TabsList>
               
               {Object.entries(modes).map(([key, mode]) => (
                 <TabsContent key={key} value={key} className="mt-4">
-                  <p className="text-gray-600">{mode.description}</p>
-                  {key === 'challenge' && selectedChallenge && (
-                    <div className="mt-2 p-3 bg-teal-50 rounded-lg">
-                      <p className="font-medium text-teal-800">
-                        Selected Challenge: {selectedChallenge.name}
-                      </p>
-                      <p className="text-sm text-teal-600">
-                        Pattern: {selectedChallenge.pattern.inhale}-{selectedChallenge.pattern.hold1}-{selectedChallenge.pattern.exhale}
-                        {selectedChallenge.pattern.hold2 > 0 && `-${selectedChallenge.pattern.hold2}`} • {selectedChallenge.duration} minutes
-                      </p>
+                  <div className="flex items-center gap-3 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg">
+                    <span className="text-2xl">{mode.icon}</span>
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-gray-800">{mode.name}</h3>
+                      <p className="text-gray-600">{mode.description}</p>
                     </div>
-                  )}
+                    <Badge className={getLevelColor(mode.level)}>
+                      {mode.level}
+                    </Badge>
+                  </div>
                 </TabsContent>
               ))}
             </Tabs>
@@ -390,7 +281,7 @@ const Breathing = () => {
         </Card>
 
         {/* Technique Selection - Show for guided modes */}
-        {(selectedMode === 'guided' || selectedMode === 'guided-2d') && (
+        {(selectedMode === 'guided-3d' || selectedMode === 'guided-2d' || selectedMode === 'virtual-coach') && (
           <Card className="bg-white/80 backdrop-blur-sm border-teal-200 shadow-lg">
             <CardHeader>
               <CardTitle className="text-xl text-teal-800">Choose Your Technique</CardTitle>
@@ -429,14 +320,14 @@ const Breathing = () => {
 
         {/* Breathing Exercise Component */}
         <SelectedComponent
-          technique={selectedMode === 'challenge' && selectedChallenge ? 'box' : selectedTechnique}
-          isActive={(selectedMode === 'guided' || selectedMode === 'guided-2d' || selectedMode === 'challenge') ? isActive : undefined}
-          currentPhase={(selectedMode === 'guided' || selectedMode === 'guided-2d' || selectedMode === 'challenge') ? currentPhase : undefined}
+          technique={selectedTechnique}
+          isActive={(selectedMode === 'guided-3d' || selectedMode === 'guided-2d' || selectedMode === 'virtual-coach') ? isActive : undefined}
+          currentPhase={(selectedMode === 'guided-3d' || selectedMode === 'guided-2d' || selectedMode === 'virtual-coach') ? currentPhase : undefined}
           onSessionComplete={onSessionComplete}
         />
 
-        {/* Guided Controls - Show for guided modes and challenges */}
-        {(selectedMode === 'guided' || selectedMode === 'guided-2d' || selectedMode === 'challenge') && (
+        {/* Guided Controls - Show for guided modes */}
+        {(selectedMode === 'guided-3d' || selectedMode === 'guided-2d' || selectedMode === 'virtual-coach') && (
           <div className="flex justify-center gap-4">
             <Button
               onClick={isActive ? stopExercise : startExercise}
@@ -446,12 +337,45 @@ const Breathing = () => {
                   ? 'bg-red-500 hover:bg-red-600' 
                   : 'bg-teal-500 hover:bg-teal-600'
               } text-white font-medium`}
-              disabled={selectedMode === 'challenge' && !selectedChallenge}
             >
               {isActive ? '⏸️ Stop Exercise' : '▶️ Start Exercise'}
             </Button>
           </div>
         )}
+
+        {/* Expert Features Information */}
+        <Card className="bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200">
+          <CardHeader>
+            <CardTitle className="text-lg text-purple-800">🚀 World-Leading Features</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="flex items-start gap-3">
+                <span className="text-2xl">🤖</span>
+                <div>
+                  <h4 className="font-medium text-purple-800">3D Virtual Coach</h4>
+                  <p className="text-sm text-purple-600">Realistic avatar with voice guidance and breathing demonstrations</p>
+                </div>
+              </div>
+              
+              <div className="flex items-start gap-3">
+                <span className="text-2xl">📹</span>
+                <div>
+                  <h4 className="font-medium text-purple-800">Biofeedback Camera</h4>
+                  <p className="text-sm text-purple-600">AI-powered vital signs monitoring and mood detection</p>
+                </div>
+              </div>
+              
+              <div className="flex items-start gap-3">
+                <span className="text-2xl">🔬</span>
+                <div>
+                  <h4 className="font-medium text-purple-800">Multimodal Sensing</h4>
+                  <p className="text-sm text-purple-600">Advanced sensor fusion with gamification and real-time feedback</p>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
