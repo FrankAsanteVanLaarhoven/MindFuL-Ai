@@ -17,8 +17,8 @@ import Community from "./pages/Community";
 import Teletherapy from "./pages/Teletherapy";
 import NotFound from "./pages/NotFound";
 
-// Initialize i18n
-import "./i18n";
+// Initialize i18n - temporarily commented out until dependencies are installed
+// import "./i18n";
 
 const queryClient = new QueryClient();
 
