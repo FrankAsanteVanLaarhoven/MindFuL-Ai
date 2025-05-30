@@ -10,6 +10,8 @@ import NavigationBar from '@/components/layout/NavigationBar';
 import HeroSection from '@/components/layout/HeroSection';
 import ModernFeaturesGrid from '@/components/layout/ModernFeaturesGrid';
 import TestimonialsSection from '@/components/layout/TestimonialsSection';
+import TherapyAvatar3D from '@/components/TherapyAvatar3D';
+import { avatarCharacters } from '@/components/AvatarSelector';
 
 const Index = () => {
   const cardRef = useRef<HTMLDivElement>(null);
@@ -24,6 +26,14 @@ const Index = () => {
     }
   }, []);
 
+  // Sample avatars to display
+  const displayAvatars = [
+    avatarCharacters.find(a => a.id === 'therapist-african-female'),
+    avatarCharacters.find(a => a.id === 'therapist-asian-male'),
+    avatarCharacters.find(a => a.id === 'grandma-jamaican'),
+    avatarCharacters.find(a => a.id === 'uncle-mixed')
+  ].filter(Boolean);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 relative overflow-hidden">
       <NavigationBar />
@@ -34,6 +44,40 @@ const Index = () => {
       {/* Hero Section with enhanced glass effect */}
       <div className="relative z-10 bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl mx-4 mt-8 mb-8">
         <HeroSection />
+      </div>
+
+      {/* Animated 3D Avatars Section */}
+      <div className="relative z-10 bg-white/8 backdrop-blur-lg border border-white/20 rounded-3xl mx-4 mb-8 p-6">
+        <div className="text-center mb-8">
+          <h2 className="text-3xl font-bold text-white mb-4">Meet Your AI Companions</h2>
+          <p className="text-white/80 text-lg">Choose from our diverse range of culturally-aware AI therapy companions</p>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {displayAvatars.map((avatar, index) => (
+            <div key={avatar?.id} className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-4">
+              <TherapyAvatar3D
+                avatar={avatar!}
+                isActive={true}
+                isSpeaking={index % 2 === 0}
+                emotion={index === 0 ? 'happy' : index === 1 ? 'encouraging' : index === 2 ? 'thoughtful' : 'neutral'}
+              />
+              <div className="text-center mt-4">
+                <h3 className="text-white font-semibold text-lg">{avatar?.name}</h3>
+                <p className="text-white/70 text-sm">{avatar?.description}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+        
+        <div className="text-center mt-8">
+          <Button
+            onClick={() => navigate('/therapy-bot')}
+            className="bg-gradient-to-r from-purple-500/80 to-blue-500/80 hover:from-purple-600/90 hover:to-blue-600/90 text-white font-semibold rounded-full px-8 py-3 transition-all duration-300 shadow-lg hover:shadow-xl backdrop-blur-sm border border-white/20"
+          >
+            Start Therapy Session →
+          </Button>
+        </div>
       </div>
       
       {/* Animated background elements with glass effect */}
