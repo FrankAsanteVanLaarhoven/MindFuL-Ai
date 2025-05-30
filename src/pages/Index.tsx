@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useEffect, useRef } from 'react';
@@ -7,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Sparkles, BrainCircuit, HeartPulse, BookOpenCheck, Lightbulb, GraduationCap } from 'lucide-react';
 import { gsap } from 'gsap';
 import { useNavigate } from 'react-router-dom';
+import NavigationBar from '@/components/layout/NavigationBar';
 
 const Index = () => {
   const cardRef = useRef<HTMLDivElement>(null);
@@ -23,6 +25,8 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-800 relative overflow-hidden">
+      <NavigationBar />
+      
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse"></div>
