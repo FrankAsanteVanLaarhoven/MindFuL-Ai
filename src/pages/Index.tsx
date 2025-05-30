@@ -98,129 +98,13 @@ const Index = () => {
         </div>
       </div>
 
-      {/* Weather Data Visualization Section */}
+      {/* Global Wellness Features - Compact Cards */}
       <div className="relative z-10 bg-white/8 backdrop-blur-lg border border-white/20 rounded-3xl mx-4 mb-8 p-6">
         <div className="text-center mb-8">
-          <h2 className="text-4xl font-bold text-white mb-4">Advanced Weather Data Visualization</h2>
-          <p className="text-white/80 text-lg max-w-4xl mx-auto mb-6">
-            Comprehensive weather visualization platform featuring real-time data, interactive maps, 
-            forecasting capabilities, and global weather station monitoring for enhanced decision-making.
-          </p>
-          <Button
-            onClick={() => navigate('/advanced-weather-dashboard')}
-            className="bg-gradient-to-r from-purple-500/80 to-blue-500/80 hover:from-purple-600/90 hover:to-blue-600/90 text-white font-semibold rounded-full px-8 py-3 transition-all duration-300 shadow-lg hover:shadow-xl backdrop-blur-sm border border-white/20"
-          >
-            Explore Live Weather Demo →
-          </Button>
+          <h2 className="text-3xl font-bold text-white mb-4">Global Wellness Features</h2>
+          <p className="text-white/80 text-lg">Stay connected with the world while maintaining your wellbeing</p>
         </div>
         
-        {/* Why Visualize Weather Data */}
-        <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-6 mb-8">
-          <h3 className="text-2xl font-bold text-white mb-4">Why Visualize Weather Data?</h3>
-          <p className="text-white/80 mb-4">
-            Weather data visualization serves multiple purposes across different sectors. For meteorologists and researchers, 
-            visualizations help identify patterns and anomalies in climate data. For agriculture, they assist in making 
-            critical decisions about planting, irrigation, and harvesting. For everyday users, weather visualizations 
-            provide easy-to-understand forecasts that help plan daily activities.
-          </p>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-            <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-4">
-              <h4 className="text-lg font-semibold text-white mb-2">🎯 Improved Decision-Making</h4>
-              <p className="text-white/70 text-sm">
-                Visualizations make it easier to understand complex data, leading to better-informed decisions.
-              </p>
-            </div>
-            <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-4">
-              <h4 className="text-lg font-semibold text-white mb-2">🔍 Pattern Recognition</h4>
-              <p className="text-white/70 text-sm">
-                Visual representations help identify trends and patterns that might not be apparent in raw data.
-              </p>
-            </div>
-            <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-4">
-              <h4 className="text-lg font-semibold text-white mb-2">♿ Accessibility</h4>
-              <p className="text-white/70 text-sm">
-                Well-designed visualizations make weather information accessible to users of all technical backgrounds.
-              </p>
-            </div>
-            <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-4">
-              <h4 className="text-lg font-semibold text-white mb-2">🎮 Engagement</h4>
-              <p className="text-white/70 text-sm">
-                Interactive elements encourage users to explore data, leading to deeper understanding and insights.
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Live Demo Preview */}
-        <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-6 mb-8">
-          <h3 className="text-2xl font-bold text-white mb-4 text-center">Live Weather Demo Preview</h3>
-          <div className="bg-white/5 backdrop-blur-sm border border-white/20 rounded-xl p-4 mb-6">
-            <img 
-              src="/lovable-uploads/9010a424-1037-411e-a12e-ffaa08739052.png" 
-              alt="Advanced Weather Dashboard Preview with World Clock"
-              className="w-full h-auto rounded-lg shadow-2xl"
-            />
-          </div>
-          <p className="text-white/80 text-center">
-            Our demo showcases a comprehensive weather dashboard built with advanced visualization components. 
-            It provides real-time weather forecasts from the Norwegian Meteorological Institute for various 
-            weather stations across North America, integrated with world clock functionality.
-          </p>
-        </div>
-
-        {/* Interactive Components */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-6">
-            <h4 className="text-xl font-semibold text-white mb-3">🗺️ Interactive Map</h4>
-            <p className="text-white/80 text-sm">
-              Displays weather stations with color-coded markers based on selected parameters. 
-              Click stations to view location-specific data with zoom and pan functionality.
-            </p>
-          </div>
-          
-          <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-6">
-            <h4 className="text-xl font-semibold text-white mb-3">📊 KPI Gauges</h4>
-            <p className="text-white/80 text-sm">
-              Semicircular gauges showing current temperature, wind speed, and precipitation 
-              with color-coded indicators for easy interpretation at a glance.
-            </p>
-          </div>
-          
-          <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-6">
-            <h4 className="text-xl font-semibold text-white mb-3">📋 Forecast Grid</h4>
-            <p className="text-white/80 text-sm">
-              Detailed table view with hourly forecasts for all parameters over 24 hours. 
-              Synchronized highlighting with charts for data correlation.
-            </p>
-          </div>
-          
-          <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-6">
-            <h4 className="text-xl font-semibold text-white mb-3">📈 Dynamic Charts</h4>
-            <p className="text-white/80 text-sm">
-              Adaptive visualizations: spline charts for temperature, area charts for wind, 
-              column charts for precipitation with appropriate color gradients.
-            </p>
-          </div>
-          
-          <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-6">
-            <h4 className="text-xl font-semibold text-white mb-3">🕐 World Clock Integration</h4>
-            <p className="text-white/80 text-sm">
-              Real-time world clock showing local times across different weather stations 
-              for global coordination and timezone-aware planning.
-            </p>
-          </div>
-          
-          <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-6">
-            <h4 className="text-xl font-semibold text-white mb-3">🌐 Real-time Data</h4>
-            <p className="text-white/80 text-sm">
-              Live data from Norwegian Meteorological Institute API with automatic refresh 
-              and synchronized updates across all dashboard components.
-            </p>
-          </div>
-        </div>
-
-        {/* Global Wellness Features - Compact Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div data-section="world-clock-widget">
             <WorldClockCard />
