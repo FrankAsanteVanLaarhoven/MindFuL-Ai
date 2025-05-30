@@ -167,7 +167,7 @@ const Index = () => {
         <div className="text-center py-12 text-white/80">
           <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6 mx-auto max-w-md">
             <p className="text-sm">
-              © 2024 AI Wellness Platform. All rights reserved.
+              © 2025 Mindful AI Wellness Platform. All rights reserved.
             </p>
             <p className="text-xs mt-2 text-white/60">
               Empowering Minds, Transforming Lives.
