@@ -12,10 +12,14 @@ import TestimonialsSection from '@/components/layout/TestimonialsSection';
 import TherapyAvatar3D from '@/components/TherapyAvatar3D';
 import { avatarCharacters } from '@/components/AvatarSelector';
 import GlobalWidgets from '@/components/layout/GlobalWidgets';
+import UserGroupSelection from '@/components/onboarding/UserGroupSelection';
+import PersonalizedDashboard from '@/components/personalization/PersonalizedDashboard';
+import { useUserProfile } from '@/hooks/useUserProfile';
 
 const Index = () => {
   const cardRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+  const { userProfile, loading, updateUserGroups, saveUserProfile } = useUserProfile();
 
   useEffect(() => {
     if (cardRef.current) {
@@ -26,6 +30,36 @@ const Index = () => {
     }
   }, []);
 
+  const handleGroupSelectionComplete = (selectedGroups: string[], primaryGroup: string) => {
+    const newProfile = {
+      id: 'user-1',
+      email: 'user@example.com',
+      name: 'Wellness User',
+      selectedGroups,
+      primaryGroup,
+      preferences: {
+        language: 'en',
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        privacyMode: 'public' as const,
+        notifications: {
+          reminders: true,
+          community: true,
+          challenges: true,
+          mentorship: true
+        },
+        accessibility: {
+          highContrast: false,
+          largeText: false,
+          reduceMotion: false
+        }
+      },
+      onboardingCompleted: true,
+      joinedDate: new Date()
+    };
+    
+    saveUserProfile(newProfile);
+  };
+
   // Sample avatars to display
   const displayAvatars = [
     avatarCharacters.find(a => a.id === 'therapist-african-female'),
@@ -33,6 +67,24 @@ const Index = () => {
     avatarCharacters.find(a => a.id === 'grandma-jamaican'),
     avatarCharacters.find(a => a.id === 'uncle-mixed')
   ].filter(Boolean);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center">
+        <div className="text-white text-xl">Loading your wellness journey...</div>
+      </div>
+    );
+  }
+
+  // Show group selection if user hasn't completed onboarding
+  if (!userProfile || !userProfile.onboardingCompleted) {
+    return <UserGroupSelection onComplete={handleGroupSelectionComplete} />;
+  }
+
+  // Show personalized dashboard if user has completed onboarding
+  if (userProfile.onboardingCompleted && userProfile.selectedGroups.length > 0) {
+    return <PersonalizedDashboard userProfile={userProfile} />;
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 relative overflow-hidden">
