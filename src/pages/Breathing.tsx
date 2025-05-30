@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useRef, useEffect } from 'react';
@@ -13,6 +12,7 @@ import BreathingCircle2D from '@/components/breathing-exercises/breathing-circle
 import VirtualCoach3D from '@/components/breathing-exercises/virtual-coach-3d';
 import BiofeedbackCamera from '@/components/breathing-exercises/biofeedback-camera';
 import MultimodalSensing from '@/components/breathing-exercises/multimodal-sensing';
+import BreathingMoodApp from '@/components/breathing-exercises/BreathingMoodApp';
 import BreathingAchievements from '@/components/breathing-exercises/breathing-achievements';
 import BreathingProgress from '@/components/breathing-exercises/breathing-progress';
 import { gsap } from 'gsap';
@@ -21,11 +21,11 @@ import { addBreathingSession } from '@/lib/breathing-storage';
 import { toast } from '@/hooks/use-toast';
 
 type BreathingTechnique = 'box' | '4-7-8' | 'triangle';
-type ExerciseMode = 'guided-2d' | 'guided-3d' | 'realtime' | 'enhanced' | 'virtual-coach' | 'biofeedback' | 'multimodal';
+type ExerciseMode = 'guided-2d' | 'guided-3d' | 'realtime' | 'enhanced' | 'virtual-coach' | 'biofeedback' | 'multimodal' | 'mood-analysis';
 
 const Breathing = () => {
   const [selectedTechnique, setSelectedTechnique] = useState<BreathingTechnique>('box');
-  const [selectedMode, setSelectedMode] = useState<ExerciseMode>('virtual-coach');
+  const [selectedMode, setSelectedMode] = useState<ExerciseMode>('mood-analysis');
   const [isActive, setIsActive] = useState(false);
   const [currentPhase, setCurrentPhase] = useState<'inhale' | 'hold1' | 'exhale' | 'hold2'>('inhale');
   const [sessionStartTime, setSessionStartTime] = useState<number | null>(null);
@@ -100,6 +100,13 @@ const Breathing = () => {
       description: 'Advanced fusion of camera, microphone, and motion sensors',
       icon: '🔬',
       component: MultimodalSensing,
+      level: 'Expert'
+    },
+    'mood-analysis': {
+      name: '3D Breathing & Mood Analysis',
+      description: 'Complete implementation with 3D scene, face detection, and speech sentiment',
+      icon: '🎭',
+      component: BreathingMoodApp,
       level: 'Expert'
     },
     realtime: {
@@ -250,7 +257,7 @@ const Breathing = () => {
           </CardHeader>
           <CardContent>
             <Tabs value={selectedMode} onValueChange={(value) => setSelectedMode(value as ExerciseMode)}>
-              <TabsList className="grid w-full grid-cols-4 lg:grid-cols-7">
+              <TabsList className="grid w-full grid-cols-4 lg:grid-cols-8">
                 {Object.entries(modes).map(([key, mode]) => (
                   <TabsTrigger key={key} value={key} className="flex flex-col items-center gap-1 text-xs p-2">
                     <span className="text-lg">{mode.icon}</span>
@@ -371,6 +378,14 @@ const Breathing = () => {
                 <div>
                   <h4 className="font-medium text-purple-800">Multimodal Sensing</h4>
                   <p className="text-sm text-purple-600">Advanced sensor fusion with gamification and real-time feedback</p>
+                </div>
+              </div>
+              
+              <div className="flex items-start gap-3">
+                <span className="text-2xl">🎭</span>
+                <div>
+                  <h4 className="font-medium text-purple-800">Mood & Sentiment Analysis</h4>
+                  <p className="text-sm text-purple-600">Complete implementation with face detection and speech sentiment</p>
                 </div>
               </div>
             </div>
