@@ -373,6 +373,7 @@ const Breathing = () => {
                 ))}
               </div>
             </CardContent>
+          </Card>
         )}
 
         {/* Breathing Exercise Component - Enhanced container with increased height */}
