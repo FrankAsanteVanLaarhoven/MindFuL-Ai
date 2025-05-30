@@ -2,6 +2,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { NavigationMenu, NavigationMenuList } from '@/components/ui/navigation-menu';
 import NavigationBrand from './navigation/NavigationBrand';
 import TherapyMenu from './navigation/TherapyMenu';
 import WellnessMenu from './navigation/WellnessMenu';
@@ -17,11 +18,15 @@ const NavigationBar = () => {
         <div className="flex justify-between items-center h-16">
           <NavigationBrand />
           
-          <div className="hidden md:flex space-x-8">
-            <TherapyMenu />
-            <WellnessMenu />
-            <CommunityMenu />
-            <GlobalFeaturesMenu />
+          <div className="hidden md:flex">
+            <NavigationMenu>
+              <NavigationMenuList className="space-x-8">
+                <TherapyMenu />
+                <WellnessMenu />
+                <CommunityMenu />
+                <GlobalFeaturesMenu />
+              </NavigationMenuList>
+            </NavigationMenu>
           </div>
 
           <div className="flex items-center space-x-4">
