@@ -1,0 +1,58 @@
+
+{
+  "app": {
+    "title": "IA Consciente",
+    "subtitle": "Aplicación global de bienestar con funciones impulsadas por IA"
+  },
+  "navigation": {
+    "therapy": "Terapia",
+    "wellness": "Bienestar",
+    "community": "Comunidad",
+    "globalFeatures": "Funciones Globales"
+  },
+  "global": {
+    "weather": "Clima y Calidad del Aire",
+    "worldClock": "Reloj Mundial",
+    "localization": "Localización",
+    "language": "Idioma",
+    "selectLanguage": "Seleccionar Idioma",
+    "currentSettings": "Configuración Actual",
+    "applyingChanges": "Aplicando cambios...",
+    "languageChanged": "Idioma Cambiado",
+    "interfaceLanguage": "Idioma de interfaz establecido en"
+  },
+  "weather": {
+    "title": "Clima y Calidad del Aire",
+    "description": "Monitoreo en tiempo real del clima y calidad del aire",
+    "loading": "Cargando clima...",
+    "error": "No se pueden cargar los datos del clima",
+    "locationUpdated": "Ubicación Actualizada",
+    "weatherRefreshed": "Datos del clima actualizados para tu ubicación actual",
+    "defaultLocation": "Usando Ubicación Predeterminada",
+    "couldntAccess": "No se pudo acceder a tu ubicación, mostrando clima predeterminado",
+    "weatherUpdated": "Clima Actualizado",
+    "latestInfo": "Información meteorológica más reciente obtenida"
+  },
+  "worldClock": {
+    "title": "Reloj Mundial",
+    "description": "Rastrear tiempo en diferentes zonas para programación global de bienestar",
+    "addCity": "Agregar ciudad",
+    "wellnessTips": "Consejos de Bienestar",
+    "scheduleTitle": "Programa meditación durante horas tranquilas",
+    "planMeetings": "Planifica reuniones globales de bienestar",
+    "liveTime": "Tiempo en vivo • Actualizado cada segundo"
+  },
+  "localization": {
+    "title": "Localización",
+    "description": "Cambia el idioma de la interfaz para mejor accesibilidad",
+    "selectLanguage": "Seleccionar Idioma",
+    "currentSettings": "Configuración Actual",
+    "language": "Idioma",
+    "region": "Región",
+    "timeFormat": "Formato de hora",
+    "dateFormat": "Formato de fecha",
+    "autoDetected": "Auto-detectado",
+    "24hour": "24 horas",
+    "localPreference": "Preferencia local"
+  }
+}

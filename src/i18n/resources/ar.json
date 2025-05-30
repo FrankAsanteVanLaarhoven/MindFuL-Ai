@@ -1,0 +1,58 @@
+
+{
+  "app": {
+    "title": "الذكاء الاصطناعي الواعي",
+    "subtitle": "تطبيق عالمي للعافية مع ميزات مدعومة بالذكاء الاصطناعي"
+  },
+  "navigation": {
+    "therapy": "العلاج",
+    "wellness": "العافية",
+    "community": "المجتمع",
+    "globalFeatures": "الميزات العالمية"
+  },
+  "global": {
+    "weather": "الطقس وجودة الهواء",
+    "worldClock": "الساعة العالمية",
+    "localization": "التوطين",
+    "language": "اللغة",
+    "selectLanguage": "اختيار اللغة",
+    "currentSettings": "الإعدادات الحالية",
+    "applyingChanges": "تطبيق التغييرات...",
+    "languageChanged": "تم تغيير اللغة",
+    "interfaceLanguage": "تم تعيين لغة الواجهة إلى"
+  },
+  "weather": {
+    "title": "الطقس وجودة الهواء",
+    "description": "مراقبة الطقس وجودة الهواء في الوقت الفعلي",
+    "loading": "جاري تحميل الطقس...",
+    "error": "تعذر تحميل بيانات الطقس",
+    "locationUpdated": "تم تحديث الموقع",
+    "weatherRefreshed": "تم تحديث بيانات الطقس لموقعك الحالي",
+    "defaultLocation": "استخدام الموقع الافتراضي",
+    "couldntAccess": "تعذر الوصول إلى موقعك، عرض الطقس الافتراضي",
+    "weatherUpdated": "تم تحديث الطقس",
+    "latestInfo": "تم الحصول على أحدث معلومات الطقس"
+  },
+  "worldClock": {
+    "title": "الساعة العالمية",
+    "description": "تتبع الوقت في مناطق زمنية مختلفة لجدولة العافية العالمية",
+    "addCity": "إضافة مدينة",
+    "wellnessTips": "نصائح العافية",
+    "scheduleTitle": "جدولة التأمل خلال الساعات الهادئة",
+    "planMeetings": "تخطيط اجتماعات العافية العالمية",
+    "liveTime": "الوقت المباشر • يتم التحديث كل ثانية"
+  },
+  "localization": {
+    "title": "التوطين",
+    "description": "تغيير لغة الواجهة لتحسين إمكانية الوصول",
+    "selectLanguage": "اختيار اللغة",
+    "currentSettings": "الإعدادات الحالية",
+    "language": "اللغة",
+    "region": "المنطقة",
+    "timeFormat": "تنسيق الوقت",
+    "dateFormat": "تنسيق التاريخ",
+    "autoDetected": "اكتشاف تلقائي",
+    "24hour": "24 ساعة",
+    "localPreference": "التفضيل المحلي"
+  }
+}

@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -25,6 +26,7 @@ const timeZones = [
 ];
 
 const WorldClock = () => {
+  const { t } = useTranslation();
   const [selectedTimeZones, setSelectedTimeZones] = useState<string[]>([
     'America/New_York',
     'Europe/London',
@@ -100,12 +102,12 @@ const WorldClock = () => {
   };
 
   return (
-    <Card className="bg-white/90 backdrop-blur-sm border-white/20 shadow-lg h-full">
+    <Card className="bg-white/90 backdrop-blur-sm border-white/20 shadow-lg h-full" id="world-clock-widget">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2 text-indigo-800 text-lg">
             <Clock className="w-5 h-5" />
-            World Clock
+            {t('worldClock.title')}
           </CardTitle>
           <Button
             onClick={updateTimes}
@@ -117,7 +119,7 @@ const WorldClock = () => {
           </Button>
         </div>
         <CardDescription className="text-sm">
-          Track time across different zones for global wellness scheduling
+          {t('worldClock.description')}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-3">
@@ -125,7 +127,7 @@ const WorldClock = () => {
           <div className="space-y-2">
             <Select onValueChange={addTimeZone}>
               <SelectTrigger className="h-8">
-                <SelectValue placeholder="Add city" />
+                <SelectValue placeholder={t('worldClock.addCity')} />
               </SelectTrigger>
               <SelectContent className="bg-white/95 backdrop-blur-md border border-white/20">
                 {timeZones
@@ -175,15 +177,15 @@ const WorldClock = () => {
         </div>
 
         <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-3">
-          <h4 className="font-semibold text-indigo-800 mb-2 text-sm">Wellness Tips</h4>
+          <h4 className="font-semibold text-indigo-800 mb-2 text-sm">{t('worldClock.wellnessTips')}</h4>
           <div className="text-indigo-700 text-xs space-y-1">
-            <p>• Schedule meditation during peaceful hours</p>
-            <p>• Plan global wellness meetings</p>
+            <p>• {t('worldClock.scheduleTitle')}</p>
+            <p>• {t('worldClock.planMeetings')}</p>
           </div>
         </div>
 
         <div className="text-xs text-gray-400 text-center">
-          Live time • Updated every second
+          {t('worldClock.liveTime')}
         </div>
       </CardContent>
     </Card>

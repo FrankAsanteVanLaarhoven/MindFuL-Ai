@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
   NavigationMenuItem,
   NavigationMenuTrigger,
@@ -11,12 +12,13 @@ import { Heart, Zap, BookOpen, BarChart3 } from 'lucide-react';
 
 const WellnessMenu = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   return (
     <NavigationMenuItem>
       <NavigationMenuTrigger className="text-white hover:bg-white/20 hover:text-white bg-transparent border-none">
         <Heart className="w-4 h-4 mr-2" />
-        Wellness
+        {t('navigation.wellness')}
       </NavigationMenuTrigger>
       <NavigationMenuContent className="bg-white/95 backdrop-blur-md border border-white/20 shadow-lg min-w-[200px]">
         <div className="p-2">

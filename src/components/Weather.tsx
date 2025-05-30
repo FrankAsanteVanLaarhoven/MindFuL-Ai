@@ -1,5 +1,6 @@
 
 import React, { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card, CardContent } from '@/components/ui/card';
 import { useWeatherLocation } from '@/hooks/useWeatherLocation';
 import WeatherHeader from '@/components/weather/WeatherHeader';
@@ -9,6 +10,7 @@ import WeatherLoadingState from '@/components/weather/WeatherLoadingState';
 import WeatherEmptyState from '@/components/weather/WeatherEmptyState';
 
 const Weather = () => {
+  const { t } = useTranslation();
   const { weatherData, isLoading, getCurrentLocation, refreshWeather } = useWeatherLocation();
 
   useEffect(() => {
@@ -16,7 +18,7 @@ const Weather = () => {
   }, []);
 
   return (
-    <Card className="bg-white/90 backdrop-blur-sm border-white/20 shadow-lg h-full">
+    <Card className="bg-white/90 backdrop-blur-sm border-white/20 shadow-lg h-full" id="weather-widget">
       <WeatherHeader onRefresh={refreshWeather} isLoading={isLoading} />
       <CardContent className="space-y-3">
         {isLoading ? (

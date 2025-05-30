@@ -1,0 +1,58 @@
+
+{
+  "app": {
+    "title": "Bewusste KI",
+    "subtitle": "Globale Wellness-App mit KI-gestützten Funktionen"
+  },
+  "navigation": {
+    "therapy": "Therapie",
+    "wellness": "Wohlbefinden",
+    "community": "Gemeinschaft",
+    "globalFeatures": "Globale Funktionen"
+  },
+  "global": {
+    "weather": "Wetter & Luftqualität",
+    "worldClock": "Weltzeit",
+    "localization": "Lokalisierung",
+    "language": "Sprache",
+    "selectLanguage": "Sprache Auswählen",
+    "currentSettings": "Aktuelle Einstellungen",
+    "applyingChanges": "Änderungen werden angewendet...",
+    "languageChanged": "Sprache Geändert",
+    "interfaceLanguage": "Oberflächensprache eingestellt auf"
+  },
+  "weather": {
+    "title": "Wetter & Luftqualität",
+    "description": "Echtzeit-Überwachung von Wetter und Luftqualität",
+    "loading": "Wetter wird geladen...",
+    "error": "Wetterdaten können nicht geladen werden",
+    "locationUpdated": "Standort Aktualisiert",
+    "weatherRefreshed": "Wetterdaten für Ihren aktuellen Standort aktualisiert",
+    "defaultLocation": "Standard-Standort Verwenden",
+    "couldntAccess": "Zugriff auf Ihren Standort nicht möglich, Standard-Wetter wird angezeigt",
+    "weatherUpdated": "Wetter Aktualisiert",
+    "latestInfo": "Neueste Wetterinformationen abgerufen"
+  },
+  "worldClock": {
+    "title": "Weltzeit",
+    "description": "Zeit in verschiedenen Zonen für globale Wellness-Planung verfolgen",
+    "addCity": "Stadt hinzufügen",
+    "wellnessTips": "Wellness-Tipps",
+    "scheduleTitle": "Meditation während ruhiger Stunden planen",
+    "planMeetings": "Globale Wellness-Meetings planen",
+    "liveTime": "Live-Zeit • Jede Sekunde aktualisiert"
+  },
+  "localization": {
+    "title": "Lokalisierung",
+    "description": "Oberflächensprache für bessere Zugänglichkeit ändern",
+    "selectLanguage": "Sprache Auswählen",
+    "currentSettings": "Aktuelle Einstellungen",
+    "language": "Sprache",
+    "region": "Region",
+    "timeFormat": "Zeitformat",
+    "dateFormat": "Datumsformat",
+    "autoDetected": "Automatisch erkannt",
+    "24hour": "24-Stunden",
+    "localPreference": "Lokale Präferenz"
+  }
+}

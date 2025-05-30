@@ -7,7 +7,8 @@ const NavigationBrand = () => {
       <img 
         src="/lovable-uploads/b30cfc8d-ace5-4b3c-8673-7f064ae3783c.png" 
         alt="Mindful AI Brain Logo" 
-        className="w-8 h-8 mr-2" 
+        className="w-8 h-8 mr-2 bg-transparent" 
+        style={{ filter: 'drop-shadow(0 0 2px rgba(255,255,255,0.3))' }}
       />
       <h1 className="text-xl font-bold text-white">Mindful AI</h1>
     </div>

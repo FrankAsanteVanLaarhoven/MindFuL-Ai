@@ -1,0 +1,58 @@
+
+{
+  "app": {
+    "title": "IA Consciente",
+    "subtitle": "Application mondiale de bien-être avec des fonctionnalités alimentées par l'IA"
+  },
+  "navigation": {
+    "therapy": "Thérapie",
+    "wellness": "Bien-être",
+    "community": "Communauté",
+    "globalFeatures": "Fonctionnalités Globales"
+  },
+  "global": {
+    "weather": "Météo et Qualité de l'Air",
+    "worldClock": "Horloge Mondiale",
+    "localization": "Localisation",
+    "language": "Langue",
+    "selectLanguage": "Sélectionner la Langue",
+    "currentSettings": "Paramètres Actuels",
+    "applyingChanges": "Application des modifications...",
+    "languageChanged": "Langue Modifiée",
+    "interfaceLanguage": "Langue de l'interface définie sur"
+  },
+  "weather": {
+    "title": "Météo et Qualité de l'Air",
+    "description": "Surveillance en temps réel de la météo et de la qualité de l'air",
+    "loading": "Chargement de la météo...",
+    "error": "Impossible de charger les données météo",
+    "locationUpdated": "Localisation Mise à Jour",
+    "weatherRefreshed": "Données météo actualisées pour votre localisation actuelle",
+    "defaultLocation": "Utilisation de la Localisation par Défaut",
+    "couldntAccess": "Impossible d'accéder à votre localisation, affichage de la météo par défaut",
+    "weatherUpdated": "Météo Mise à Jour",
+    "latestInfo": "Dernières informations météorologiques récupérées"
+  },
+  "worldClock": {
+    "title": "Horloge Mondiale",
+    "description": "Suivre l'heure dans différentes zones pour la planification globale du bien-être",
+    "addCity": "Ajouter une ville",
+    "wellnessTips": "Conseils de Bien-être",
+    "scheduleTitle": "Programmer la méditation pendant les heures paisibles",
+    "planMeetings": "Planifier des réunions globales de bien-être",
+    "liveTime": "Heure en direct • Mise à jour chaque seconde"
+  },
+  "localization": {
+    "title": "Localisation",
+    "description": "Changer la langue de l'interface pour une meilleure accessibilité",
+    "selectLanguage": "Sélectionner la Langue",
+    "currentSettings": "Paramètres Actuels",
+    "language": "Langue",
+    "region": "Région",
+    "timeFormat": "Format d'heure",
+    "dateFormat": "Format de date",
+    "autoDetected": "Auto-détecté",
+    "24hour": "24 heures",
+    "localPreference": "Préférence locale"
+  }
+}

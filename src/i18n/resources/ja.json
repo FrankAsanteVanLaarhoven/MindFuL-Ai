@@ -1,0 +1,58 @@
+
+{
+  "app": {
+    "title": "マインドフルAI",
+    "subtitle": "AI駆動機能を備えたグローバルウェルネスアプリ"
+  },
+  "navigation": {
+    "therapy": "セラピー",
+    "wellness": "ウェルネス",
+    "community": "コミュニティ",
+    "globalFeatures": "グローバル機能"
+  },
+  "global": {
+    "weather": "天気と大気質",
+    "worldClock": "世界時計",
+    "localization": "ローカライゼーション",
+    "language": "言語",
+    "selectLanguage": "言語を選択",
+    "currentSettings": "現在の設定",
+    "applyingChanges": "変更を適用中...",
+    "languageChanged": "言語が変更されました",
+    "interfaceLanguage": "インターフェース言語を設定しました"
+  },
+  "weather": {
+    "title": "天気と大気質",
+    "description": "リアルタイムの天気と大気質の監視",
+    "loading": "天気を読み込み中...",
+    "error": "天気データを読み込めません",
+    "locationUpdated": "位置が更新されました",
+    "weatherRefreshed": "現在の位置の天気データが更新されました",
+    "defaultLocation": "デフォルトの位置を使用",
+    "couldntAccess": "位置にアクセスできませんでした。デフォルトの天気を表示します",
+    "weatherUpdated": "天気が更新されました",
+    "latestInfo": "最新の天気情報を取得しました"
+  },
+  "worldClock": {
+    "title": "世界時計",
+    "description": "グローバルウェルネススケジューリングのためのタイムゾーン追跡",
+    "addCity": "都市を追加",
+    "wellnessTips": "ウェルネスのヒント",
+    "scheduleTitle": "平和な時間に瞑想をスケジュール",
+    "planMeetings": "グローバルウェルネスミーティングを計画",
+    "liveTime": "ライブタイム • 毎秒更新"
+  },
+  "localization": {
+    "title": "ローカライゼーション",
+    "description": "アクセシビリティ向上のためにインターフェース言語を変更",
+    "selectLanguage": "言語を選択",
+    "currentSettings": "現在の設定",
+    "language": "言語",
+    "region": "地域",
+    "timeFormat": "時刻形式",
+    "dateFormat": "日付形式",
+    "autoDetected": "自動検出",
+    "24hour": "24時間制",
+    "localPreference": "ローカル設定"
+  }
+}

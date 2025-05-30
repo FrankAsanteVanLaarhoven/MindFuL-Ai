@@ -1,0 +1,58 @@
+
+{
+  "app": {
+    "title": "正念人工智能",
+    "subtitle": "全球健康应用，具有AI驱动的功能"
+  },
+  "navigation": {
+    "therapy": "治疗",
+    "wellness": "健康",
+    "community": "社区",
+    "globalFeatures": "全球功能"
+  },
+  "global": {
+    "weather": "天气和空气质量",
+    "worldClock": "世界时钟",
+    "localization": "本地化",
+    "language": "语言",
+    "selectLanguage": "选择语言",
+    "currentSettings": "当前设置",
+    "applyingChanges": "正在应用更改...",
+    "languageChanged": "语言已更改",
+    "interfaceLanguage": "界面语言设置为"
+  },
+  "weather": {
+    "title": "天气和空气质量",
+    "description": "实时天气和空气质量监测",
+    "loading": "正在加载天气...",
+    "error": "无法加载天气数据",
+    "locationUpdated": "位置已更新",
+    "weatherRefreshed": "已为您当前位置刷新天气数据",
+    "defaultLocation": "使用默认位置",
+    "couldntAccess": "无法访问您的位置，显示默认天气",
+    "weatherUpdated": "天气已更新",
+    "latestInfo": "已获取最新天气信息"
+  },
+  "worldClock": {
+    "title": "世界时钟",
+    "description": "跟踪不同时区的时间以进行全球健康安排",
+    "addCity": "添加城市",
+    "wellnessTips": "健康提示",
+    "scheduleTitle": "在安静的时间安排冥想",
+    "planMeetings": "计划全球健康会议",
+    "liveTime": "实时时间 • 每秒更新"
+  },
+  "localization": {
+    "title": "本地化",
+    "description": "更改界面语言以获得更好的可访问性",
+    "selectLanguage": "选择语言",
+    "currentSettings": "当前设置",
+    "language": "语言",
+    "region": "地区",
+    "timeFormat": "时间格式",
+    "dateFormat": "日期格式",
+    "autoDetected": "自动检测",
+    "24hour": "24小时制",
+    "localPreference": "本地首选项"
+  }
+}
