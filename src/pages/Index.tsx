@@ -12,9 +12,6 @@ import ModernFeaturesGrid from '@/components/layout/ModernFeaturesGrid';
 import TestimonialsSection from '@/components/layout/TestimonialsSection';
 import TherapyAvatar3D from '@/components/TherapyAvatar3D';
 import { avatarCharacters } from '@/components/AvatarSelector';
-import GlobalWidgets from '@/components/layout/GlobalWidgets';
-import UserGroupSelection from '@/components/onboarding/UserGroupSelection';
-import PersonalizedDashboard from '@/components/personalization/PersonalizedDashboard';
 import PersonalizationDropdown from '@/components/personalization/PersonalizationDropdown';
 import { useUserProfile } from '@/hooks/useUserProfile';
 
@@ -97,9 +94,6 @@ const Index = () => {
           />
         </div>
       </div>
-
-      {/* Global Features Section - Compact Widgets */}
-      <GlobalWidgets />
 
       {/* Animated 3D Avatars Section */}
       <div className="relative z-10 bg-white/8 backdrop-blur-lg border border-white/20 rounded-3xl mx-4 mb-8 p-6">
