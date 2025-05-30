@@ -101,7 +101,13 @@ const Index = () => {
       <div className="relative z-10 bg-white/8 backdrop-blur-lg border border-white/20 rounded-3xl mx-4 mb-8 p-6">
         <div className="text-center mb-6">
           <h2 className="text-3xl font-bold text-white mb-2">Global Wellness Features</h2>
-          <p className="text-white/70 text-lg">Stay connected with the world while maintaining your wellbeing</p>
+          <p className="text-white/70 text-lg mb-4">Stay connected with the world while maintaining your wellbeing</p>
+          <Button
+            onClick={() => navigate('/advanced-weather-dashboard')}
+            className="bg-gradient-to-r from-purple-500/80 to-blue-500/80 hover:from-purple-600/90 hover:to-blue-600/90 text-white font-semibold rounded-full px-6 py-2 transition-all duration-300 shadow-lg hover:shadow-xl backdrop-blur-sm border border-white/20"
+          >
+            View Advanced Weather Dashboard →
+          </Button>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
