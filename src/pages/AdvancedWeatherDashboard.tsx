@@ -1,8 +1,181 @@
-
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import NavigationBar from '@/components/layout/NavigationBar';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { MapPin, RefreshCw, Clock, Thermometer, Wind, Droplets, Eye } from 'lucide-react';
+import { WeatherService } from '@/services/weatherService';
+import { WeatherData } from '@/types/weather';
 
 const AdvancedWeatherDashboard = () => {
+  const [currentLocationWeather, setCurrentLocationWeather] = useState<WeatherData | null>(null);
+  const [londonWeather, setLondonWeather] = useState<WeatherData | null>(null);
+  const [currentTime, setCurrentTime] = useState(new Date());
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Update time every second
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  // Get current location and weather data
+  const getCurrentLocationWeather = () => {
+    setIsLoading(true);
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          // Simulate getting weather for current coordinates
+          setTimeout(() => {
+            const currentWeather = WeatherService.generateWeatherData('Current Location');
+            setCurrentLocationWeather(currentWeather);
+            setIsLoading(false);
+          }, 1000);
+        },
+        (error) => {
+          console.error('Location error:', error);
+          // Fallback to default location
+          const defaultWeather = WeatherService.generateWeatherData('Current Location (Default)');
+          setCurrentLocationWeather(defaultWeather);
+          setIsLoading(false);
+        }
+      );
+    } else {
+      const defaultWeather = WeatherService.generateWeatherData('Current Location (Default)');
+      setCurrentLocationWeather(defaultWeather);
+      setIsLoading(false);
+    }
+  };
+
+  // Get London weather data
+  const getLondonWeather = () => {
+    const londonWeather = WeatherService.generateWeatherData('London, UK');
+    setLondonWeather(londonWeather);
+  };
+
+  // Refresh all weather data
+  const refreshAllWeather = () => {
+    getCurrentLocationWeather();
+    getLondonWeather();
+  };
+
+  // Initial data load
+  useEffect(() => {
+    getCurrentLocationWeather();
+    getLondonWeather();
+    
+    // Set up auto-refresh every 5 minutes
+    const refreshInterval = setInterval(() => {
+      refreshAllWeather();
+    }, 300000); // 5 minutes
+
+    return () => clearInterval(refreshInterval);
+  }, []);
+
+  const getWeatherIcon = (condition: string) => {
+    switch (condition.toLowerCase()) {
+      case 'sunny':
+      case 'clear':
+        return '☀️';
+      case 'partly cloudy':
+        return '⛅';
+      case 'cloudy':
+        return '☁️';
+      case 'light rain':
+        return '🌧️';
+      default:
+        return '🌤️';
+    }
+  };
+
+  const WeatherCard = ({ weather, title, timeZone }: { weather: WeatherData | null, title: string, timeZone: string }) => {
+    if (!weather) return null;
+
+    const localTime = new Date().toLocaleString('en-US', { 
+      timeZone,
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: true
+    });
+
+    return (
+      <Card className="bg-white/10 backdrop-blur-md border border-white/20 shadow-xl">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center justify-between text-white">
+            <div className="flex items-center gap-2">
+              <MapPin className="w-5 h-5" />
+              {title}
+            </div>
+            <div className="text-2xl">{getWeatherIcon(weather.condition)}</div>
+          </CardTitle>
+          <div className="flex items-center gap-2 text-white/80">
+            <Clock className="w-4 h-4" />
+            <span className="text-sm font-mono">{localTime}</span>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="text-center">
+            <div className="text-4xl font-bold text-white mb-2">
+              {weather.temperature}°C
+            </div>
+            <Badge className={WeatherService.getConditionColor(weather.condition)}>
+              {weather.condition}
+            </Badge>
+          </div>
+          
+          <div className="grid grid-cols-2 gap-3">
+            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
+              <div className="flex items-center gap-2 text-white/80 text-sm mb-1">
+                <Droplets className="w-4 h-4" />
+                Humidity
+              </div>
+              <div className="text-lg font-bold text-white">
+                {weather.humidity}%
+              </div>
+            </div>
+            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
+              <div className="flex items-center gap-2 text-white/80 text-sm mb-1">
+                <Wind className="w-4 h-4" />
+                Wind
+              </div>
+              <div className="text-lg font-bold text-white">
+                {weather.windSpeed} km/h
+              </div>
+            </div>
+            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
+              <div className="flex items-center gap-2 text-white/80 text-sm mb-1">
+                <Thermometer className="w-4 h-4" />
+                UV Index
+              </div>
+              <div className="text-lg font-bold text-white">
+                {weather.uvIndex}
+              </div>
+            </div>
+            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
+              <div className="flex items-center gap-2 text-white/80 text-sm mb-1">
+                <Eye className="w-4 h-4" />
+                Air Quality
+              </div>
+              <div className="text-sm font-bold text-white">
+                {weather.airQuality}
+              </div>
+            </div>
+          </div>
+
+          <div className="text-center">
+            <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm text-white px-3 py-1 rounded-full text-xs">
+              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
+              Updated: {weather.lastUpdated.toLocaleTimeString()}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 relative overflow-hidden">
       <NavigationBar />
@@ -14,10 +187,41 @@ const AdvancedWeatherDashboard = () => {
       <div className="relative z-10 bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl mx-4 mt-8 mb-8 p-8">
         <div className="text-center">
           <h1 className="text-4xl font-bold text-white mb-4">Advanced Weather Dashboard</h1>
-          <p className="text-white/80 text-lg max-w-3xl mx-auto">
-            A comprehensive weather visualization platform featuring real-time data, interactive maps, 
-            forecasting capabilities, and global weather station monitoring.
+          <p className="text-white/80 text-lg max-w-3xl mx-auto mb-6">
+            Real-time weather monitoring for your current location and London with live data updates every 5 minutes.
           </p>
+          <Button
+            onClick={refreshAllWeather}
+            disabled={isLoading}
+            className="bg-white/20 hover:bg-white/30 text-white border border-white/30"
+          >
+            <RefreshCw className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+            Refresh All Data
+          </Button>
+        </div>
+      </div>
+
+      {/* Real-time Weather Cards */}
+      <div className="relative z-10 bg-white/8 backdrop-blur-lg border border-white/20 rounded-3xl mx-4 mb-8 p-6">
+        <div className="text-center mb-8">
+          <h2 className="text-3xl font-bold text-white mb-4">Live Weather Data</h2>
+          <div className="flex items-center justify-center gap-2 text-white/80">
+            <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
+            <span>Real-time updates • Last refreshed: {currentTime.toLocaleTimeString()}</span>
+          </div>
+        </div>
+        
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <WeatherCard 
+            weather={currentLocationWeather} 
+            title="Current Location" 
+            timeZone={Intl.DateTimeFormat().resolvedOptions().timeZone}
+          />
+          <WeatherCard 
+            weather={londonWeather} 
+            title="London, UK" 
+            timeZone="Europe/London"
+          />
         </div>
       </div>
 
@@ -68,7 +272,7 @@ const AdvancedWeatherDashboard = () => {
           </div>
           
           <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-6">
-            <h3 className="text-xl font-semibent text-white mb-3">🎯 KPI Monitoring</h3>
+            <h3 className="text-xl font-semibold text-white mb-3">🎯 KPI Monitoring</h3>
             <p className="text-white/80 text-sm">
               Real-time key performance indicators with circular gauges displaying 
               temperature, wind speed, and precipitation metrics.

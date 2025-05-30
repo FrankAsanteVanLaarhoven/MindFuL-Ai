@@ -9,7 +9,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { NavigationMenuItem } from '@/components/ui/navigation-menu';
-import { Globe, CloudSun, Clock, Languages, ChevronDown } from 'lucide-react';
+import { Globe, CloudSun, Clock, Languages, ChevronDown, MapPin } from 'lucide-react';
 
 const GlobalFeaturesMenu = () => {
   const navigate = useNavigate();
@@ -71,6 +71,13 @@ const GlobalFeaturesMenu = () => {
           >
             <Languages className="w-4 h-4 text-blue-500" />
             Localization
+          </DropdownMenuItem>
+          <DropdownMenuItem 
+            className="flex items-center gap-2 cursor-pointer hover:bg-purple-50"
+            onClick={() => navigate('/advanced-weather-dashboard')}
+          >
+            <MapPin className="w-4 h-4 text-purple-500" />
+            Advanced Weather Dashboard
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
