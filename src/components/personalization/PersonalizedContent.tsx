@@ -34,6 +34,54 @@ const PersonalizedContent: React.FC<PersonalizedContentProps> = ({ userProfile }
           { title: 'Performance Visualization', duration: '12 min', type: 'meditation' },
           { title: 'Victory Celebration', duration: '5 min', type: 'movement' }
         ];
+      case 'child-with-adult':
+        return [
+          { title: 'Fun Breathing Games', duration: '3 min', type: 'breathing' },
+          { title: 'Story Time Relaxation', duration: '8 min', type: 'guided-story' },
+          { title: 'Gentle Movement Fun', duration: '5 min', type: 'movement' }
+        ];
+      case 'senior':
+        return [
+          { title: 'Gentle Morning Stretch', duration: '6 min', type: 'movement' },
+          { title: 'Memory & Mindfulness', duration: '10 min', type: 'meditation' },
+          { title: 'Peaceful Breathing', duration: '4 min', type: 'breathing' }
+        ];
+      case 'teen':
+        return [
+          { title: 'Stress-Free Study Break', duration: '3 min', type: 'breathing' },
+          { title: 'Confidence Boost', duration: '7 min', type: 'meditation' },
+          { title: 'Energy Reset', duration: '4 min', type: 'movement' }
+        ];
+      case 'entrepreneur':
+        return [
+          { title: 'Decision Clarity', duration: '5 min', type: 'meditation' },
+          { title: 'Stress Release', duration: '4 min', type: 'breathing' },
+          { title: 'Energy Recharge', duration: '6 min', type: 'movement' }
+        ];
+      case 'artist-creative':
+        return [
+          { title: 'Creative Flow State', duration: '8 min', type: 'meditation' },
+          { title: 'Inspiration Breathing', duration: '4 min', type: 'breathing' },
+          { title: 'Artist Block Release', duration: '6 min', type: 'movement' }
+        ];
+      case 'faith-based':
+        return [
+          { title: 'Spiritual Reflection', duration: '10 min', type: 'meditation' },
+          { title: 'Peaceful Prayer', duration: '5 min', type: 'prayer' },
+          { title: 'Gratitude Practice', duration: '4 min', type: 'gratitude' }
+        ];
+      case 'military-veteran':
+        return [
+          { title: 'Grounding Technique', duration: '5 min', type: 'grounding' },
+          { title: 'Tactical Breathing', duration: '4 min', type: 'breathing' },
+          { title: 'Strength Recovery', duration: '8 min', type: 'meditation' }
+        ];
+      case 'first-responder':
+        return [
+          { title: 'Post-Shift Decompression', duration: '6 min', type: 'meditation' },
+          { title: 'Emergency Calm', duration: '2 min', type: 'breathing' },
+          { title: 'Resilience Building', duration: '8 min', type: 'strength' }
+        ];
       default:
         return [
           { title: 'Daily Mindfulness', duration: '7 min', type: 'meditation' },
@@ -51,17 +99,41 @@ const PersonalizedContent: React.FC<PersonalizedContentProps> = ({ userProfile }
           'Schedule respite time - even 15 minutes can make a difference.',
           'Connect with other carers who understand your journey.'
         ];
-      case 'teacher':
+      case 'child-with-adult':
         return [
-          'Use the 3-breath rule before responding to challenging situations.',
-          'Create a calm corner in your classroom for mindful moments.',
-          'Practice gratitude - write down 3 positive moments from each day.'
+          'Make wellness fun with games and stories.',
+          'Keep sessions short and engaging for young attention spans.',
+          'Always ensure a trusted adult is present for guidance.'
         ];
-      case 'sports-fan':
+      case 'senior':
         return [
-          'Channel your team\'s energy into positive motivation for your own goals.',
-          'Use halftime as a reminder to pause and breathe during stressful moments.',
-          'Celebrate small victories like your favorite team celebrates goals.'
+          'Start slowly and be gentle with yourself.',
+          'Focus on what feels good and comfortable for your body.',
+          'Remember that wisdom comes with experience - trust yourself.'
+        ];
+      case 'teen':
+        return [
+          'It\'s normal to feel overwhelmed - you\'re not alone.',
+          'Small daily practices can make a big difference.',
+          'Your feelings are valid and it\'s okay to ask for help.'
+        ];
+      case 'entrepreneur':
+        return [
+          'Schedule wellness breaks like important meetings.',
+          'Decision fatigue is real - give your mind time to rest.',
+          'Success includes taking care of your mental health.'
+        ];
+      case 'faith-based':
+        return [
+          'Integrate your spiritual practices with mindfulness.',
+          'Use prayer and meditation as complementary practices.',
+          'Find strength in your faith community support.'
+        ];
+      case 'military-veteran':
+        return [
+          'Transition takes time - be patient with yourself.',
+          'Your service experience can be a source of strength.',
+          'Connect with fellow veterans who understand your journey.'
         ];
       default:
         return [
@@ -72,8 +144,56 @@ const PersonalizedContent: React.FC<PersonalizedContentProps> = ({ userProfile }
     }
   };
 
+  const getPersonalizedChallenge = () => {
+    switch (userProfile.primaryGroup) {
+      case 'child-with-adult':
+        return {
+          title: 'Family Fun Wellness Week',
+          description: 'Day 2 of 7 • Complete fun activities with your guide',
+          progress: 28
+        };
+      case 'senior':
+        return {
+          title: 'Gentle Wellness Journey',
+          description: 'Day 4 of 7 • Comfortable pace, lasting results',
+          progress: 57
+        };
+      case 'teen':
+        return {
+          title: 'Teen Stress-Buster Challenge',
+          description: 'Day 3 of 7 • Build confidence and calm',
+          progress: 43
+        };
+      case 'entrepreneur':
+        return {
+          title: 'Founder Wellness Sprint',
+          description: 'Day 5 of 7 • Balance hustle with health',
+          progress: 71
+        };
+      case 'faith-based':
+        return {
+          title: 'Spiritual Wellness Journey',
+          description: 'Day 3 of 7 • Deepen your practice',
+          progress: 43
+        };
+      case 'military-veteran':
+        return {
+          title: 'Warrior Wellness Path',
+          description: 'Day 4 of 7 • Strength through service',
+          progress: 57
+        };
+      default:
+        return {
+          title: '7-Day Wellness Journey',
+          description: 'Day 3 of 7 • Building healthy habits',
+          progress: 43
+        };
+    }
+  };
+
   const personalizedExercises = getPersonalizedExercises();
   const personalizedTips = getPersonalizedTips();
+  const personalizedChallenge = getPersonalizedChallenge();
 
   return (
     <div className="space-y-6">
@@ -142,16 +262,16 @@ const PersonalizedContent: React.FC<PersonalizedContentProps> = ({ userProfile }
           <div className="space-y-4">
             <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
               <h4 className="font-medium text-purple-800 mb-2">
-                {primaryGroup?.id === 'sports-fan' ? 'Team Spirit Challenge' : 
-                 primaryGroup?.id === 'carer' ? 'Self-Care Week' :
-                 primaryGroup?.id === 'teacher' ? 'Classroom Mindfulness' :
-                 '7-Day Wellness Journey'}
+                {personalizedChallenge.title}
               </h4>
               <p className="text-sm text-purple-600 mb-3">
-                Day 3 of 7 • 67% complete
+                {personalizedChallenge.description}
               </p>
               <div className="w-full bg-purple-200 rounded-full h-2 mb-3">
-                <div className="bg-purple-600 h-2 rounded-full w-2/3"></div>
+                <div 
+                  className="bg-purple-600 h-2 rounded-full transition-all duration-300" 
+                  style={{ width: `${personalizedChallenge.progress}%` }}
+                ></div>
               </div>
               <Button size="sm" className="bg-purple-600 hover:bg-purple-700">
                 Continue Challenge

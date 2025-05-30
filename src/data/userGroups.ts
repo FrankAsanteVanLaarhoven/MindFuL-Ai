@@ -81,5 +81,125 @@ export const USER_GROUPS: UserGroup[] = [
     color: 'bg-indigo-500',
     features: ['work-stress', 'productivity-mindfulness', 'team-wellness', 'professional-network'],
     communityName: "Workplace Wellness"
+  },
+  {
+    id: 'child-with-adult',
+    name: 'child-with-adult',
+    displayName: "Child with Guided Adult",
+    description: 'Safe, supervised wellness activities for children',
+    icon: '👧🏽👦🏻',
+    color: 'bg-emerald-500',
+    features: ['guided-sessions', 'child-safety', 'family-activities', 'educational-content'],
+    communityName: "Young Minds & Guides"
+  },
+  {
+    id: 'senior',
+    name: 'senior',
+    displayName: "I'm a Senior",
+    description: 'Gentle wellness practices for mature adults',
+    icon: '🧓',
+    color: 'bg-amber-500',
+    features: ['gentle-exercises', 'memory-wellness', 'senior-community', 'accessibility-focused'],
+    communityName: "Golden Years Wellness"
+  },
+  {
+    id: 'teen',
+    name: 'teen',
+    displayName: "I'm a Teenager",
+    description: 'Age-appropriate mental health support for teens',
+    icon: '🧑‍🎓',
+    color: 'bg-cyan-500',
+    features: ['peer-pressure', 'identity-exploration', 'teen-challenges', 'youth-community'],
+    communityName: "Teen Talk Circle"
+  },
+  {
+    id: 'entrepreneur',
+    name: 'entrepreneur',
+    displayName: "I'm an Entrepreneur",
+    description: 'Managing startup stress and business wellness',
+    icon: '🚀',
+    color: 'bg-violet-500',
+    features: ['startup-stress', 'decision-fatigue', 'leadership-wellness', 'founder-network'],
+    communityName: "Founder Wellness Hub"
+  },
+  {
+    id: 'artist-creative',
+    name: 'artist-creative',
+    displayName: "I'm an Artist/Creative",
+    description: 'Creative wellness and artistic inspiration',
+    icon: '🎨',
+    color: 'bg-rose-500',
+    features: ['creative-blocks', 'artistic-wellness', 'inspiration-tools', 'creative-community'],
+    communityName: "Creative Spirits Circle"
+  },
+  {
+    id: 'faith-based',
+    name: 'faith-based',
+    displayName: "I'm Faith-Based",
+    description: 'Spiritual wellness and faith-centered practices',
+    icon: '🙏',
+    color: 'bg-teal-500',
+    features: ['spiritual-practices', 'faith-community', 'prayer-meditation', 'values-based-wellness'],
+    communityName: "Faith & Wellness Community"
+  },
+  {
+    id: 'lgbtq-plus',
+    name: 'lgbtq-plus',
+    displayName: "I'm LGBTQ+",
+    description: 'Inclusive wellness with community support',
+    icon: '🏳️‍🌈',
+    color: 'bg-fuchsia-500',
+    features: ['inclusive-content', 'identity-support', 'safe-space', 'pride-community'],
+    communityName: "Pride Wellness Community"
+  },
+  {
+    id: 'refugee-immigrant',
+    name: 'refugee-immigrant',
+    displayName: "I'm a Refugee/Immigrant",
+    description: 'Cultural adaptation and community wellness support',
+    icon: '🌍',
+    color: 'bg-lime-500',
+    features: ['cultural-support', 'adaptation-help', 'multilingual-content', 'newcomer-community'],
+    communityName: "New Horizons Community"
+  },
+  {
+    id: 'disability-community',
+    name: 'disability-community',
+    displayName: "I'm in the Disability Community",
+    description: 'Accessible wellness practices and inclusive support',
+    icon: '♿',
+    color: 'bg-sky-500',
+    features: ['accessibility-tools', 'adaptive-exercises', 'inclusive-design', 'disability-advocacy'],
+    communityName: "Accessible Wellness Circle"
+  },
+  {
+    id: 'military-veteran',
+    name: 'military-veteran',
+    displayName: "I'm Military/Veteran",
+    description: 'Specialized support for service members and veterans',
+    icon: '🎖️',
+    color: 'bg-stone-600',
+    features: ['ptsd-support', 'transition-help', 'service-community', 'honor-wellness'],
+    communityName: "Warriors' Wellness Network"
+  },
+  {
+    id: 'first-responder',
+    name: 'first-responder',
+    displayName: "I'm a First Responder",
+    description: 'Critical stress management for emergency professionals',
+    icon: '🚨',
+    color: 'bg-red-600',
+    features: ['trauma-recovery', 'critical-stress', 'responder-support', 'emergency-wellness'],
+    communityName: "First Response Wellness"
+  },
+  {
+    id: 'other',
+    name: 'other',
+    displayName: "Other/Prefer to Explore",
+    description: 'General wellness journey for unique situations',
+    icon: '✨',
+    color: 'bg-gray-500',
+    features: ['flexible-content', 'diverse-options', 'exploration-mode', 'general-community'],
+    communityName: "Wellness Explorers"
   }
 ];
