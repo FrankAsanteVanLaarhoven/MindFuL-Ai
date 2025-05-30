@@ -53,24 +53,10 @@ const GlobalFeaturesMenu = () => {
         >
           <DropdownMenuItem 
             className="flex items-center gap-2 cursor-pointer hover:bg-blue-50"
-            onClick={() => scrollToSection('weather-widget')}
+            onClick={() => scrollToSection('weather-dashboard')}
           >
             <CloudSun className="w-4 h-4 text-orange-500" />
-            Weather & Air Quality
-          </DropdownMenuItem>
-          <DropdownMenuItem 
-            className="flex items-center gap-2 cursor-pointer hover:bg-blue-50"
-            onClick={() => scrollToSection('world-clock-widget')}
-          >
-            <Clock className="w-4 h-4 text-indigo-500" />
-            World Clock
-          </DropdownMenuItem>
-          <DropdownMenuItem 
-            className="flex items-center gap-2 cursor-pointer hover:bg-blue-50"
-            onClick={() => scrollToSection('language-widget')}
-          >
-            <Languages className="w-4 h-4 text-blue-500" />
-            Localization
+            Weather Visualization
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

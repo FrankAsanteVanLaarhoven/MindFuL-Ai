@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useEffect, useRef } from 'react';
@@ -13,9 +14,7 @@ import TherapyAvatar3D from '@/components/TherapyAvatar3D';
 import { avatarCharacters } from '@/components/AvatarSelector';
 import PersonalizationDropdown from '@/components/personalization/PersonalizationDropdown';
 import { useUserProfile } from '@/hooks/useUserProfile';
-import WorldClockCard from '@/components/global/WorldClockCard';
-import WeatherCard from '@/components/global/WeatherCard';
-import LanguageCard from '@/components/global/LanguageCard';
+import AdvancedWeatherDashboard from '@/components/global/AdvancedWeatherDashboard';
 
 const Index = () => {
   const cardRef = useRef<HTMLDivElement>(null);
@@ -97,24 +96,9 @@ const Index = () => {
         </div>
       </div>
 
-      {/* Enhanced Global Wellness Features Section */}
-      <div className="relative z-10 bg-white/8 backdrop-blur-lg border border-white/20 rounded-3xl mx-4 mb-8 p-6">
-        <div className="text-center mb-6">
-          <h2 className="text-3xl font-bold text-white mb-2">Global Wellness Features</h2>
-          <p className="text-white/70 text-lg">Stay connected with the world while maintaining your wellbeing</p>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div data-section="world-clock-widget">
-            <WorldClockCard />
-          </div>
-          <div data-section="weather-widget">
-            <WeatherCard />
-          </div>
-          <div data-section="language-widget">
-            <LanguageCard />
-          </div>
-        </div>
+      {/* Advanced Weather Dashboard Section */}
+      <div className="relative z-10 bg-white/8 backdrop-blur-lg border border-white/20 rounded-3xl mx-4 mb-8 p-6" data-section="weather-dashboard">
+        <AdvancedWeatherDashboard />
       </div>
 
       {/* Animated 3D Avatars Section */}
