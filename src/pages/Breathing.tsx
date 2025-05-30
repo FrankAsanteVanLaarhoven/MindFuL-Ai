@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useRef, useEffect } from 'react';
@@ -261,14 +262,14 @@ const Breathing = () => {
             <CardDescription className="text-gray-300 text-lg">Select from beginner-friendly to expert-level breathing technologies</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {Object.entries(modes).map(([key, mode]) => (
                 <div
                   key={key}
                   onClick={() => setSelectedMode(key as ExerciseMode)}
-                  className={`group relative p-6 rounded-2xl border-2 cursor-pointer transition-all duration-500 transform hover:scale-105 hover:-translate-y-2 ${
+                  className={`group relative p-3 rounded-xl border-2 cursor-pointer transition-all duration-500 transform hover:scale-105 hover:-translate-y-1 ${
                     selectedMode === key
-                      ? 'border-white/50 bg-white/20 shadow-2xl'
+                      ? 'border-white/50 bg-white/20 shadow-xl'
                       : 'border-white/20 bg-white/5 hover:bg-white/15 hover:border-white/40'
                   }`}
                   style={{
@@ -278,23 +279,23 @@ const Breathing = () => {
                   }}
                 >
                   {/* Gradient overlay on hover */}
-                  <div className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${mode.gradient} opacity-0 group-hover:opacity-20 transition-opacity duration-300`}></div>
+                  <div className={`absolute inset-0 rounded-xl bg-gradient-to-br ${mode.gradient} opacity-0 group-hover:opacity-20 transition-opacity duration-300`}></div>
                   
-                  <div className="relative z-10 text-center space-y-4">
-                    <div className="text-4xl mb-3 transform group-hover:scale-110 transition-transform duration-300">
+                  <div className="relative z-10 text-center space-y-2">
+                    <div className="text-2xl mb-2 transform group-hover:scale-110 transition-transform duration-300">
                       {mode.icon}
                     </div>
-                    <h3 className="font-bold text-white text-lg leading-tight">{mode.name}</h3>
-                    <p className="text-gray-300 text-sm leading-relaxed">{mode.description}</p>
-                    <Badge className={`${getLevelColor(mode.level)} font-medium px-3 py-1`}>
+                    <h3 className="font-bold text-white text-sm leading-tight">{mode.name}</h3>
+                    <p className="text-gray-300 text-xs leading-relaxed">{mode.description}</p>
+                    <Badge className={`${getLevelColor(mode.level)} font-medium px-2 py-1 text-xs`}>
                       {mode.level}
                     </Badge>
                   </div>
                   
                   {/* Selection indicator */}
                   {selectedMode === key && (
-                    <div className="absolute top-3 right-3 w-6 h-6 bg-white rounded-full flex items-center justify-center">
-                      <div className="w-3 h-3 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full"></div>
+                    <div className="absolute top-2 right-2 w-4 h-4 bg-white rounded-full flex items-center justify-center">
+                      <div className="w-2 h-2 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full"></div>
                     </div>
                   )}
                 </div>
