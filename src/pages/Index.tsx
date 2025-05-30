@@ -14,6 +14,9 @@ import TherapyAvatar3D from '@/components/TherapyAvatar3D';
 import { avatarCharacters } from '@/components/AvatarSelector';
 import PersonalizationDropdown from '@/components/personalization/PersonalizationDropdown';
 import { useUserProfile } from '@/hooks/useUserProfile';
+import WorldClockCard from '@/components/global/WorldClockCard';
+import WeatherCard from '@/components/global/WeatherCard';
+import LanguageCard from '@/components/global/LanguageCard';
 
 const Index = () => {
   const cardRef = useRef<HTMLDivElement>(null);
@@ -95,37 +98,26 @@ const Index = () => {
         </div>
       </div>
 
-      {/* Compact Global Stats Section */}
+      {/* Global Wellness Features Section */}
       <div className="relative z-10 bg-white/8 backdrop-blur-lg border border-white/20 rounded-3xl mx-4 mb-8 p-6">
         <div className="text-center mb-6">
-          <h2 className="text-2xl font-bold text-white mb-2">Global Wellness Impact</h2>
-          <p className="text-white/70 text-sm">Our worldwide community making a difference</p>
+          <h2 className="text-2xl font-bold text-white mb-2">Global Wellness Features</h2>
+          <p className="text-white/70 text-sm">Stay connected with the world while maintaining your wellbeing</p>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-6 text-center">
-            <div className="text-3xl font-bold text-white mb-2">10K+</div>
-            <div className="text-white/80 text-sm">Active Users</div>
-          </div>
-          <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-6 text-center">
-            <div className="text-3xl font-bold text-white mb-2">50+</div>
-            <div className="text-white/80 text-sm">Countries Represented</div>
-          </div>
-          <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-6 text-center">
-            <div className="text-3xl font-bold text-white mb-2">95%</div>
-            <div className="text-white/80 text-sm">Satisfaction Rate</div>
-          </div>
+          <WorldClockCard />
+          <WeatherCard />
+          <LanguageCard />
         </div>
         
         <div className="text-center mt-6">
           <Button
-            onClick={() => {
-              document.getElementById('weather-widget')?.scrollIntoView({ behavior: 'smooth' });
-            }}
+            onClick={() => navigate('/global-features')}
             variant="ghost"
             className="text-white/80 hover:text-white hover:bg-white/10 text-sm"
           >
-            View Global Features →
+            View Full Global Features →
           </Button>
         </div>
       </div>
