@@ -25,7 +25,7 @@ type ExerciseMode = 'guided-2d' | 'guided-3d' | 'realtime' | 'enhanced' | 'virtu
 
 const Breathing = () => {
   const [selectedTechnique, setSelectedTechnique] = useState<BreathingTechnique>('box');
-  const [selectedMode, setSelectedMode] = useState<ExerciseMode>('mood-analysis');
+  const [selectedMode, setSelectedMode] = useState<ExerciseMode>('guided-2d');
   const [isActive, setIsActive] = useState(false);
   const [currentPhase, setCurrentPhase] = useState<'inhale' | 'hold1' | 'exhale' | 'hold2'>('inhale');
   const [sessionStartTime, setSessionStartTime] = useState<number | null>(null);
@@ -384,7 +384,7 @@ const Breathing = () => {
               <div className="flex items-start gap-3">
                 <span className="text-2xl">🎭</span>
                 <div>
-                  <h4 className="font-medium text-purple-800">Mood & Sentiment Analysis</h4>
+                  <h4 className="font-medium text-purple-800">3D Breathing & Mood Analysis</h4>
                   <p className="text-sm text-purple-600">Complete implementation with face detection and speech sentiment</p>
                 </div>
               </div>
