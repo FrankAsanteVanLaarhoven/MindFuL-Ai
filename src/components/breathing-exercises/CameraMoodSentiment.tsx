@@ -133,15 +133,16 @@ export default function CameraMoodSentiment({ userId }: CameraMoodSentimentProps
   }, [listening]);
 
   return (
-    <Card className="bg-white/90 backdrop-blur-sm border-purple-200">
-      <CardHeader className="pb-3">
+    <Card className="bg-white/90 backdrop-blur-sm border-purple-200 h-full flex flex-col">
+      <CardHeader className="pb-2 pt-3 flex-shrink-0">
         <CardTitle className="text-lg text-purple-800 flex items-center gap-2">
           🎭 Mood & Sentiment Analysis
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-3">
-        <div role="region" aria-label="Camera and mic mood/sentiment detection">
-          <div style={{ position: "relative", width: "100%", height: 400 }} className="mx-auto mb-3 bg-black rounded-lg overflow-hidden">
+      <CardContent className="flex-1 flex flex-col space-y-3 pb-3">
+        <div role="region" aria-label="Camera and mic mood/sentiment detection" className="flex-1 flex flex-col">
+          {/* Full Camera Screen */}
+          <div className="relative flex-1 min-h-0 bg-black rounded-lg overflow-hidden">
             <video
               ref={videoRef}
               autoPlay
@@ -159,15 +160,16 @@ export default function CameraMoodSentiment({ userId }: CameraMoodSentimentProps
             />
           </div>
           
-          <div className="flex gap-2 mb-3 justify-center">
+          {/* Compact Controls */}
+          <div className="flex gap-2 justify-center mt-3 flex-shrink-0">
             <Button
               onClick={() => setFacingMode(facingMode === "user" ? "environment" : "user")}
               aria-label="Switch camera"
               variant="outline"
               size="sm"
-              className="text-xs px-3 py-1 h-7"
+              className="text-xs px-3 py-1 h-8"
             >
-              Switch Camera
+              📷 Switch Camera
             </Button>
             <Button
               onClick={() => setListening((l) => !l)}
@@ -175,22 +177,25 @@ export default function CameraMoodSentiment({ userId }: CameraMoodSentimentProps
               aria-label={listening ? "Stop listening" : "Start listening"}
               variant={listening ? "destructive" : "default"}
               size="sm"
-              className="text-xs px-3 py-1 h-7"
+              className="text-xs px-3 py-1 h-8"
             >
-              {listening ? "Stop Mic" : "Start Mic"}
+              {listening ? "🎤 Stop Mic" : "🎤 Start Mic"}
             </Button>
           </div>
           
-          <div className="space-y-2 text-sm">
-            <div role="status" aria-live="polite" className="p-2 bg-gray-50 rounded">
-              <strong>Face verdict:</strong> {verdict}
+          {/* Compact Status Display */}
+          <div className="space-y-2 text-sm flex-shrink-0">
+            <div role="status" aria-live="polite" className="p-2 bg-gray-50 rounded text-xs">
+              <strong>Face:</strong> {verdict}
             </div>
-            <div aria-live="polite" className="p-2 bg-gray-50 rounded">
-              <strong>Speech transcript:</strong> {transcript}
-            </div>
+            {transcript && (
+              <div aria-live="polite" className="p-2 bg-gray-50 rounded text-xs">
+                <strong>Speech:</strong> {transcript}
+              </div>
+            )}
             {speechSentiment && (
-              <div aria-live="polite" className="p-2 bg-gray-50 rounded">
-                <strong>Speech sentiment:</strong> {speechSentiment.sentiment} ({Math.round(speechSentiment.confidence * 100)}%)
+              <div aria-live="polite" className="p-2 bg-gray-50 rounded text-xs">
+                <strong>Sentiment:</strong> {speechSentiment.sentiment} ({Math.round(speechSentiment.confidence * 100)}%)
               </div>
             )}
           </div>
