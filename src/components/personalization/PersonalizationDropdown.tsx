@@ -13,12 +13,9 @@ import { ChevronDown, Settings, User, Sparkles } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useUserProfile } from '@/hooks/useUserProfile';
 
-const PersonalizationDropdown = () => {
+export const PersonalizationDropdown = () => {
   const { t } = useTranslation();
   const { userProfile } = useUserProfile();
-
-  // Check if user profile is configured by checking if they have completed onboarding
-  const isConfigured = userProfile?.onboardingCompleted || false;
 
   return (
     <DropdownMenu>
@@ -33,7 +30,7 @@ const PersonalizationDropdown = () => {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-64 bg-white/95 backdrop-blur-md border border-white/20">
-        {!isConfigured ? (
+        {!userProfile?.isConfigured ? (
           <DropdownMenuItem asChild>
             <Link to="/personalized-dashboard" className="flex items-center">
               <Settings className="w-4 h-4 mr-2" />
@@ -67,5 +64,3 @@ const PersonalizationDropdown = () => {
     </DropdownMenu>
   );
 };
-
-export default PersonalizationDropdown;

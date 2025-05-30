@@ -91,7 +91,10 @@ const Index = () => {
         
         {/* Personalization Dropdown */}
         <div className="flex justify-center pb-8">
-          <PersonalizationDropdown />
+          <PersonalizationDropdown 
+            userProfile={userProfile}
+            onGroupSelectionComplete={handleGroupSelectionComplete}
+          />
         </div>
       </div>
 

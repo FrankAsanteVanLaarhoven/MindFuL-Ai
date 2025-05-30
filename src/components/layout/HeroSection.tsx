@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Brain, Heart, Users, Globe } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
-import PersonalizationDropdown from '../personalization/PersonalizationDropdown';
+import { PersonalizationDropdown } from '../personalization/PersonalizationDropdown';
 
 const HeroSection = () => {
   const { t } = useTranslation();
