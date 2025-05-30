@@ -43,7 +43,7 @@ const NavigationBar = () => {
           <div className="flex items-center">
             <div className="flex-shrink-0 flex items-center">
               <Brain className="w-8 h-8 text-white mr-2" />
-              <h1 className="text-xl font-bold text-white">AI Wellness Platform</h1>
+              <h1 className="text-xl font-bold text-white">Mindful AI</h1>
             </div>
           </div>
           
