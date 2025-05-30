@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useEffect, useRef } from 'react';
@@ -106,9 +105,15 @@ const Index = () => {
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <WorldClockCard />
-          <WeatherCard />
-          <LanguageCard />
+          <div data-section="world-clock-widget">
+            <WorldClockCard />
+          </div>
+          <div data-section="weather-widget">
+            <WeatherCard />
+          </div>
+          <div data-section="language-widget">
+            <LanguageCard />
+          </div>
         </div>
       </div>
 
