@@ -64,6 +64,7 @@ const Breathing = () => {
     }
   };
 
+  // Reordered modes from beginner to expert
   const modes = {
     'guided-2d': {
       name: 'Simple 2D Guide',
@@ -72,6 +73,22 @@ const Breathing = () => {
       component: BreathingCircle2D,
       level: 'Beginner',
       gradient: 'from-emerald-400 to-cyan-400'
+    },
+    'realtime': {
+      name: 'Real-Time Detection',
+      description: 'AI analyzes your actual breathing patterns',
+      icon: '🎤',
+      component: RealTimeBreathingSphere,
+      level: 'Intermediate',
+      gradient: 'from-cyan-500 to-blue-500'
+    },
+    'enhanced': {
+      name: 'Enhanced Experience',
+      description: 'Immersive visuals with trails, rings, and dynamic colors',
+      icon: '✨',
+      component: EnhancedRealTimeBreathingSphere,
+      level: 'Intermediate',
+      gradient: 'from-pink-500 to-rose-500'
     },
     'virtual-coach': {
       name: '3D Virtual Coach',
@@ -104,22 +121,6 @@ const Breathing = () => {
       component: BreathingMoodApp,
       level: 'Expert',
       gradient: 'from-orange-500 to-amber-500'
-    },
-    realtime: {
-      name: 'Real-Time Detection',
-      description: 'AI analyzes your actual breathing patterns',
-      icon: '🎤',
-      component: RealTimeBreathingSphere,
-      level: 'Intermediate',
-      gradient: 'from-cyan-500 to-blue-500'
-    },
-    enhanced: {
-      name: 'Enhanced Experience',
-      description: 'Immersive visuals with trails, rings, and dynamic colors',
-      icon: '✨',
-      component: EnhancedRealTimeBreathingSphere,
-      level: 'Intermediate',
-      gradient: 'from-pink-500 to-rose-500'
     }
   };
 
@@ -244,31 +245,22 @@ const Breathing = () => {
           </p>
         </div>
 
-        {/* Progress and Achievements Row */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="backdrop-blur-md bg-white/10 rounded-2xl border border-white/20">
-            <BreathingProgress />
-          </div>
-          <div className="backdrop-blur-md bg-white/10 rounded-2xl border border-white/20">
-            <BreathingAchievements />
-          </div>
-        </div>
-
-        {/* Experience Level Selection */}
+        {/* Experience Level Selection with Analytics Card */}
         <Card className="backdrop-blur-md bg-white/10 border-white/20 shadow-2xl">
           <CardHeader className="text-center">
             <CardTitle className="text-3xl text-white mb-2">Choose Your Experience Level</CardTitle>
             <CardDescription className="text-gray-300 text-lg">Select from beginner-friendly to expert-level breathing technologies</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {/* Exercise Mode Cards - Smaller and arranged logically */}
               {Object.entries(modes).map(([key, mode]) => (
                 <div
                   key={key}
                   onClick={() => setSelectedMode(key as ExerciseMode)}
-                  className={`group relative p-6 rounded-2xl border-2 cursor-pointer transition-all duration-500 transform hover:scale-105 hover:-translate-y-2 ${
+                  className={`group relative p-4 rounded-xl border-2 cursor-pointer transition-all duration-500 transform hover:scale-105 hover:-translate-y-1 ${
                     selectedMode === key
-                      ? 'border-white/50 bg-white/20 shadow-2xl'
+                      ? 'border-white/50 bg-white/20 shadow-xl'
                       : 'border-white/20 bg-white/5 hover:bg-white/15 hover:border-white/40'
                   }`}
                   style={{
@@ -278,27 +270,43 @@ const Breathing = () => {
                   }}
                 >
                   {/* Gradient overlay on hover */}
-                  <div className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${mode.gradient} opacity-0 group-hover:opacity-20 transition-opacity duration-300`}></div>
+                  <div className={`absolute inset-0 rounded-xl bg-gradient-to-br ${mode.gradient} opacity-0 group-hover:opacity-20 transition-opacity duration-300`}></div>
                   
-                  <div className="relative z-10 text-center space-y-4">
-                    <div className="text-4xl mb-3 transform group-hover:scale-110 transition-transform duration-300">
+                  <div className="relative z-10 text-center space-y-3">
+                    <div className="text-2xl mb-2 transform group-hover:scale-110 transition-transform duration-300">
                       {mode.icon}
                     </div>
-                    <h3 className="font-bold text-white text-lg leading-tight">{mode.name}</h3>
-                    <p className="text-gray-300 text-sm leading-relaxed">{mode.description}</p>
-                    <Badge className={`${getLevelColor(mode.level)} font-medium px-3 py-1`}>
+                    <h3 className="font-bold text-white text-sm leading-tight">{mode.name}</h3>
+                    <p className="text-gray-300 text-xs leading-relaxed">{mode.description}</p>
+                    <Badge className={`${getLevelColor(mode.level)} font-medium px-2 py-1 text-xs`}>
                       {mode.level}
                     </Badge>
                   </div>
                   
                   {/* Selection indicator */}
                   {selectedMode === key && (
-                    <div className="absolute top-3 right-3 w-6 h-6 bg-white rounded-full flex items-center justify-center">
-                      <div className="w-3 h-3 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full"></div>
+                    <div className="absolute top-2 right-2 w-4 h-4 bg-white rounded-full flex items-center justify-center">
+                      <div className="w-2 h-2 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full"></div>
                     </div>
                   )}
                 </div>
               ))}
+
+              {/* Analytics Card - Moved into the grid */}
+              <div className="group relative p-4 rounded-xl border-2 border-white/20 bg-white/5 hover:bg-white/15 hover:border-white/40 transition-all duration-500">
+                <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-green-500 to-emerald-500 opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
+                
+                <div className="relative z-10 text-center space-y-3">
+                  <div className="text-2xl mb-2 transform group-hover:scale-110 transition-transform duration-300">
+                    📊
+                  </div>
+                  <h3 className="font-bold text-white text-sm leading-tight">Progress & Analytics</h3>
+                  <div className="space-y-2">
+                    <BreathingProgress />
+                    <BreathingAchievements />
+                  </div>
+                </div>
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -343,8 +351,8 @@ const Breathing = () => {
           </Card>
         )}
 
-        {/* Breathing Exercise Component - Enhanced container */}
-        <div className="backdrop-blur-md bg-white/5 rounded-2xl border border-white/20 shadow-2xl p-2" style={{ aspectRatio: '16/9', minHeight: '600px' }}>
+        {/* Breathing Exercise Component - Enhanced container with increased height */}
+        <div className="backdrop-blur-md bg-white/5 rounded-2xl border border-white/20 shadow-2xl p-2" style={{ aspectRatio: '16/9', minHeight: '700px' }}>
           <SelectedComponent
             technique={selectedTechnique}
             isActive={(selectedMode === 'guided-2d' || selectedMode === 'virtual-coach') ? isActive : undefined}
