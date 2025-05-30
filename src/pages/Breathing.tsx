@@ -25,7 +25,7 @@ type ExerciseMode = 'guided-2d' | 'guided-3d' | 'realtime' | 'enhanced' | 'virtu
 
 const Breathing = () => {
   const [selectedTechnique, setSelectedTechnique] = useState<BreathingTechnique>('box');
-  const [selectedMode, setSelectedMode] = useState<ExerciseMode>('guided-3d');
+  const [selectedMode, setSelectedMode] = useState<ExerciseMode>('mood-analysis');
   const [isActive, setIsActive] = useState(false);
   const [currentPhase, setCurrentPhase] = useState<'inhale' | 'hold1' | 'exhale' | 'hold2'>('inhale');
   const [sessionStartTime, setSessionStartTime] = useState<number | null>(null);

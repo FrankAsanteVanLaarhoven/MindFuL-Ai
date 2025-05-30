@@ -141,7 +141,7 @@ export default function CameraMoodSentiment({ userId }: CameraMoodSentimentProps
       </CardHeader>
       <CardContent className="space-y-3">
         <div role="region" aria-label="Camera and mic mood/sentiment detection">
-          <div style={{ position: "relative", width: "100%", height: 600 }} className="mx-auto mb-3 bg-black rounded-lg overflow-hidden">
+          <div style={{ position: "relative", width: "100%", height: 400 }} className="mx-auto mb-3 bg-black rounded-lg overflow-hidden">
             <video
               ref={videoRef}
               autoPlay
@@ -165,7 +165,7 @@ export default function CameraMoodSentiment({ userId }: CameraMoodSentimentProps
               aria-label="Switch camera"
               variant="outline"
               size="sm"
-              className="text-xs px-2 py-1 h-6"
+              className="text-xs px-3 py-1 h-7"
             >
               Switch Camera
             </Button>
@@ -175,7 +175,7 @@ export default function CameraMoodSentiment({ userId }: CameraMoodSentimentProps
               aria-label={listening ? "Stop listening" : "Start listening"}
               variant={listening ? "destructive" : "default"}
               size="sm"
-              className="text-xs px-2 py-1 h-6"
+              className="text-xs px-3 py-1 h-7"
             >
               {listening ? "Stop Mic" : "Start Mic"}
             </Button>
