@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -98,7 +97,6 @@ const PublicAPIDocumentation = () => {
       return;
     }
 
-    // Simulate API call
     setTestResponse('Testing...');
     
     setTimeout(() => {
@@ -278,7 +276,7 @@ const PublicAPIDocumentation = () => {
                 <h3 className="font-semibold text-gray-800 mb-3">Test Endpoint</h3>
                 <div className="space-y-3">
                   <Textarea
-                    placeholder='{"text": "I\'m feeling really good today!", "options": {"detailed": true}}'
+                    placeholder='{"text": "I am feeling really good today!", "options": {"detailed": true}}'
                     value={testEndpoint}
                     onChange={(e) => setTestEndpoint(e.target.value)}
                     className="min-h-[100px] font-mono text-sm"
