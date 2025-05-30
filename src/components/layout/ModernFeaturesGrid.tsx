@@ -41,6 +41,14 @@ const ModernFeaturesGrid = () => {
       href: '/community'
     },
     {
+      icon: '🎓',
+      title: 'Educational Research Hub',
+      description: 'Access evidence-based mental health resources, research findings, and educational content to deepen your understanding.',
+      badges: ['📚 Research Articles', '🔬 Clinical Studies', '🎯 Learning Modules', '📊 Data Insights'],
+      gradient: 'from-indigo-400 via-indigo-500 to-indigo-600',
+      href: '/wellness-dashboard'
+    },
+    {
       icon: '🧠',
       title: 'AI Wellness Platform',
       description: 'Advanced mood mapping, open data science, public API, and world-class accessibility features.',
