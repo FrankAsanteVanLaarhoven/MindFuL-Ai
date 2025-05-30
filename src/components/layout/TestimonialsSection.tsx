@@ -54,7 +54,7 @@ const TestimonialsSection = () => {
 
   return (
     <div className="mt-12 sm:mt-16 mb-8 sm:mb-12 px-4 sm:px-0">
-      <h2 className="text-2xl sm:text-3xl font-bold text-center text-teal-800 mb-6 sm:mb-8">
+      <h2 className="text-2xl sm:text-3xl font-bold text-center text-white mb-6 sm:mb-8">
         What Our Community Says
       </h2>
       
@@ -69,20 +69,20 @@ const TestimonialsSection = () => {
         <CarouselContent className="-ml-2 md:-ml-4">
           {testimonials.map((testimonial, index) => (
             <CarouselItem key={index} className="pl-2 md:pl-4 md:basis-1/2 lg:basis-1/3">
-              <Card className="bg-white/80 backdrop-blur-sm border-teal-200 shadow-lg h-full">
+              <Card className="bg-white/15 backdrop-blur-md border-white/30 shadow-lg h-full">
                 <CardContent className="p-4 sm:p-6">
                   <div className="flex items-center gap-3 sm:gap-4 mb-3 sm:mb-4">
                     <img 
                       src={testimonial.image}
                       alt={`${testimonial.name} from ${testimonial.location}`}
-                      className="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover"
+                      className="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover border-2 border-white/20"
                     />
                     <div>
-                      <div className="font-semibold text-gray-800 text-sm sm:text-base">{testimonial.name}</div>
-                      <div className="text-xs sm:text-sm text-gray-600">{testimonial.location}</div>
+                      <div className="font-semibold text-white text-sm sm:text-base">{testimonial.name}</div>
+                      <div className="text-xs sm:text-sm text-white/70">{testimonial.location}</div>
                     </div>
                   </div>
-                  <p className="text-gray-600 text-xs sm:text-sm leading-relaxed">
+                  <p className="text-white/80 text-xs sm:text-sm leading-relaxed">
                     "{testimonial.text}"
                   </p>
                 </CardContent>

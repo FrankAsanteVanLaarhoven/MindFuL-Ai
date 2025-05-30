@@ -28,45 +28,58 @@ const Index = () => {
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 relative overflow-hidden">
       <NavigationBar />
       
-      {/* Hero Section with Community Images */}
-      <HeroSection />
+      {/* Enhanced glassmorphism background overlay */}
+      <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-white/5 backdrop-blur-[2px]"></div>
       
-      {/* Animated background elements */}
+      {/* Hero Section with enhanced glass effect */}
+      <div className="relative z-10 bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl mx-4 mt-8 mb-8">
+        <HeroSection />
+      </div>
+      
+      {/* Animated background elements with glass effect */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-teal-500/5 rounded-full blur-3xl animate-pulse delay-500"></div>
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse backdrop-blur-sm"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl animate-pulse delay-1000 backdrop-blur-sm"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-teal-500/15 rounded-full blur-3xl animate-pulse delay-500 backdrop-blur-sm"></div>
       </div>
 
       <div ref={cardRef} className="relative z-10">
-        {/* Modern Features Grid */}
-        <ModernFeaturesGrid />
-
-        {/* Call to Action */}
-        <div className="text-center py-12 px-6">
-          <p className="text-lg text-white/80 mb-6">
-            Ready to embark on a journey of self-discovery and personal growth?
-          </p>
-          <Button
-            onClick={() => navigate('/wellness-dashboard')}
-            size="lg"
-            className="bg-gradient-to-r from-teal-500 to-blue-500 hover:from-teal-600 hover:to-blue-600 text-white font-semibold rounded-full px-8 py-3 transition-all duration-300 shadow-lg hover:shadow-xl"
-          >
-            Explore Your Dashboard →
-          </Button>
+        {/* Modern Features Grid with enhanced glass container */}
+        <div className="bg-white/8 backdrop-blur-lg border border-white/20 rounded-3xl mx-4 mb-8 p-6">
+          <ModernFeaturesGrid />
         </div>
 
-        {/* Testimonials */}
-        <TestimonialsSection />
+        {/* Call to Action with glass effect */}
+        <div className="text-center py-12 px-6">
+          <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-8 mx-auto max-w-2xl">
+            <p className="text-lg text-white/90 mb-6">
+              Ready to embark on a journey of self-discovery and personal growth?
+            </p>
+            <Button
+              onClick={() => navigate('/wellness-dashboard')}
+              size="lg"
+              className="bg-gradient-to-r from-teal-500/80 to-blue-500/80 hover:from-teal-600/90 hover:to-blue-600/90 text-white font-semibold rounded-full px-8 py-3 transition-all duration-300 shadow-lg hover:shadow-xl backdrop-blur-sm border border-white/20"
+            >
+              Explore Your Dashboard →
+            </Button>
+          </div>
+        </div>
 
-        {/* Footer */}
-        <div className="text-center py-12 text-white/60">
-          <p className="text-sm">
-            © 2024 AI Wellness Platform. All rights reserved.
-          </p>
-          <p className="text-xs mt-2">
-            Empowering Minds, Transforming Lives.
-          </p>
+        {/* Testimonials with glass container */}
+        <div className="bg-white/8 backdrop-blur-lg border border-white/20 rounded-3xl mx-4 mb-8 p-6">
+          <TestimonialsSection />
+        </div>
+
+        {/* Footer with glass effect */}
+        <div className="text-center py-12 text-white/80">
+          <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6 mx-auto max-w-md">
+            <p className="text-sm">
+              © 2024 AI Wellness Platform. All rights reserved.
+            </p>
+            <p className="text-xs mt-2 text-white/60">
+              Empowering Minds, Transforming Lives.
+            </p>
+          </div>
         </div>
       </div>
     </div>
