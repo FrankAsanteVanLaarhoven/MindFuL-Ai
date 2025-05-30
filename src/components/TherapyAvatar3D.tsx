@@ -41,6 +41,71 @@ const RealisticHumanAvatar: React.FC<{
   const speakStateRef = useRef({ intensity: 0, phase: 0 });
   const walkStateRef = useRef({ phase: 0, isWalking: true });
 
+  // Realistic human proportions and colors - moved and simplified
+  const avatarColors = useMemo(() => {
+    const skinTones: Record<string, string> = {
+      therapist: '#F4C2A1',
+      grandma: '#E8B887',
+      grandpa: '#D2B48C',
+      aunt: '#CD853F',
+      uncle: '#8B7355',
+      sibling: '#F5DEB3',
+      teacher: '#DEB887',
+      friend: '#DDBEA9'
+    };
+    
+    const hairColors: Record<string, string> = {
+      therapist: '#8B4513',
+      grandma: '#C0C0C0',
+      grandpa: '#808080',
+      aunt: '#654321',
+      uncle: '#2F1B14',
+      sibling: '#8B4513',
+      teacher: '#654321',
+      friend: '#D2691E'
+    };
+    
+    const clothingColors: Record<string, string> = {
+      therapist: '#4682B4',
+      grandma: '#DDA0DD',
+      grandpa: '#708090',
+      aunt: '#CD853F',
+      uncle: '#2F4F4F',
+      sibling: '#FF6347',
+      teacher: '#9370DB',
+      friend: '#20B2AA'
+    };
+    
+    const eyeColors: Record<string, string> = {
+      therapist: '#8B4513',
+      grandma: '#4682B4',
+      grandpa: '#808080',
+      aunt: '#228B22',
+      uncle: '#2F4F4F',
+      sibling: '#8B4513',
+      teacher: '#4B0082',
+      friend: '#20B2AA'
+    };
+
+    return {
+      skin: skinTones[avatar.type] || avatar.skinTone || '#F4C2A1',
+      hair: hairColors[avatar.type] || '#8B4513',
+      clothing: clothingColors[avatar.type] || '#4682B4',
+      eyeColor: eyeColors[avatar.type] || '#8B4513'
+    };
+  }, [avatar.type, avatar.skinTone]);
+
+  const emotionColors = useMemo(() => {
+    const colors = {
+      neutral: { mouth: "#CD5C5C", text: "#FFFFFF" },
+      happy: { mouth: "#FF69B4", text: "#FFD700" },
+      concerned: { mouth: "#4682B4", text: "#87CEEB" },
+      encouraging: { mouth: "#32CD32", text: "#98FB98" },
+      thoughtful: { mouth: "#9370DB", text: "#DDA0DD" }
+    };
+    return colors[emotion as keyof typeof colors] || colors.neutral;
+  }, [emotion]);
+
   // Enhanced realistic animation system
   useFrame((state) => {
     if (!groupRef.current) return;
@@ -150,30 +215,6 @@ const RealisticHumanAvatar: React.FC<{
       eyebrowRightRef.current.position.y = 1.8 + eyebrowRaise;
     }
   });
-
-  // Realistic human proportions and colors
-  const avatarColors = useMemo(() => {
-    const skinTones = {
-      therapist: '#F4C2A1',
-      grandma: '#E8B887',
-      grandpa: '#D2B48C',
-      aunt: '#CD853F',
-      uncle: '#8B7355',
-      sibling: '#F5DEB3',
-      teacher: '#DEB887',
-      friend: '#DDBEA9'
-    };
-    return {
-      skin: avatarColors[avatar.type] || avatar.skinTone || '#F4C2A1',
-      hair: getRealisticHairColor(avatar.type),
-      clothing: getRealisticClothingColor(avatar.type),
-      eyeColor: getEyeColor(avatar.type)
-    };
-  }, [avatar.type, avatar.skinTone]);
-
-  const emotionColors = useMemo(() => {
-    return getEmotionColors(emotion);
-  }, [emotion]);
 
   return (
     <group ref={groupRef} scale={[0.9, 0.9, 0.9]}>
@@ -349,48 +390,6 @@ const getRealisticPupilDirection = (emotion: string, time: number) => {
   return directions[emotion as keyof typeof directions] || directions.neutral;
 };
 
-const getRealisticHairColor = (type: string): string => {
-  const hairColors = {
-    therapist: '#8B4513',
-    grandma: '#C0C0C0',
-    grandpa: '#808080',
-    aunt: '#654321',
-    uncle: '#2F1B14',
-    sibling: '#8B4513',
-    teacher: '#654321',
-    friend: '#D2691E'
-  };
-  return hairColors[type as keyof typeof hairColors] || '#8B4513';
-};
-
-const getRealisticClothingColor = (type: string): string => {
-  const clothingColors = {
-    therapist: '#4682B4',
-    grandma: '#DDA0DD',
-    grandpa: '#708090',
-    aunt: '#CD853F',
-    uncle: '#2F4F4F',
-    sibling: '#FF6347',
-    teacher: '#9370DB',
-    friend: '#20B2AA'
-  };
-  return clothingColors[type as keyof typeof clothingColors] || '#4682B4';
-};
-
-const getEyeColor = (type: string): string => {
-  const eyeColors = {
-    therapist: '#8B4513',
-    grandma: '#4682B4',
-    grandpa: '#808080',
-    aunt: '#228B22',
-    uncle: '#2F4F4F',
-    sibling: '#8B4513',
-    teacher: '#4B0082',
-    friend: '#20B2AA'
-  };
-  return eyeColors[type as keyof typeof eyeColors] || '#8B4513';
-};
-
 const getEmotionEyebrowPosition = (emotion: string, time: number): number => {
   const positions = {
     neutral: 0,
@@ -400,17 +399,6 @@ const getEmotionEyebrowPosition = (emotion: string, time: number): number => {
     thoughtful: 0.04
   };
   return positions[emotion as keyof typeof positions] || 0;
-};
-
-const getEmotionColors = (emotion: string) => {
-  const colors = {
-    neutral: { mouth: "#CD5C5C", text: "#FFFFFF" },
-    happy: { mouth: "#FF69B4", text: "#FFD700" },
-    concerned: { mouth: "#4682B4", text: "#87CEEB" },
-    encouraging: { mouth: "#32CD32", text: "#98FB98" },
-    thoughtful: { mouth: "#9370DB", text: "#DDA0DD" }
-  };
-  return colors[emotion as keyof typeof colors] || colors.neutral;
 };
 
 const getEmotionEmoji = (emotion: string): string => {
