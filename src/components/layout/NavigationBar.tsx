@@ -2,11 +2,11 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { NavigationBrand } from './navigation/NavigationBrand';
-import { TherapyMenu } from './navigation/TherapyMenu';
-import { WellnessMenu } from './navigation/WellnessMenu';
-import { CommunityMenu } from './navigation/CommunityMenu';
-import { GlobalFeaturesMenu } from './navigation/GlobalFeaturesMenu';
+import NavigationBrand from './navigation/NavigationBrand';
+import TherapyMenu from './navigation/TherapyMenu';
+import WellnessMenu from './navigation/WellnessMenu';
+import CommunityMenu from './navigation/CommunityMenu';
+import GlobalFeaturesMenu from './navigation/GlobalFeaturesMenu';
 
 const NavigationBar = () => {
   const { t } = useTranslation();
