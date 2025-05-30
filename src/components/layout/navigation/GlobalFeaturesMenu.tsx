@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,6 +12,8 @@ import { NavigationMenuItem } from '@/components/ui/navigation-menu';
 import { Globe, CloudSun, Clock, Languages, ChevronDown } from 'lucide-react';
 
 const GlobalFeaturesMenu = () => {
+  const navigate = useNavigate();
+
   return (
     <NavigationMenuItem>
       <DropdownMenu>
@@ -30,21 +33,43 @@ const GlobalFeaturesMenu = () => {
         >
           <DropdownMenuItem 
             className="flex items-center gap-2 cursor-pointer hover:bg-blue-50"
-            onClick={() => document.getElementById('weather-widget')?.scrollIntoView({ behavior: 'smooth' })}
+            onClick={() => navigate('/global-features')}
+          >
+            <Globe className="w-4 h-4 text-blue-500" />
+            Global Features Hub
+          </DropdownMenuItem>
+          <DropdownMenuItem 
+            className="flex items-center gap-2 cursor-pointer hover:bg-blue-50"
+            onClick={() => {
+              navigate('/global-features');
+              setTimeout(() => {
+                document.getElementById('weather-widget')?.scrollIntoView({ behavior: 'smooth' });
+              }, 100);
+            }}
           >
             <CloudSun className="w-4 h-4 text-orange-500" />
             Weather & Air Quality
           </DropdownMenuItem>
           <DropdownMenuItem 
             className="flex items-center gap-2 cursor-pointer hover:bg-blue-50"
-            onClick={() => document.getElementById('world-clock-widget')?.scrollIntoView({ behavior: 'smooth' })}
+            onClick={() => {
+              navigate('/global-features');
+              setTimeout(() => {
+                document.getElementById('world-clock-widget')?.scrollIntoView({ behavior: 'smooth' });
+              }, 100);
+            }}
           >
             <Clock className="w-4 h-4 text-indigo-500" />
             World Clock
           </DropdownMenuItem>
           <DropdownMenuItem 
             className="flex items-center gap-2 cursor-pointer hover:bg-blue-50"
-            onClick={() => document.getElementById('localization-widget')?.scrollIntoView({ behavior: 'smooth' })}
+            onClick={() => {
+              navigate('/global-features');
+              setTimeout(() => {
+                document.getElementById('localization-widget')?.scrollIntoView({ behavior: 'smooth' });
+              }, 100);
+            }}
           >
             <Languages className="w-4 h-4 text-blue-500" />
             Localization

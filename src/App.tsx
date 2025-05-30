@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -14,6 +15,7 @@ import Journal from "./pages/Journal";
 import WellnessDashboard from "./pages/WellnessDashboard";
 import Community from "./pages/Community";
 import Teletherapy from "./pages/Teletherapy";
+import GlobalFeatures from "./pages/GlobalFeatures";
 import NotFound from "./pages/NotFound";
 
 // Initialize i18n
@@ -39,6 +41,7 @@ const App = () => (
             <Route path="/teletherapy" element={<Teletherapy />} />
             <Route path="/therapy-bot" element={<TherapyBot />} />
             <Route path="/wellness-dashboard" element={<WellnessDashboard />} />
+            <Route path="/global-features" element={<GlobalFeatures />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
