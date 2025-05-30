@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -122,7 +123,7 @@ const UserGroupSelection: React.FC<UserGroupSelectionProps> = ({ onComplete, exi
                   key={group.id}
                   group={group}
                   isSelected={selectedGroups.includes(group.id)}
-                  onToggle={() => handleGroupToggle(group.id)}
+                  onSelect={handleGroupToggle}
                 />
               ))}
             </div>
