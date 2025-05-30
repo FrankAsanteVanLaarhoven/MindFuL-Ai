@@ -33,13 +33,6 @@ const GlobalFeaturesMenu = () => {
         >
           <DropdownMenuItem 
             className="flex items-center gap-2 cursor-pointer hover:bg-blue-50"
-            onClick={() => navigate('/global-features')}
-          >
-            <Globe className="w-4 h-4 text-blue-500" />
-            Global Features Hub
-          </DropdownMenuItem>
-          <DropdownMenuItem 
-            className="flex items-center gap-2 cursor-pointer hover:bg-blue-50"
             onClick={() => {
               navigate('/global-features');
               setTimeout(() => {
