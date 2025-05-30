@@ -8,7 +8,18 @@
     "therapy": "Terapia",
     "wellness": "Bienestar",
     "community": "Comunidad",
-    "globalFeatures": "Funciones Globales"
+    "globalFeatures": "Funciones Globales",
+    "dashboard": "Panel de Control",
+    "startSession": "Comenzar Sesión de Respiración",
+    "analyzeMood": "Analizar Tu Estado de Ánimo"
+  },
+  "features": {
+    "aiPowered": "Impulsado por IA",
+    "aiDescription": "IA avanzada para orientación personalizada de bienestar",
+    "community": "Comunidad",
+    "communityDescription": "Conecta con otros en tu viaje de bienestar",
+    "global": "Global",
+    "globalDescription": "Herramientas de bienestar para usuarios de todo el mundo"
   },
   "global": {
     "weather": "Clima y Calidad del Aire",

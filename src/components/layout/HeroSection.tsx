@@ -1,86 +1,87 @@
 
-import React, { useRef, useEffect } from 'react';
-import { gsap } from 'gsap';
+import React from 'react';
+import { useTranslation } from 'react-i18next';
+import { Brain, Heart, Users, Globe } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Link } from 'react-router-dom';
+import { PersonalizationDropdown } from '../personalization/PersonalizationDropdown';
 
 const HeroSection = () => {
-  const headerRef = useRef<HTMLDivElement>(null);
-  const heroImageRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    // Animate header
-    if (headerRef.current) {
-      gsap.fromTo(headerRef.current,
-        { y: -50, opacity: 0 },
-        { y: 0, opacity: 1, duration: 1, ease: "power2.out" }
-      );
-    }
-
-    // Animate hero image
-    if (heroImageRef.current) {
-      gsap.fromTo(heroImageRef.current,
-        { scale: 0.8, opacity: 0 },
-        { scale: 1, opacity: 1, duration: 1.2, ease: "power2.out", delay: 0.3 }
-      );
-    }
-  }, []);
+  const { t } = useTranslation();
 
   return (
-    <div className="mb-8 sm:mb-12 lg:mb-16 p-6">
-      <div ref={headerRef} className="text-center mb-6 sm:mb-8">
-        <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4 sm:mb-6 px-4">
-          Welcome to Mindful AI
+    <div className="relative min-h-screen flex items-center justify-center overflow-hidden">
+      {/* Background with animated elements */}
+      <div className="absolute inset-0 bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
+        <div className="absolute inset-0 bg-black/20" />
+        {/* Animated floating elements */}
+        <div className="absolute inset-0 overflow-hidden">
+          {[...Array(50)].map((_, i) => (
+            <div
+              key={i}
+              className="absolute w-2 h-2 bg-white rounded-full opacity-20 animate-pulse"
+              style={{
+                left: `${Math.random() * 100}%`,
+                top: `${Math.random() * 100}%`,
+                animationDelay: `${Math.random() * 3}s`,
+                animationDuration: `${2 + Math.random() * 3}s`
+              }}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="relative z-10 text-center px-6 max-w-4xl mx-auto">
+        <div className="mb-8 flex justify-center">
+          <div className="relative">
+            <Brain className="w-20 h-20 text-purple-300 animate-pulse" />
+            <Heart className="w-8 h-8 text-pink-300 absolute -top-2 -right-2 animate-bounce" />
+          </div>
+        </div>
+        
+        <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 bg-clip-text text-transparent bg-gradient-to-r from-purple-200 to-blue-200">
+          {t('app.title', 'Mindful AI')}
         </h1>
-        <p className="text-lg sm:text-xl text-white/80 max-w-3xl mx-auto mb-6 sm:mb-8 px-4 leading-relaxed">
-          Your personal companion for understanding and improving your mental well-being.
-          Join a diverse community focused on mental health and personal growth.
+        
+        <p className="text-xl md:text-2xl text-purple-200 mb-12 leading-relaxed">
+          {t('app.subtitle', 'Global wellness app with AI-powered features')}
         </p>
-      </div>
 
-      {/* Hero Image Gallery with enhanced glass effect */}
-      <div ref={heroImageRef} className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4 mb-6 sm:mb-8 px-4">
-        <div className="overflow-hidden rounded-lg shadow-lg bg-white/10 backdrop-blur-sm border border-white/20">
-          <img 
-            src="https://images.unsplash.com/photo-1547036967-23d11aacaee0?w=300&h=200&fit=crop&crop=face"
-            alt="Diverse young woman smiling"
-            className="w-full h-24 sm:h-32 object-cover hover:scale-105 transition-transform duration-300"
-          />
+        <div className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-12">
+          <Link to="/breathing">
+            <Button size="lg" className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-8 py-4 text-lg font-semibold rounded-full shadow-2xl hover:shadow-purple-500/25 transition-all duration-300 transform hover:scale-105">
+              {t('navigation.startSession', 'Start Breathing Session')}
+            </Button>
+          </Link>
+          
+          <Link to="/mood-analysis">
+            <Button variant="outline" size="lg" className="border-2 border-purple-300 text-purple-100 px-8 py-4 text-lg font-semibold rounded-full bg-white/10 backdrop-blur-sm hover:bg-white/20 transition-all duration-300">
+              {t('navigation.analyzeMood', 'Analyze Your Mood')}
+            </Button>
+          </Link>
         </div>
-        <div className="overflow-hidden rounded-lg shadow-lg bg-white/10 backdrop-blur-sm border border-white/20">
-          <img 
-            src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=300&h=200&fit=crop&crop=face"
-            alt="Man from diverse background"
-            className="w-full h-24 sm:h-32 object-cover hover:scale-105 transition-transform duration-300"
-          />
-        </div>
-        <div className="overflow-hidden rounded-lg shadow-lg bg-white/10 backdrop-blur-sm border border-white/20">
-          <img 
-            src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=300&h=200&fit=crop&crop=face"
-            alt="Young woman with natural hair"
-            className="w-full h-24 sm:h-32 object-cover hover:scale-105 transition-transform duration-300"
-          />
-        </div>
-        <div className="overflow-hidden rounded-lg shadow-lg bg-white/10 backdrop-blur-sm border border-white/20">
-          <img 
-            src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=300&h=200&fit=crop&crop=face"
-            alt="Elderly person smiling"
-            className="w-full h-24 sm:h-32 object-cover hover:scale-105 transition-transform duration-300"
-          />
-        </div>
-      </div>
 
-      {/* Community Stats with enhanced glass effect */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-8 sm:mb-12 px-4">
-        <div className="text-center bg-white/15 backdrop-blur-md border border-white/30 rounded-lg p-4 sm:p-6 shadow-md">
-          <div className="text-2xl sm:text-3xl font-bold text-white mb-2">10K+</div>
-          <div className="text-sm sm:text-base text-white/80">Active Users</div>
-        </div>
-        <div className="text-center bg-white/15 backdrop-blur-md border border-white/30 rounded-lg p-4 sm:p-6 shadow-md">
-          <div className="text-2xl sm:text-3xl font-bold text-white mb-2">50+</div>
-          <div className="text-sm sm:text-base text-white/80">Countries Represented</div>
-        </div>
-        <div className="text-center bg-white/15 backdrop-blur-md border border-white/30 rounded-lg p-4 sm:p-6 shadow-md">
-          <div className="text-2xl sm:text-3xl font-bold text-white mb-2">95%</div>
-          <div className="text-sm sm:text-base text-white/80">Satisfaction Rate</div>
+        <PersonalizationDropdown />
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-16">
+          <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
+            <Brain className="w-12 h-12 text-purple-300 mb-4 mx-auto" />
+            <h3 className="text-xl font-semibold text-white mb-2">{t('features.aiPowered', 'AI-Powered')}</h3>
+            <p className="text-purple-200">{t('features.aiDescription', 'Advanced AI for personalized wellness guidance')}</p>
+          </div>
+          
+          <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
+            <Users className="w-12 h-12 text-blue-300 mb-4 mx-auto" />
+            <h3 className="text-xl font-semibold text-white mb-2">{t('features.community', 'Community')}</h3>
+            <p className="text-purple-200">{t('features.communityDescription', 'Connect with others on your wellness journey')}</p>
+          </div>
+          
+          <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
+            <Globe className="w-12 h-12 text-green-300 mb-4 mx-auto" />
+            <h3 className="text-xl font-semibold text-white mb-2">{t('features.global', 'Global')}</h3>
+            <p className="text-purple-200">{t('features.globalDescription', 'Wellness tools for users worldwide')}</p>
+          </div>
         </div>
       </div>
     </div>

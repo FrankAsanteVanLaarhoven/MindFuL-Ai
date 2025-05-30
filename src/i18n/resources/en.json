@@ -8,7 +8,25 @@
     "therapy": "Therapy",
     "wellness": "Wellness",
     "community": "Community",
-    "globalFeatures": "Global Features"
+    "globalFeatures": "Global Features",
+    "dashboard": "Dashboard",
+    "startSession": "Start Breathing Session",
+    "analyzeMood": "Analyze Your Mood"
+  },
+  "features": {
+    "aiPowered": "AI-Powered",
+    "aiDescription": "Advanced AI for personalized wellness guidance",
+    "community": "Community",
+    "communityDescription": "Connect with others on your wellness journey",
+    "global": "Global",
+    "globalDescription": "Wellness tools for users worldwide"
+  },
+  "personalization": {
+    "title": "Personalization",
+    "setup": "Set Up My Profile",
+    "update": "Update My Groups",
+    "dashboard": "View Wellness Dashboard",
+    "content": "My Personalized Content"
   },
   "global": {
     "weather": "Weather & Air Quality",

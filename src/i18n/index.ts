@@ -54,8 +54,27 @@ i18n
     },
 
     react: {
-      useSuspense: false
+      useSuspense: false,
+      bindI18n: 'languageChanged',
+      bindI18nStore: false,
+      transSupportBasicHtmlNodes: true,
+      transKeepBasicHtmlNodesFor: ['br', 'strong', 'i']
     }
   });
+
+// Set up language change listener to update document direction and language
+i18n.on('languageChanged', (lng) => {
+  console.log('Language changed to:', lng);
+  
+  // Update document direction for RTL languages
+  if (['ar', 'ur'].includes(lng)) {
+    document.documentElement.dir = 'rtl';
+  } else {
+    document.documentElement.dir = 'ltr';
+  }
+  
+  // Update document language attribute
+  document.documentElement.lang = lng;
+});
 
 export default i18n;
