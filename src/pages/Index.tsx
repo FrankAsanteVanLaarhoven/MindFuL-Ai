@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import React, { useEffect, useRef } from 'react';
@@ -9,6 +10,7 @@ import { Sparkles, BrainCircuit, HeartPulse, BookOpenCheck, Lightbulb, Graduatio
 import { gsap } from 'gsap';
 import { useNavigate } from 'react-router-dom';
 import NavigationBar from '@/components/layout/NavigationBar';
+import HeroSection from '@/components/layout/HeroSection';
 
 const Index = () => {
   const cardRef = useRef<HTMLDivElement>(null);
@@ -24,28 +26,20 @@ const Index = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-800 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-teal-50 via-blue-50 to-purple-50 relative overflow-hidden">
       <NavigationBar />
       
+      {/* Hero Section with Community Images */}
+      <HeroSection />
+      
       {/* Animated background elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-teal-500/10 rounded-full blur-3xl animate-pulse delay-500"></div>
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-teal-500/5 rounded-full blur-3xl animate-pulse delay-500"></div>
       </div>
 
       <div ref={cardRef} className="relative z-10 max-w-7xl mx-auto p-6 space-y-8">
-        {/* Header */}
-        <div className="text-center py-8">
-          <h1 className="text-5xl font-bold text-white mb-4 flex items-center justify-center gap-3">
-            <span className="text-6xl">✨</span>
-            Unlock Your Inner Genius
-          </h1>
-          <p className="text-xl text-gray-300 max-w-4xl mx-auto leading-relaxed">
-            Explore cutting-edge AI tools and personalized wellness programs designed to elevate your mind, body, and spirit.
-          </p>
-        </div>
-
         {/* Enhanced Features Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {/* AI-Powered Brain Training */}
@@ -167,7 +161,7 @@ const Index = () => {
 
         {/* Call to Action */}
         <div className="text-center">
-          <p className="text-lg text-gray-300 mb-6">
+          <p className="text-lg text-gray-700 mb-6">
             Ready to embark on a journey of self-discovery and personal growth?
           </p>
           <Button
@@ -181,24 +175,24 @@ const Index = () => {
 
         {/* Testimonials */}
         <div className="space-y-6">
-          <h2 className="text-3xl font-bold text-white text-center">
+          <h2 className="text-3xl font-bold text-gray-800 text-center">
             What Our Users Are Saying
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card className="bg-white/10 backdrop-blur-md border-white/20">
-              <CardContent className="text-gray-300">
+            <Card className="bg-white/70 backdrop-blur-sm border-gray-200">
+              <CardContent className="text-gray-700 pt-6">
                 <p className="mb-4">"This platform has completely transformed my approach to mental wellness. The AI insights are incredibly helpful, and the community support is invaluable."</p>
                 <div className="flex items-center gap-2">
-                  <GraduationCap className="w-5 h-5 text-teal-400" />
+                  <GraduationCap className="w-5 h-5 text-teal-500" />
                   <span className="font-semibold">Dr. Emily Carter</span>, Clinical Psychologist
                 </div>
               </CardContent>
             </Card>
-            <Card className="bg-white/10 backdrop-blur-md border-white/20">
-              <CardContent className="text-gray-300">
+            <Card className="bg-white/70 backdrop-blur-sm border-gray-200">
+              <CardContent className="text-gray-700 pt-6">
                 <p className="mb-4">"I've struggled with anxiety for years, but the personalized breathing exercises and mood tracking tools have made a significant difference in my daily life."</p>
                 <div className="flex items-center gap-2">
-                  <Lightbulb className="w-5 h-5 text-blue-400" />
+                  <Lightbulb className="w-5 h-5 text-blue-500" />
                   <span className="font-semibold">David Chen</span>, Software Engineer
                 </div>
               </CardContent>
@@ -207,7 +201,7 @@ const Index = () => {
         </div>
 
         {/* Footer */}
-        <div className="text-center py-12 text-gray-400">
+        <div className="text-center py-12 text-gray-500">
           <p className="text-sm">
             © 2024 AI Wellness Platform. All rights reserved.
           </p>
@@ -221,3 +215,4 @@ const Index = () => {
 };
 
 export default Index;
+
