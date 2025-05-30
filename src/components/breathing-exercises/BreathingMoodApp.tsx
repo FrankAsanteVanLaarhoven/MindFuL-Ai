@@ -27,7 +27,7 @@ export default function BreathingMoodApp() {
           </CardTitle>
         </CardHeader>
         <CardContent className="pb-4">
-          <div className="mb-3" style={{ height: 350 }}>
+          <div className="mb-3" style={{ height: 450 }}>
             <BreathingScene phase={phase} />
           </div>
           <div className="text-center">
