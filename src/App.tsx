@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -8,6 +7,7 @@ import NavigationTools from "./components/NavigationTools";
 import Index from "./pages/Index";
 import Breathing from "./pages/Breathing";
 import MoodAnalysis from "./pages/MoodAnalysis";
+import MoodAnalysisEnhanced from "./pages/MoodAnalysisEnhanced";
 import TherapyBot from "./pages/TherapyBot";
 import Journal from "./pages/Journal";
 import WellnessDashboard from "./pages/WellnessDashboard";
@@ -26,14 +26,14 @@ const App = () => (
         <NavigationTools />
         <Routes>
           <Route path="/" element={<Index />} />
-          <Route path="/breathing" element={<Breathing />} />
           <Route path="/mood-analysis" element={<MoodAnalysis />} />
-          <Route path="/therapy-bot" element={<TherapyBot />} />
+          <Route path="/mood-analysis-enhanced" element={<MoodAnalysisEnhanced />} />
+          <Route path="/breathing" element={<Breathing />} />
           <Route path="/journal" element={<Journal />} />
-          <Route path="/wellness-dashboard" element={<WellnessDashboard />} />
           <Route path="/community" element={<Community />} />
           <Route path="/teletherapy" element={<Teletherapy />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+          <Route path="/therapy-bot" element={<TherapyBot />} />
+          <Route path="/wellness-dashboard" element={<WellnessDashboard />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
