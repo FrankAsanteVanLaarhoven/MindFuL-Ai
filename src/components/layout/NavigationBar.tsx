@@ -30,7 +30,8 @@ import {
   Stethoscope,
   MessageCircle,
   BarChart3,
-  Zap
+  Zap,
+  Settings
 } from 'lucide-react';
 
 const NavigationBar = () => {
@@ -132,18 +133,11 @@ const NavigationBar = () => {
                         Community Hub
                       </NavigationMenuLink>
                       <NavigationMenuLink 
-                        onClick={() => document.getElementById('weather-widget')?.scrollIntoView({ behavior: 'smooth' })}
+                        onClick={() => document.getElementById('personalization-dropdown')?.click()}
                         className="block px-3 py-2 text-sm text-gray-800 hover:bg-blue-50 rounded cursor-pointer"
                       >
-                        <CloudSun className="w-4 h-4 inline mr-2" />
-                        Weather & Air Quality
-                      </NavigationMenuLink>
-                      <NavigationMenuLink 
-                        onClick={() => document.getElementById('world-clock-widget')?.scrollIntoView({ behavior: 'smooth' })}
-                        className="block px-3 py-2 text-sm text-gray-800 hover:bg-blue-50 rounded cursor-pointer"
-                      >
-                        <Clock className="w-4 h-4 inline mr-2" />
-                        World Clock
+                        <Settings className="w-4 h-4 inline mr-2" />
+                        Personalization
                       </NavigationMenuLink>
                     </div>
                   </NavigationMenuContent>
