@@ -98,27 +98,17 @@ const Index = () => {
         </div>
       </div>
 
-      {/* Global Wellness Features Section */}
+      {/* Enhanced Global Wellness Features Section */}
       <div className="relative z-10 bg-white/8 backdrop-blur-lg border border-white/20 rounded-3xl mx-4 mb-8 p-6">
         <div className="text-center mb-6">
-          <h2 className="text-2xl font-bold text-white mb-2">Global Wellness Features</h2>
-          <p className="text-white/70 text-sm">Stay connected with the world while maintaining your wellbeing</p>
+          <h2 className="text-3xl font-bold text-white mb-2">Global Wellness Features</h2>
+          <p className="text-white/70 text-lg">Stay connected with the world while maintaining your wellbeing</p>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <WorldClockCard />
           <WeatherCard />
           <LanguageCard />
-        </div>
-        
-        <div className="text-center mt-6">
-          <Button
-            onClick={() => navigate('/global-features')}
-            variant="ghost"
-            className="text-white/80 hover:text-white hover:bg-white/10 text-sm"
-          >
-            View Full Global Features →
-          </Button>
         </div>
       </div>
 
