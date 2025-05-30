@@ -1,6 +1,5 @@
 
 import React, { useState, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -26,7 +25,6 @@ const timeZones = [
 ];
 
 const WorldClock = () => {
-  const { t } = useTranslation();
   const [selectedTimeZones, setSelectedTimeZones] = useState<string[]>([
     'America/New_York',
     'Europe/London',
@@ -107,7 +105,7 @@ const WorldClock = () => {
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2 text-indigo-800 text-lg">
             <Clock className="w-5 h-5" />
-            {t('worldClock.title')}
+            World Clock
           </CardTitle>
           <Button
             onClick={updateTimes}
@@ -119,7 +117,7 @@ const WorldClock = () => {
           </Button>
         </div>
         <CardDescription className="text-sm">
-          {t('worldClock.description')}
+          Track time across different zones for global wellness scheduling
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-3">
@@ -127,7 +125,7 @@ const WorldClock = () => {
           <div className="space-y-2">
             <Select onValueChange={addTimeZone}>
               <SelectTrigger className="h-8">
-                <SelectValue placeholder={t('worldClock.addCity')} />
+                <SelectValue placeholder="Add city" />
               </SelectTrigger>
               <SelectContent className="bg-white/95 backdrop-blur-md border border-white/20">
                 {timeZones
@@ -177,15 +175,15 @@ const WorldClock = () => {
         </div>
 
         <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-3">
-          <h4 className="font-semibold text-indigo-800 mb-2 text-sm">{t('worldClock.wellnessTips')}</h4>
+          <h4 className="font-semibold text-indigo-800 mb-2 text-sm">Wellness Tips</h4>
           <div className="text-indigo-700 text-xs space-y-1">
-            <p>• {t('worldClock.scheduleTitle')}</p>
-            <p>• {t('worldClock.planMeetings')}</p>
+            <p>• Schedule meditation during peaceful hours</p>
+            <p>• Plan global wellness meetings</p>
           </div>
         </div>
 
         <div className="text-xs text-gray-400 text-center">
-          {t('worldClock.liveTime')}
+          Live time • Updated every second
         </div>
       </CardContent>
     </Card>

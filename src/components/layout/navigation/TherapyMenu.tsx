@@ -1,7 +1,6 @@
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
 import {
   NavigationMenuItem,
   NavigationMenuTrigger,
@@ -12,13 +11,12 @@ import { Stethoscope, MessageCircle, Activity } from 'lucide-react';
 
 const TherapyMenu = () => {
   const navigate = useNavigate();
-  const { t } = useTranslation();
 
   return (
     <NavigationMenuItem>
       <NavigationMenuTrigger className="text-white hover:bg-white/20 hover:text-white bg-transparent border-none">
         <Stethoscope className="w-4 h-4 mr-2" />
-        {t('navigation.therapy')}
+        Therapy
       </NavigationMenuTrigger>
       <NavigationMenuContent className="bg-white/95 backdrop-blur-md border border-white/20 shadow-lg min-w-[200px]">
         <div className="p-2">

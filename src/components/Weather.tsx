@@ -1,6 +1,5 @@
 
 import React, { useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
 import { Card, CardContent } from '@/components/ui/card';
 import { useWeatherLocation } from '@/hooks/useWeatherLocation';
 import WeatherHeader from '@/components/weather/WeatherHeader';
@@ -10,7 +9,6 @@ import WeatherLoadingState from '@/components/weather/WeatherLoadingState';
 import WeatherEmptyState from '@/components/weather/WeatherEmptyState';
 
 const Weather = () => {
-  const { t } = useTranslation();
   const { weatherData, isLoading, getCurrentLocation, refreshWeather } = useWeatherLocation();
 
   useEffect(() => {
