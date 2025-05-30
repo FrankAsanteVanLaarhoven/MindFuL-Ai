@@ -94,9 +94,9 @@ const RealisticAvatarMesh: React.FC<{
 
     if (mouthRef.current) {
       const speakScale = 1 + Math.sin(speakStateRef.current.phase) * 0.4 * speakStateRef.current.intensity;
-      const jawDrop = speakStateRef.current.intensity * 0.1;
+      const jawDrop = speakStateRef.current.intensity * 0.05;
       mouthRef.current.scale.y = speakScale;
-      mouthRef.current.position.y = -0.25 - jawDrop;
+      mouthRef.current.position.y = 1.45 - jawDrop; // Fixed: keep mouth on the face
     }
 
     // Emotion-based expressions
@@ -107,9 +107,9 @@ const RealisticAvatarMesh: React.FC<{
     if (pupilLeftRef.current && pupilRightRef.current) {
       const lookDirection = getRealisticPupilDirection(emotion, time);
       pupilLeftRef.current.position.x = -0.25 + lookDirection.x * 0.03;
-      pupilLeftRef.current.position.y = 0.15 + lookDirection.y * 0.03;
+      pupilLeftRef.current.position.y = 1.75 + lookDirection.y * 0.03;
       pupilRightRef.current.position.x = 0.25 + lookDirection.x * 0.03;
-      pupilRightRef.current.position.y = 0.15 + lookDirection.y * 0.03;
+      pupilRightRef.current.position.y = 1.75 + lookDirection.y * 0.03;
     }
 
     // Realistic arm and leg movement (subtle idle animation)
@@ -213,7 +213,7 @@ const RealisticAvatarMesh: React.FC<{
         <meshPhongMaterial color={avatarColors.skin} />
       </mesh>
 
-      {/* Mouth - more realistic */}
+      {/* Mouth - properly positioned on the face */}
       <mesh ref={mouthRef} position={[0, 1.45, 0.55]}>
         <sphereGeometry args={[0.15, 16, 8]} />
         <meshPhongMaterial 
