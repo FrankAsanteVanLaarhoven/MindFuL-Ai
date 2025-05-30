@@ -1,7 +1,6 @@
-
 "use client";
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { GraduationCap, Lightbulb, Users, Settings } from 'lucide-react';
 import { gsap } from 'gsap';
@@ -14,16 +13,14 @@ import TherapyAvatar3D from '@/components/TherapyAvatar3D';
 import { avatarCharacters } from '@/components/AvatarSelector';
 import PersonalizationDropdown from '@/components/personalization/PersonalizationDropdown';
 import { useUserProfile } from '@/hooks/useUserProfile';
-import WeatherBackground from '@/components/global/WeatherBackground';
-import EnhancedWeatherWidget from '@/components/global/EnhancedWeatherWidget';
-import EnhancedWorldClock from '@/components/global/EnhancedWorldClock';
-import EnhancedLanguageSelector from '@/components/global/EnhancedLanguageSelector';
+import WorldClockCard from '@/components/global/WorldClockCard';
+import WeatherCard from '@/components/global/WeatherCard';
+import LanguageCard from '@/components/global/LanguageCard';
 
 const Index = () => {
   const cardRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const { userProfile, loading, updateUserGroups, saveUserProfile } = useUserProfile();
-  const [currentWeather, setCurrentWeather] = useState({ condition: 'clear-day', description: 'Clear sky' });
 
   useEffect(() => {
     if (cardRef.current) {
@@ -81,17 +78,14 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen relative overflow-hidden">
-      {/* Dynamic Weather Background */}
-      <WeatherBackground condition={currentWeather.condition} description={currentWeather.description} />
-      
+    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 relative overflow-hidden">
       <NavigationBar />
       
       {/* Enhanced glassmorphism background overlay */}
-      <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-white/5 backdrop-blur-[2px] z-10"></div>
+      <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-white/5 backdrop-blur-[2px]"></div>
       
       {/* Hero Section with enhanced glass effect */}
-      <div className="relative z-20 bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl mx-4 mt-8 mb-8">
+      <div className="relative z-10 bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl mx-4 mt-8 mb-8">
         <HeroSection />
         
         {/* Personalization Dropdown */}
@@ -103,73 +97,28 @@ const Index = () => {
         </div>
       </div>
 
-      {/* Enhanced Global Features Dashboard */}
-      <div className="relative z-20 bg-white/8 backdrop-blur-lg border border-white/20 rounded-3xl mx-4 mb-8 p-6" data-section="weather-dashboard">
-        <div className="text-center mb-8">
-          <h2 className="text-4xl font-bold text-white mb-4">Global Wellness Dashboard</h2>
-          <p className="text-white/90 text-lg max-w-6xl mx-auto leading-relaxed">
-            Experience world-leading weather visualization technology with real-time global insights. 
-            Our advanced dashboard provides comprehensive weather data visualization, multi-timezone awareness, 
-            and seamless language localization for an unparalleled user experience across agriculture, 
-            transportation, energy management, and emergency response sectors.
-          </p>
+      {/* Enhanced Global Wellness Features Section */}
+      <div className="relative z-10 bg-white/8 backdrop-blur-lg border border-white/20 rounded-3xl mx-4 mb-8 p-6">
+        <div className="text-center mb-6">
+          <h2 className="text-3xl font-bold text-white mb-2">Global Wellness Features</h2>
+          <p className="text-white/70 text-lg">Stay connected with the world while maintaining your wellbeing</p>
         </div>
         
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-          <div className="lg:col-span-1">
-            <EnhancedWeatherWidget />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div data-section="world-clock-widget">
+            <WorldClockCard />
           </div>
-          <div className="lg:col-span-1">
-            <EnhancedWorldClock />
+          <div data-section="weather-widget">
+            <WeatherCard />
           </div>
-          <div className="lg:col-span-1">
-            <EnhancedLanguageSelector />
-          </div>
-        </div>
-
-        {/* Benefits Section */}
-        <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-6">
-          <h3 className="text-2xl font-semibold text-white mb-6 text-center">Why Visualize Weather Data?</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-white/90">
-            <div className="space-y-4">
-              <div>
-                <h4 className="font-semibold mb-2 text-lg text-white">• Improved Decision-Making</h4>
-                <p className="text-white/80 leading-relaxed">
-                  Weather data visualization serves multiple purposes across different sectors. For meteorologists and researchers, 
-                  visualizations help identify patterns and anomalies in climate data. For agriculture, they assist in making 
-                  critical decisions about planting, irrigation, and harvesting.
-                </p>
-              </div>
-              <div>
-                <h4 className="font-semibold mb-2 text-lg text-white">• Pattern Recognition</h4>
-                <p className="text-white/80 leading-relaxed">
-                  Visual representations help identify trends and patterns that might not be apparent in raw meteorological data. 
-                  This enables better forecasting and long-term climate analysis.
-                </p>
-              </div>
-            </div>
-            <div className="space-y-4">
-              <div>
-                <h4 className="font-semibold mb-2 text-lg text-white">• Accessibility & Engagement</h4>
-                <p className="text-white/80 leading-relaxed">
-                  Well-designed visualizations make weather information accessible to users of all technical backgrounds. 
-                  Interactive elements encourage users to explore data, leading to deeper understanding and actionable insights.
-                </p>
-              </div>
-              <div>
-                <h4 className="font-semibold mb-2 text-lg text-white">• Real-Time Global Awareness</h4>
-                <p className="text-white/80 leading-relaxed">
-                  Our dashboard provides real-time weather forecasts and multi-timezone functionality, allowing users to 
-                  monitor conditions with ease and precision across different geographic areas worldwide.
-                </p>
-              </div>
-            </div>
+          <div data-section="language-widget">
+            <LanguageCard />
           </div>
         </div>
       </div>
 
       {/* Animated 3D Avatars Section */}
-      <div className="relative z-20 bg-white/8 backdrop-blur-lg border border-white/20 rounded-3xl mx-4 mb-8 p-6">
+      <div className="relative z-10 bg-white/8 backdrop-blur-lg border border-white/20 rounded-3xl mx-4 mb-8 p-6">
         <div className="text-center mb-8">
           <h2 className="text-3xl font-bold text-white mb-4">Meet Your AI Companions</h2>
           <p className="text-white/80 text-lg">Choose from our diverse range of culturally-aware AI therapy companions</p>
@@ -203,13 +152,13 @@ const Index = () => {
       </div>
       
       {/* Animated background elements with glass effect */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse backdrop-blur-sm"></div>
         <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl animate-pulse delay-1000 backdrop-blur-sm"></div>
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-teal-500/15 rounded-full blur-3xl animate-pulse delay-500 backdrop-blur-sm"></div>
       </div>
 
-      <div ref={cardRef} className="relative z-20">
+      <div ref={cardRef} className="relative z-10">
         {/* Modern Features Grid with enhanced glass container */}
         <div className="bg-white/8 backdrop-blur-lg border border-white/20 rounded-3xl mx-4 mb-8 p-6">
           <ModernFeaturesGrid />
