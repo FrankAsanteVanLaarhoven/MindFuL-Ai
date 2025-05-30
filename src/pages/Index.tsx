@@ -1,8 +1,9 @@
+
 "use client";
 
 import React, { useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { GraduationCap, Lightbulb } from 'lucide-react';
+import { GraduationCap, Lightbulb, Users, Settings } from 'lucide-react';
 import { gsap } from 'gsap';
 import { useNavigate } from 'react-router-dom';
 import NavigationBar from '@/components/layout/NavigationBar';
@@ -14,6 +15,7 @@ import { avatarCharacters } from '@/components/AvatarSelector';
 import GlobalWidgets from '@/components/layout/GlobalWidgets';
 import UserGroupSelection from '@/components/onboarding/UserGroupSelection';
 import PersonalizedDashboard from '@/components/personalization/PersonalizedDashboard';
+import PersonalizationDropdown from '@/components/personalization/PersonalizationDropdown';
 import { useUserProfile } from '@/hooks/useUserProfile';
 
 const Index = () => {
@@ -76,16 +78,6 @@ const Index = () => {
     );
   }
 
-  // Show group selection if user hasn't completed onboarding
-  if (!userProfile || !userProfile.onboardingCompleted) {
-    return <UserGroupSelection onComplete={handleGroupSelectionComplete} />;
-  }
-
-  // Show personalized dashboard if user has completed onboarding
-  if (userProfile.onboardingCompleted && userProfile.selectedGroups.length > 0) {
-    return <PersonalizedDashboard userProfile={userProfile} />;
-  }
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 relative overflow-hidden">
       <NavigationBar />
@@ -96,6 +88,14 @@ const Index = () => {
       {/* Hero Section with enhanced glass effect */}
       <div className="relative z-10 bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl mx-4 mt-8 mb-8">
         <HeroSection />
+        
+        {/* Personalization Dropdown */}
+        <div className="flex justify-center pb-8">
+          <PersonalizationDropdown 
+            userProfile={userProfile}
+            onGroupSelectionComplete={handleGroupSelectionComplete}
+          />
+        </div>
       </div>
 
       {/* Global Features Section - Compact Widgets */}
