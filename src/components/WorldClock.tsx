@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Clock, RefreshCw } from 'lucide-react';
+import { Clock, RefreshCw, Plus, X } from 'lucide-react';
 
 interface TimeZoneData {
   city: string;
@@ -21,8 +21,6 @@ const timeZones = [
   { city: 'Tokyo', timeZone: 'Asia/Tokyo' },
   { city: 'Sydney', timeZone: 'Australia/Sydney' },
   { city: 'Dubai', timeZone: 'Asia/Dubai' },
-  { city: 'Singapore', timeZone: 'Asia/Singapore' },
-  { city: 'Moscow', timeZone: 'Europe/Moscow' },
   { city: 'Mumbai', timeZone: 'Asia/Kolkata' },
 ];
 
@@ -33,11 +31,9 @@ const WorldClock = () => {
     'Asia/Tokyo'
   ]);
   const [timeData, setTimeData] = useState<TimeZoneData[]>([]);
-  const [currentTime, setCurrentTime] = useState<Date>(new Date());
 
   const updateTimes = () => {
     const now = new Date();
-    setCurrentTime(now);
     
     const newTimeData = selectedTimeZones.map(timeZone => {
       const cityName = timeZones.find(tz => tz.timeZone === timeZone)?.city || timeZone;
@@ -46,7 +42,6 @@ const WorldClock = () => {
         timeZone,
         hour: '2-digit',
         minute: '2-digit',
-        second: '2-digit',
         hour12: false,
       });
       
@@ -57,9 +52,6 @@ const WorldClock = () => {
         day: 'numeric',
       });
       
-      // Calculate offset
-      const utcTime = now.getTime() + (now.getTimezoneOffset() * 60000);
-      const targetTime = new Date(utcTime + (getTimezoneOffset(timeZone, now) * 3600000));
       const offsetHours = getTimezoneOffset(timeZone, now);
       const offsetString = `UTC${offsetHours >= 0 ? '+' : ''}${offsetHours}`;
       
@@ -82,13 +74,15 @@ const WorldClock = () => {
   };
 
   const addTimeZone = (timeZone: string) => {
-    if (!selectedTimeZones.includes(timeZone)) {
+    if (!selectedTimeZones.includes(timeZone) && selectedTimeZones.length < 4) {
       setSelectedTimeZones(prev => [...prev, timeZone]);
     }
   };
 
   const removeTimeZone = (timeZone: string) => {
-    setSelectedTimeZones(prev => prev.filter(tz => tz !== timeZone));
+    if (selectedTimeZones.length > 1) {
+      setSelectedTimeZones(prev => prev.filter(tz => tz !== timeZone));
+    }
   };
 
   useEffect(() => {
@@ -106,73 +100,71 @@ const WorldClock = () => {
   };
 
   return (
-    <Card className="bg-white/80 backdrop-blur-sm border-indigo-200 shadow-lg">
-      <CardHeader>
+    <Card className="bg-white/90 backdrop-blur-sm border-white/20 shadow-lg h-full">
+      <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
-          <div>
-            <CardTitle className="flex items-center gap-2 text-indigo-800">
-              <Clock className="w-5 h-5" />
-              World Clock
-            </CardTitle>
-            <CardDescription>
-              Track time across different zones for global wellness scheduling
-            </CardDescription>
-          </div>
+          <CardTitle className="flex items-center gap-2 text-indigo-800 text-lg">
+            <Clock className="w-5 h-5" />
+            World Clock
+          </CardTitle>
           <Button
             onClick={updateTimes}
             variant="outline"
             size="sm"
+            className="h-8 w-8 p-0"
           >
-            <RefreshCw className="w-3 h-3 mr-1" />
-            Sync
+            <RefreshCw className="w-3 h-3" />
           </Button>
         </div>
+        <CardDescription className="text-sm">
+          Track time across different zones for global wellness scheduling
+        </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="space-y-2">
-          <label className="text-sm font-medium text-gray-700">
-            Add Time Zone
-          </label>
-          <Select onValueChange={addTimeZone}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select a city to add" />
-            </SelectTrigger>
-            <SelectContent>
-              {timeZones
-                .filter(tz => !selectedTimeZones.includes(tz.timeZone))
-                .map((tz) => (
-                  <SelectItem key={tz.timeZone} value={tz.timeZone}>
-                    {tz.city}
-                  </SelectItem>
-                ))}
-            </SelectContent>
-          </Select>
-        </div>
+      <CardContent className="space-y-3">
+        {selectedTimeZones.length < 4 && (
+          <div className="space-y-2">
+            <Select onValueChange={addTimeZone}>
+              <SelectTrigger className="h-8">
+                <SelectValue placeholder="Add city" />
+              </SelectTrigger>
+              <SelectContent className="bg-white/95 backdrop-blur-md border border-white/20">
+                {timeZones
+                  .filter(tz => !selectedTimeZones.includes(tz.timeZone))
+                  .map((tz) => (
+                    <SelectItem key={tz.timeZone} value={tz.timeZone}>
+                      {tz.city}
+                    </SelectItem>
+                  ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
 
-        <div className="space-y-3">
-          {timeData.map((data, index) => (
+        <div className="space-y-2">
+          {timeData.map((data) => (
             <div 
               key={data.timeZone} 
-              className={`border rounded-lg p-4 ${getTimeOfDayColor(data.time)}`}
+              className={`border rounded-lg p-3 ${getTimeOfDayColor(data.time)}`}
             >
               <div className="flex items-center justify-between">
                 <div className="flex-1">
                   <div className="flex items-center justify-between mb-1">
-                    <h3 className="font-semibold text-gray-800">{data.city}</h3>
-                    <button
-                      onClick={() => removeTimeZone(data.timeZone)}
-                      className="text-red-500 hover:text-red-700 text-sm"
-                      disabled={selectedTimeZones.length <= 1}
-                    >
-                      ×
-                    </button>
+                    <h3 className="font-semibold text-gray-800 text-sm">{data.city}</h3>
+                    {selectedTimeZones.length > 1 && (
+                      <button
+                        onClick={() => removeTimeZone(data.timeZone)}
+                        className="text-red-500 hover:text-red-700 text-xs p-1"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    )}
                   </div>
-                  <div className="text-2xl font-bold text-gray-900 mb-1">
+                  <div className="text-lg font-bold text-gray-900 mb-1">
                     {data.time}
                   </div>
-                  <div className="flex items-center justify-between text-sm text-gray-600">
+                  <div className="flex items-center justify-between text-xs text-gray-600">
                     <span>{data.date}</span>
-                    <span className="text-xs bg-white/50 px-2 py-1 rounded">
+                    <span className="bg-white/50 px-2 py-0.5 rounded">
                       {data.offset}
                     </span>
                   </div>
@@ -182,12 +174,11 @@ const WorldClock = () => {
           ))}
         </div>
 
-        <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-4">
-          <h4 className="font-semibold text-indigo-800 mb-2">Wellness Scheduling Tips</h4>
-          <div className="text-indigo-700 text-sm space-y-1">
-            <p>• Schedule meditation sessions during peaceful morning hours</p>
-            <p>• Plan virtual wellness meetings considering all time zones</p>
-            <p>• Track optimal times for global mental health check-ins</p>
+        <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-3">
+          <h4 className="font-semibold text-indigo-800 mb-2 text-sm">Wellness Tips</h4>
+          <div className="text-indigo-700 text-xs space-y-1">
+            <p>• Schedule meditation during peaceful hours</p>
+            <p>• Plan global wellness meetings</p>
           </div>
         </div>
 

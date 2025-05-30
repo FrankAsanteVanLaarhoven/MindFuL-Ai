@@ -1,7 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Globe } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -41,7 +40,6 @@ const Localization = () => {
     setIsLoading(true);
     console.log('Changing language to:', languageCode);
     
-    // Simulate language change processing
     setTimeout(() => {
       setSelectedLanguage(languageCode);
       localStorage.setItem('wellness-app-language', languageCode);
@@ -56,7 +54,6 @@ const Localization = () => {
       
       setIsLoading(false);
       
-      // Trigger language change event for other components
       window.dispatchEvent(new CustomEvent('languageChanged', { 
         detail: { language: languageCode } 
       }));
@@ -66,17 +63,17 @@ const Localization = () => {
   const currentLanguage = languages.find(l => l.code === selectedLanguage);
 
   return (
-    <Card className="bg-white/80 backdrop-blur-sm border-blue-200 shadow-lg">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-blue-800">
+    <Card className="bg-white/90 backdrop-blur-sm border-white/20 shadow-lg h-full">
+      <CardHeader className="pb-3">
+        <CardTitle className="flex items-center gap-2 text-blue-800 text-lg">
           <Globe className="w-5 h-5" />
           Localization
         </CardTitle>
-        <CardDescription>
+        <CardDescription className="text-sm">
           Change the interface language for better accessibility
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-3">
         <div className="space-y-2">
           <label className="text-sm font-medium text-gray-700">
             Select Language
@@ -86,17 +83,17 @@ const Localization = () => {
             onValueChange={handleLanguageChange}
             disabled={isLoading}
           >
-            <SelectTrigger>
+            <SelectTrigger className="h-10">
               <SelectValue placeholder="Choose a language">
                 {currentLanguage && (
                   <span className="flex items-center gap-2">
                     <Globe className="w-4 h-4" />
-                    {currentLanguage.nativeName} ({currentLanguage.name})
+                    {currentLanguage.nativeName}
                   </span>
                 )}
               </SelectValue>
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-white/95 backdrop-blur-md border border-white/20">
               {languages.map((language) => (
                 <SelectItem key={language.code} value={language.code}>
                   <span className="flex items-center gap-2">
@@ -108,9 +105,9 @@ const Localization = () => {
           </Select>
         </div>
 
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <h3 className="font-semibold text-blue-800 mb-2">Current Settings</h3>
-          <div className="text-blue-700 text-sm space-y-1">
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+          <h3 className="font-semibold text-blue-800 mb-2 text-sm">Current Settings</h3>
+          <div className="text-blue-700 text-xs space-y-1">
             <p>• Language: {currentLanguage?.nativeName}</p>
             <p>• Region: Auto-detected</p>
             <p>• Time format: 24-hour</p>
@@ -120,8 +117,8 @@ const Localization = () => {
 
         {isLoading && (
           <div className="flex items-center justify-center py-4">
-            <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
-            <span className="ml-2 text-sm text-gray-600">Applying language changes...</span>
+            <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+            <span className="ml-2 text-xs text-gray-600">Applying changes...</span>
           </div>
         )}
       </CardContent>
