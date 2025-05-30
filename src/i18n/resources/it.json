@@ -1,0 +1,58 @@
+
+{
+  "app": {
+    "title": "IA Consapevole",
+    "subtitle": "App globale per il benessere con funzionalità alimentate dall'IA"
+  },
+  "navigation": {
+    "therapy": "Terapia",
+    "wellness": "Benessere",
+    "community": "Comunità",
+    "globalFeatures": "Funzionalità Globali"
+  },
+  "global": {
+    "weather": "Meteo e Qualità dell'Aria",
+    "worldClock": "Orologio Mondiale",
+    "localization": "Localizzazione",
+    "language": "Lingua",
+    "selectLanguage": "Seleziona Lingua",
+    "currentSettings": "Impostazioni Attuali",
+    "applyingChanges": "Applicando modifiche...",
+    "languageChanged": "Lingua Cambiata",
+    "interfaceLanguage": "Lingua dell'interfaccia impostata su"
+  },
+  "weather": {
+    "title": "Meteo e Qualità dell'Aria",
+    "description": "Monitoraggio in tempo reale del meteo e della qualità dell'aria",
+    "loading": "Caricamento meteo...",
+    "error": "Impossibile caricare i dati meteorologici",
+    "locationUpdated": "Posizione Aggiornata",
+    "weatherRefreshed": "Dati meteorologici aggiornati per la tua posizione attuale",
+    "defaultLocation": "Usando Posizione Predefinita",
+    "couldntAccess": "Impossibile accedere alla tua posizione, mostrando meteo predefinito",
+    "weatherUpdated": "Meteo Aggiornato",
+    "latestInfo": "Ultime informazioni meteorologiche recuperate"
+  },
+  "worldClock": {
+    "title": "Orologio Mondiale",
+    "description": "Traccia il tempo in diverse zone per la programmazione globale del benessere",
+    "addCity": "Aggiungi città",
+    "wellnessTips": "Consigli per il Benessere",
+    "scheduleTitle": "Programma meditazione durante ore tranquille",
+    "planMeetings": "Pianifica incontri globali di benessere",
+    "liveTime": "Tempo in diretta • Aggiornato ogni secondo"
+  },
+  "localization": {
+    "title": "Localizzazione",
+    "description": "Cambia la lingua dell'interfaccia per una migliore accessibilità",
+    "selectLanguage": "Seleziona Lingua",
+    "currentSettings": "Impostazioni Attuali",
+    "language": "Lingua",
+    "region": "Regione",
+    "timeFormat": "Formato ora",
+    "dateFormat": "Formato data",
+    "autoDetected": "Auto-rilevato",
+    "24hour": "24 ore",
+    "localPreference": "Preferenza locale"
+  }
+}

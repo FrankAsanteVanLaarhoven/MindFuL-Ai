@@ -1,0 +1,58 @@
+
+{
+  "app": {
+    "title": "सचेत AI",
+    "subtitle": "AI-संचालित सुविधाओं के साथ वैश्विक कल्याण ऐप"
+  },
+  "navigation": {
+    "therapy": "चिकित्सा",
+    "wellness": "कल्याण",
+    "community": "समुदाय",
+    "globalFeatures": "वैश्विक सुविधाएं"
+  },
+  "global": {
+    "weather": "मौसम और वायु गुणवत्ता",
+    "worldClock": "विश्व घड़ी",
+    "localization": "स्थानीयकरण",
+    "language": "भाषा",
+    "selectLanguage": "भाषा चुनें",
+    "currentSettings": "वर्तमान सेटिंग्स",
+    "applyingChanges": "परिवर्तन लागू किए जा रहे हैं...",
+    "languageChanged": "भाषा बदली गई",
+    "interfaceLanguage": "इंटरफेस भाषा सेट की गई"
+  },
+  "weather": {
+    "title": "मौसम और वायु गुणवत्ता",
+    "description": "वास्तविक समय मौसम और वायु गुणवत्ता निगरानी",
+    "loading": "मौसम लोड हो रहा है...",
+    "error": "मौसम डेटा लोड करने में असमर्थ",
+    "locationUpdated": "स्थान अपडेट किया गया",
+    "weatherRefreshed": "आपके वर्तमान स्थान के लिए मौसम डेटा अपडेट किया गया",
+    "defaultLocation": "डिफ़ॉल्ट स्थान का उपयोग",
+    "couldntAccess": "आपके स्थान तक पहुंच नहीं सका, डिफ़ॉल्ट मौसम दिखाया जा रहा है",
+    "weatherUpdated": "मौसम अपडेट किया गया",
+    "latestInfo": "नवीनतम मौसम जानकारी प्राप्त की गई"
+  },
+  "worldClock": {
+    "title": "विश्व घड़ी",
+    "description": "वैश्विक कल्याण शेड्यूलिंग के लिए विभिन्न क्षेत्रों में समय ट्रैक करें",
+    "addCity": "शहर जोड़ें",
+    "wellnessTips": "कल्याण युक्तियाँ",
+    "scheduleTitle": "शांतिपूर्ण घंटों के दौरान ध्यान का शेड्यूल बनाएं",
+    "planMeetings": "वैश्विक कल्याण बैठकों की योजना बनाएं",
+    "liveTime": "लाइव समय • हर सेकंड अपडेट"
+  },
+  "localization": {
+    "title": "स्थानीयकरण",
+    "description": "बेहतर पहुंच के लिए इंटरफेस भाषा बदलें",
+    "selectLanguage": "भाषा चुनें",
+    "currentSettings": "वर्तमान सेटिंग्स",
+    "language": "भाषा",
+    "region": "क्षेत्र",
+    "timeFormat": "समय प्रारूप",
+    "dateFormat": "दिनांक प्रारूप",
+    "autoDetected": "स्वचालित रूप से पता लगाया गया",
+    "24hour": "24-घंटे",
+    "localPreference": "स्थानीय प्राथमिकता"
+  }
+}

@@ -5,21 +5,35 @@ import LanguageDetector from 'i18next-browser-languagedetector';
 
 // Import translation resources
 import en from './resources/en.json';
+import enGB from './resources/en-gb.json';
 import es from './resources/es.json';
 import fr from './resources/fr.json';
 import de from './resources/de.json';
 import zh from './resources/zh.json';
 import ja from './resources/ja.json';
 import ar from './resources/ar.json';
+import nl from './resources/nl.json';
+import hi from './resources/hi.json';
+import ur from './resources/ur.json';
+import pt from './resources/pt.json';
+import it from './resources/it.json';
+import el from './resources/el.json';
 
 const resources = {
   en: { translation: en },
+  'en-GB': { translation: enGB },
   es: { translation: es },
   fr: { translation: fr },
   de: { translation: de },
   zh: { translation: zh },
   ja: { translation: ja },
-  ar: { translation: ar }
+  ar: { translation: ar },
+  nl: { translation: nl },
+  hi: { translation: hi },
+  ur: { translation: ur },
+  pt: { translation: pt },
+  it: { translation: it },
+  el: { translation: el }
 };
 
 i18n

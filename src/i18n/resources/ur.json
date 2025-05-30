@@ -1,0 +1,58 @@
+
+{
+  "app": {
+    "title": "ہوشیار AI",
+    "subtitle": "AI سے چلنے والی خصوصیات کے ساتھ عالمی فلاحی ایپ"
+  },
+  "navigation": {
+    "therapy": "علاج",
+    "wellness": "فلاح و بہبود",
+    "community": "کمیونٹی",
+    "globalFeatures": "عالمی خصوصیات"
+  },
+  "global": {
+    "weather": "موسم اور ہوا کا معیار",
+    "worldClock": "عالمی گھڑی",
+    "localization": "مقامی بنانا",
+    "language": "زبان",
+    "selectLanguage": "زبان منتخب کریں",
+    "currentSettings": "موجودہ ترتیبات",
+    "applyingChanges": "تبدیلیاں لاگو کی جا رہی ہیں...",
+    "languageChanged": "زبان تبدیل کر دی گئی",
+    "interfaceLanguage": "انٹرفیس کی زبان سیٹ کی گئی"
+  },
+  "weather": {
+    "title": "موسم اور ہوا کا معیار",
+    "description": "حقیقی وقت موسم اور ہوا کے معیار کی نگرانی",
+    "loading": "موسم لوڈ ہو رہا ہے...",
+    "error": "موسمی ڈیٹا لوڈ کرنے میں ناکام",
+    "locationUpdated": "مقام اپ ڈیٹ کیا گیا",
+    "weatherRefreshed": "آپ کے موجودہ مقام کے لیے موسمی ڈیٹا اپ ڈیٹ کیا گیا",
+    "defaultLocation": "ڈیفالٹ مقام استعمال کریں",
+    "couldntAccess": "آپ کے مقام تک رسائی نہیں ہو سکی، ڈیفالٹ موسم دکھایا جا رہا ہے",
+    "weatherUpdated": "موسم اپ ڈیٹ کیا گیا",
+    "latestInfo": "تازہ ترین موسمی معلومات حاصل کی گئیں"
+  },
+  "worldClock": {
+    "title": "عالمی گھڑی",
+    "description": "عالمی فلاحی شیڈولنگ کے لیے مختلف زون میں وقت کا پتہ لگائیں",
+    "addCity": "شہر شامل کریں",
+    "wellnessTips": "فلاحی تجاویز",
+    "scheduleTitle": "پرامن گھنٹوں کے دوران مراقبہ کا شیڈول بنائیں",
+    "planMeetings": "عالمی فلاحی میٹنگز کی منصوبہ بندی کریں",
+    "liveTime": "لائیو وقت • ہر سیکنڈ اپ ڈیٹ"
+  },
+  "localization": {
+    "title": "مقامی بنانا",
+    "description": "بہتر رسائی کے لیے انٹرفیس کی زبان تبدیل کریں",
+    "selectLanguage": "زبان منتخب کریں",
+    "currentSettings": "موجودہ ترتیبات",
+    "language": "زبان",
+    "region": "علاقہ",
+    "timeFormat": "وقت کا فارمیٹ",
+    "dateFormat": "تاریخ کا فارمیٹ",
+    "autoDetected": "خودکار طور پر پتہ لگایا گیا",
+    "24hour": "24 گھنٹے",
+    "localPreference": "مقامی ترجیح"
+  }
+}

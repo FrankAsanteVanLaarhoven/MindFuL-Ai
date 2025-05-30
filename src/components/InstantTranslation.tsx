@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -16,17 +15,21 @@ interface Language {
 
 const languages: Language[] = [
   { code: 'en', name: 'English', nativeName: 'English' },
+  { code: 'en-GB', name: 'English (UK)', nativeName: 'English (UK)' },
   { code: 'es', name: 'Spanish', nativeName: 'Español' },
   { code: 'fr', name: 'French', nativeName: 'Français' },
   { code: 'de', name: 'German', nativeName: 'Deutsch' },
   { code: 'it', name: 'Italian', nativeName: 'Italiano' },
   { code: 'pt', name: 'Portuguese', nativeName: 'Português' },
+  { code: 'nl', name: 'Dutch', nativeName: 'Nederlands' },
   { code: 'ru', name: 'Russian', nativeName: 'Русский' },
   { code: 'ja', name: 'Japanese', nativeName: '日本語' },
   { code: 'ko', name: 'Korean', nativeName: '한국어' },
   { code: 'zh', name: 'Chinese', nativeName: '中文' },
   { code: 'ar', name: 'Arabic', nativeName: 'العربية' },
   { code: 'hi', name: 'Hindi', nativeName: 'हिन्दी' },
+  { code: 'ur', name: 'Urdu', nativeName: 'اردو' },
+  { code: 'el', name: 'Greek', nativeName: 'Ελληνικά' },
 ];
 
 const wellnessExamples = [
@@ -54,6 +57,13 @@ const InstantTranslation = () => {
         'de': 'Hallo, wie geht es dir? Ich fühle mich heute gut.',
         'ja': 'こんにちは、元気ですか？今日は気分がいいです。',
         'zh': '你好，你好吗？我今天感觉很好。',
+        'ar': 'مرحبا، كيف حالك؟ أشعر بحالة جيدة اليوم.',
+        'hi': 'नमस्ते, आप कैसे हैं? मैं आज अच्छा महसूस कर रहा हूँ।',
+        'ur': 'ہیلو، آپ کیسے ہیں؟ میں آج اچھا محسوس کر رہا ہوں۔',
+        'nl': 'Hallo, hoe gaat het? Ik voel me goed vandaag.',
+        'pt': 'Olá, como você está? Estou me sentindo bem hoje.',
+        'it': 'Ciao, come stai? Mi sento bene oggi.',
+        'el': 'Γεια σας, πώς είστε; Νιώθω καλά σήμερα.',
       },
       'es': {
         'en': 'Hello, how are you? I feel good today.',
@@ -90,6 +100,7 @@ const InstantTranslation = () => {
     if (/[あ-ん]|[ア-ン]|[一-龯]/.test(text)) return 'ja';
     if (/[가-힣]/.test(text)) return 'ko';
     if (/[一-龯]/.test(text)) return 'zh';
+    if (/[αβγδεζηθικλμνξοπρστυφχψω]/i.test(text)) return 'el';
     if (/[àáâãäå]|[èéêë]|[ìíîï]|[òóôõö]|[ùúûü]|[ýÿ]|[ñ]|[ç]/i.test(text)) {
       if (/[ñ]/.test(text)) return 'es';
       if (/[ç]/.test(text)) return 'fr';
@@ -98,6 +109,9 @@ const InstantTranslation = () => {
     if (/[äöüß]/i.test(text)) return 'de';
     if (/[àèìòù]/i.test(text)) return 'it';
     if (/[ãõ]/i.test(text)) return 'pt';
+    if (/[देवनागरी]/i.test(text)) return 'hi';
+    if (/[اردو]/i.test(text)) return 'ur';
+    if (/[العربية]/i.test(text)) return 'ar';
     return 'en';
   };
 
@@ -184,7 +198,7 @@ const InstantTranslation = () => {
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-white/95 backdrop-blur-md border border-white/20 max-h-64 z-50">
                 {languages.map((lang) => (
                   <SelectItem key={lang.code} value={lang.code}>
                     {lang.nativeName}
@@ -210,7 +224,7 @@ const InstantTranslation = () => {
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-white/95 backdrop-blur-md border border-white/20 max-h-64 z-50">
                 {languages.map((lang) => (
                   <SelectItem key={lang.code} value={lang.code}>
                     {lang.nativeName}

@@ -1,0 +1,58 @@
+
+{
+  "app": {
+    "title": "Bewuste AI",
+    "subtitle": "Wereldwijde wellness-app met AI-aangedreven functies"
+  },
+  "navigation": {
+    "therapy": "Therapie",
+    "wellness": "Welzijn",
+    "community": "Gemeenschap",
+    "globalFeatures": "Wereldwijde Functies"
+  },
+  "global": {
+    "weather": "Weer & Luchtkwaliteit",
+    "worldClock": "Wereldklok",
+    "localization": "Lokalisatie",
+    "language": "Taal",
+    "selectLanguage": "Taal Selecteren",
+    "currentSettings": "Huidige Instellingen",
+    "applyingChanges": "Wijzigingen toepassen...",
+    "languageChanged": "Taal Gewijzigd",
+    "interfaceLanguage": "Interfacetaal ingesteld op"
+  },
+  "weather": {
+    "title": "Weer & Luchtkwaliteit",
+    "description": "Realtime weer- en luchtkwaliteitsmonitoring",
+    "loading": "Weer laden...",
+    "error": "Kan weergegevens niet laden",
+    "locationUpdated": "Locatie Bijgewerkt",
+    "weatherRefreshed": "Weergegevens bijgewerkt voor uw huidige locatie",
+    "defaultLocation": "Standaardlocatie Gebruiken",
+    "couldntAccess": "Kon uw locatie niet bereiken, standaardweer wordt getoond",
+    "weatherUpdated": "Weer Bijgewerkt",
+    "latestInfo": "Laatste weerinformatie opgehaald"
+  },
+  "worldClock": {
+    "title": "Wereldklok",
+    "description": "Tijd bijhouden in verschillende zones voor wereldwijde wellness-planning",
+    "addCity": "Stad toevoegen",
+    "wellnessTips": "Wellness Tips",
+    "scheduleTitle": "Plan meditatie tijdens rustige uren",
+    "planMeetings": "Plan wereldwijde wellness-bijeenkomsten",
+    "liveTime": "Live tijd • Elke seconde bijgewerkt"
+  },
+  "localization": {
+    "title": "Lokalisatie",
+    "description": "Interfacetaal wijzigen voor betere toegankelijkheid",
+    "selectLanguage": "Taal Selecteren",
+    "currentSettings": "Huidige Instellingen",
+    "language": "Taal",
+    "region": "Regio",
+    "timeFormat": "Tijdformaat",
+    "dateFormat": "Datumformaat",
+    "autoDetected": "Automatisch gedetecteerd",
+    "24hour": "24-uurs",
+    "localPreference": "Lokale voorkeur"
+  }
+}

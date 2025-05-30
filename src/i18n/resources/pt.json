@@ -1,0 +1,58 @@
+
+{
+  "app": {
+    "title": "IA Consciente",
+    "subtitle": "Aplicação global de bem-estar com funcionalidades alimentadas por IA"
+  },
+  "navigation": {
+    "therapy": "Terapia",
+    "wellness": "Bem-estar",
+    "community": "Comunidade",
+    "globalFeatures": "Funcionalidades Globais"
+  },
+  "global": {
+    "weather": "Tempo e Qualidade do Ar",
+    "worldClock": "Relógio Mundial",
+    "localization": "Localização",
+    "language": "Idioma",
+    "selectLanguage": "Selecionar Idioma",
+    "currentSettings": "Configurações Atuais",
+    "applyingChanges": "Aplicando alterações...",
+    "languageChanged": "Idioma Alterado",
+    "interfaceLanguage": "Idioma da interface definido para"
+  },
+  "weather": {
+    "title": "Tempo e Qualidade do Ar",
+    "description": "Monitorização em tempo real do tempo e qualidade do ar",
+    "loading": "Carregando tempo...",
+    "error": "Não foi possível carregar dados meteorológicos",
+    "locationUpdated": "Localização Atualizada",
+    "weatherRefreshed": "Dados meteorológicos atualizados para a sua localização atual",
+    "defaultLocation": "Usando Localização Padrão",
+    "couldntAccess": "Não foi possível aceder à sua localização, mostrando tempo padrão",
+    "weatherUpdated": "Tempo Atualizado",
+    "latestInfo": "Informações meteorológicas mais recentes obtidas"
+  },
+  "worldClock": {
+    "title": "Relógio Mundial",
+    "description": "Acompanhar o tempo em diferentes fusos para agendamento global de bem-estar",
+    "addCity": "Adicionar cidade",
+    "wellnessTips": "Dicas de Bem-estar",
+    "scheduleTitle": "Agendar meditação durante horas tranquilas",
+    "planMeetings": "Planejar reuniões globais de bem-estar",
+    "liveTime": "Tempo em direto • Atualizado a cada segundo"
+  },
+  "localization": {
+    "title": "Localização",
+    "description": "Alterar o idioma da interface para melhor acessibilidade",
+    "selectLanguage": "Selecionar Idioma",
+    "currentSettings": "Configurações Atuais",
+    "language": "Idioma",
+    "region": "Região",
+    "timeFormat": "Formato de hora",
+    "dateFormat": "Formato de data",
+    "autoDetected": "Auto-detetado",
+    "24hour": "24 horas",
+    "localPreference": "Preferência local"
+  }
+}

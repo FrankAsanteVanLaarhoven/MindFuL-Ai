@@ -1,0 +1,58 @@
+
+{
+  "app": {
+    "title": "Mindful AI",
+    "subtitle": "Global wellness app with AI-powered features"
+  },
+  "navigation": {
+    "therapy": "Therapy",
+    "wellness": "Wellness",
+    "community": "Community",
+    "globalFeatures": "Global Features"
+  },
+  "global": {
+    "weather": "Weather & Air Quality",
+    "worldClock": "World Clock",
+    "localization": "Localisation",
+    "language": "Language",
+    "selectLanguage": "Select Language",
+    "currentSettings": "Current Settings",
+    "applyingChanges": "Applying changes...",
+    "languageChanged": "Language Changed",
+    "interfaceLanguage": "Interface language set to"
+  },
+  "weather": {
+    "title": "Weather & Air Quality",
+    "description": "Real-time weather and air quality monitoring",
+    "loading": "Loading weather...",
+    "error": "Unable to load weather data",
+    "locationUpdated": "Location Updated",
+    "weatherRefreshed": "Weather data refreshed for your current location",
+    "defaultLocation": "Using Default Location",
+    "couldntAccess": "Couldn't access your location, showing default weather",
+    "weatherUpdated": "Weather Updated",
+    "latestInfo": "Latest weather information retrieved"
+  },
+  "worldClock": {
+    "title": "World Clock",
+    "description": "Track time across different zones for global wellness scheduling",
+    "addCity": "Add city",
+    "wellnessTips": "Wellness Tips",
+    "scheduleTitle": "Schedule meditation during peaceful hours",
+    "planMeetings": "Plan global wellness meetings",
+    "liveTime": "Live time • Updated every second"
+  },
+  "localization": {
+    "title": "Localisation",
+    "description": "Change the interface language for better accessibility",
+    "selectLanguage": "Select Language",
+    "currentSettings": "Current Settings",
+    "language": "Language",
+    "region": "Region",
+    "timeFormat": "Time format",
+    "dateFormat": "Date format",
+    "autoDetected": "Auto-detected",
+    "24hour": "24-hour",
+    "localPreference": "Local preference"
+  }
+}

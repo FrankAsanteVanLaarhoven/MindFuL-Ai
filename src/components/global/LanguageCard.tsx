@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -7,6 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Globe, Settings, Search } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface Language {
   code: string;
@@ -20,23 +20,28 @@ interface Language {
 
 const languages: Language[] = [
   { code: 'en', name: 'English', nativeName: 'English', flag: '🇺🇸', country: 'United States', region: 'Americas', speakers: '1.5B' },
+  { code: 'en-GB', name: 'English (UK)', nativeName: 'English (UK)', flag: '🇬🇧', country: 'United Kingdom', region: 'Europe', speakers: '65M' },
   { code: 'es', name: 'Spanish', nativeName: 'Español', flag: '🇪🇸', country: 'Spain', region: 'Europe', speakers: '500M' },
   { code: 'fr', name: 'French', nativeName: 'Français', flag: '🇫🇷', country: 'France', region: 'Europe', speakers: '280M' },
   { code: 'de', name: 'German', nativeName: 'Deutsch', flag: '🇩🇪', country: 'Germany', region: 'Europe', speakers: '100M' },
   { code: 'zh', name: 'Chinese', nativeName: '中文', flag: '🇨🇳', country: 'China', region: 'Asia', speakers: '1.1B' },
   { code: 'ja', name: 'Japanese', nativeName: '日本語', flag: '🇯🇵', country: 'Japan', region: 'Asia', speakers: '125M' },
   { code: 'ar', name: 'Arabic', nativeName: 'العربية', flag: '🇸🇦', country: 'Saudi Arabia', region: 'Middle East', speakers: '400M' },
-  { code: 'pt', name: 'Portuguese', nativeName: 'Português', flag: '🇧🇷', country: 'Brazil', region: 'Americas', speakers: '260M' },
-  { code: 'ru', name: 'Russian', nativeName: 'Русский', flag: '🇷🇺', country: 'Russia', region: 'Europe/Asia', speakers: '260M' },
+  { code: 'nl', name: 'Dutch', nativeName: 'Nederlands', flag: '🇳🇱', country: 'Netherlands', region: 'Europe', speakers: '24M' },
   { code: 'hi', name: 'Hindi', nativeName: 'हिन्दी', flag: '🇮🇳', country: 'India', region: 'Asia', speakers: '600M' },
+  { code: 'ur', name: 'Urdu', nativeName: 'اردو', flag: '🇵🇰', country: 'Pakistan', region: 'Asia', speakers: '230M' },
+  { code: 'pt', name: 'Portuguese', nativeName: 'Português', flag: '🇧🇷', country: 'Brazil', region: 'Americas', speakers: '260M' },
   { code: 'it', name: 'Italian', nativeName: 'Italiano', flag: '🇮🇹', country: 'Italy', region: 'Europe', speakers: '65M' },
+  { code: 'el', name: 'Greek', nativeName: 'Ελληνικά', flag: '🇬🇷', country: 'Greece', region: 'Europe', speakers: '13M' },
+  { code: 'ru', name: 'Russian', nativeName: 'Русский', flag: '🇷🇺', country: 'Russia', region: 'Europe/Asia', speakers: '260M' },
   { code: 'ko', name: 'Korean', nativeName: '한국어', flag: '🇰🇷', country: 'South Korea', region: 'Asia', speakers: '77M' },
 ];
 
 const LanguageCard = () => {
   const [selectedLanguage, setSelectedLanguage] = useState<string>('en');
   const [searchTerm, setSearchTerm] = useState('');
-  const [favoriteLanguages, setFavoriteLanguages] = useState<string[]>(['en', 'es', 'fr']);
+  const [favoriteLanguages, setFavoriteLanguages] = useState<string[]>(['en', 'es', 'fr', 'de', 'zh']);
+  const { t, i18n } = useTranslation();
 
   const currentLanguage = languages.find(l => l.code === selectedLanguage);
   const filteredLanguages = languages.filter(lang => 
@@ -45,18 +50,24 @@ const LanguageCard = () => {
     lang.country.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleLanguageChange = (languageCode: string) => {
+  const handleLanguageChange = async (languageCode: string) => {
     setSelectedLanguage(languageCode);
     
-    // Update HTML direction for RTL languages
-    if (languageCode === 'ar') {
-      document.documentElement.dir = 'rtl';
-    } else {
-      document.documentElement.dir = 'ltr';
-    }
+    try {
+      await i18n.changeLanguage(languageCode);
+      
+      // Update HTML direction for RTL languages
+      if (['ar', 'ur'].includes(languageCode)) {
+        document.documentElement.dir = 'rtl';
+      } else {
+        document.documentElement.dir = 'ltr';
+      }
 
-    // Save to localStorage
-    localStorage.setItem('preferredLanguage', languageCode);
+      // Save to localStorage
+      localStorage.setItem('preferredLanguage', languageCode);
+    } catch (error) {
+      console.error('Language change failed:', error);
+    }
   };
 
   const toggleFavorite = (languageCode: string) => {
@@ -100,7 +111,7 @@ const LanguageCard = () => {
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2 text-blue-900 text-xl font-bold">
             <Globe className="w-6 h-6 animate-spin" style={{ animationDuration: '8s' }} />
-            Language
+            {t('global.language')}
           </CardTitle>
           <Dialog>
             <DialogTrigger asChild>
