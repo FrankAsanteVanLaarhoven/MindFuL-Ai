@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useRef, useEffect } from 'react';
@@ -20,7 +19,7 @@ import { addBreathingSession } from '@/lib/breathing-storage';
 import { toast } from '@/hooks/use-toast';
 
 type BreathingTechnique = 'box' | '4-7-8' | 'triangle';
-type ExerciseMode = 'guided-2d' | 'realtime' | 'enhanced' | 'virtual-coach' | 'biofeedback' | 'multimodal' | 'mood-analysis';
+type ExerciseMode = 'guided-2d' | 'realtime' | 'enhanced' | 'virtual-coach' | 'biofeedback' | 'multimodal' | 'mood-analysis' | 'analytics';
 
 const Breathing = () => {
   const [selectedTechnique, setSelectedTechnique] = useState<BreathingTechnique>('box');
@@ -65,6 +64,7 @@ const Breathing = () => {
     }
   };
 
+  // Reordered modes from beginner to expert with analytics card added
   const modes = {
     'guided-2d': {
       name: 'Simple 2D Guide',
@@ -74,12 +74,28 @@ const Breathing = () => {
       level: 'Beginner',
       gradient: 'from-emerald-400 to-cyan-400'
     },
+    'realtime': {
+      name: 'Real-Time Detection',
+      description: 'AI analyzes your actual breathing patterns',
+      icon: '🎤',
+      component: RealTimeBreathingSphere,
+      level: 'Intermediate',
+      gradient: 'from-cyan-500 to-blue-500'
+    },
+    'enhanced': {
+      name: 'Enhanced Experience',
+      description: 'Immersive visuals with trails, rings, and dynamic colors',
+      icon: '✨',
+      component: EnhancedRealTimeBreathingSphere,
+      level: 'Intermediate',
+      gradient: 'from-pink-500 to-rose-500'
+    },
     'virtual-coach': {
       name: '3D Virtual Coach',
       description: 'AI coach with realistic breathing movements and voice guidance',
       icon: '🤖',
       component: VirtualCoach3D,
-      level: 'Expert',
+      level: 'Advanced',
       gradient: 'from-violet-500 to-purple-500'
     },
     'biofeedback': {
@@ -106,21 +122,13 @@ const Breathing = () => {
       level: 'Expert',
       gradient: 'from-orange-500 to-amber-500'
     },
-    realtime: {
-      name: 'Real-Time Detection',
-      description: 'AI analyzes your actual breathing patterns',
-      icon: '🎤',
-      component: RealTimeBreathingSphere,
-      level: 'Intermediate',
-      gradient: 'from-cyan-500 to-blue-500'
-    },
-    enhanced: {
-      name: 'Enhanced Experience',
-      description: 'Immersive visuals with trails, rings, and dynamic colors',
-      icon: '✨',
-      component: EnhancedRealTimeBreathingSphere,
-      level: 'Intermediate',
-      gradient: 'from-pink-500 to-rose-500'
+    'analytics': {
+      name: 'Progress & Analytics',
+      description: 'Track your breathing journey with detailed insights and achievements',
+      icon: '📊',
+      component: null, // Special case for analytics view
+      level: 'Info',
+      gradient: 'from-teal-500 to-green-500'
     }
   };
 
@@ -130,7 +138,7 @@ const Breathing = () => {
     triangle: { inhale: 4000, hold1: 4000, exhale: 4000, hold2: 0 }
   };
 
-  const SelectedComponent = modes[selectedMode].component;
+  const SelectedComponent = selectedMode === 'analytics' ? null : modes[selectedMode].component;
 
   const startExercise = () => {
     setIsActive(true);
@@ -212,10 +220,23 @@ const Breathing = () => {
     switch (level) {
       case 'Beginner': return 'bg-emerald-100/80 text-emerald-800 border-emerald-200';
       case 'Intermediate': return 'bg-amber-100/80 text-amber-800 border-amber-200';
+      case 'Advanced': return 'bg-orange-100/80 text-orange-800 border-orange-200';
       case 'Expert': return 'bg-rose-100/80 text-rose-800 border-rose-200';
+      case 'Info': return 'bg-teal-100/80 text-teal-800 border-teal-200';
       default: return 'bg-slate-100/80 text-slate-800 border-slate-200';
     }
   };
+
+  const renderAnalyticsView = () => (
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full p-6">
+      <div className="backdrop-blur-md bg-white/10 rounded-2xl border border-white/20">
+        <BreathingProgress />
+      </div>
+      <div className="backdrop-blur-md bg-white/10 rounded-2xl border border-white/20">
+        <BreathingAchievements />
+      </div>
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-800 relative overflow-hidden">
@@ -245,17 +266,7 @@ const Breathing = () => {
           </p>
         </div>
 
-        {/* Progress and Achievements Row */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="backdrop-blur-md bg-white/10 rounded-2xl border border-white/20">
-            <BreathingProgress />
-          </div>
-          <div className="backdrop-blur-md bg-white/10 rounded-2xl border border-white/20">
-            <BreathingAchievements />
-          </div>
-        </div>
-
-        {/* Experience Level Selection */}
+        {/* Experience Level Selection - Now includes analytics */}
         <Card className="backdrop-blur-md bg-white/10 border-white/20 shadow-2xl">
           <CardHeader className="text-center">
             <CardTitle className="text-3xl text-white mb-2">Choose Your Experience Level</CardTitle>
@@ -344,14 +355,18 @@ const Breathing = () => {
           </Card>
         )}
 
-        {/* Breathing Exercise Component - Enhanced container */}
-        <div className="backdrop-blur-md bg-white/5 rounded-2xl border border-white/20 shadow-2xl p-2" style={{ aspectRatio: '16/9', minHeight: '600px' }}>
-          <SelectedComponent
-            technique={selectedTechnique}
-            isActive={(selectedMode === 'guided-2d' || selectedMode === 'virtual-coach') ? isActive : undefined}
-            currentPhase={(selectedMode === 'guided-2d' || selectedMode === 'virtual-coach') ? currentPhase : undefined}
-            onSessionComplete={onSessionComplete}
-          />
+        {/* Breathing Exercise Component - Enhanced container with increased height */}
+        <div className="backdrop-blur-md bg-white/5 rounded-2xl border border-white/20 shadow-2xl p-2" style={{ aspectRatio: '16/9', minHeight: '800px' }}>
+          {selectedMode === 'analytics' ? renderAnalyticsView() : (
+            SelectedComponent && (
+              <SelectedComponent
+                technique={selectedTechnique}
+                isActive={(selectedMode === 'guided-2d' || selectedMode === 'virtual-coach') ? isActive : undefined}
+                currentPhase={(selectedMode === 'guided-2d' || selectedMode === 'virtual-coach') ? currentPhase : undefined}
+                onSessionComplete={onSessionComplete}
+              />
+            )
+          )}
         </div>
 
         {/* Guided Controls - Enhanced for guided modes */}
