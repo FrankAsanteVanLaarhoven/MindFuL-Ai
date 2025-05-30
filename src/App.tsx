@@ -16,6 +16,7 @@ import WellnessDashboard from "./pages/WellnessDashboard";
 import Community from "./pages/Community";
 import Teletherapy from "./pages/Teletherapy";
 import GlobalFeatures from "./pages/GlobalFeatures";
+import PersonalizedDashboard from "./pages/PersonalizedDashboard";
 import NotFound from "./pages/NotFound";
 
 // Initialize i18n
@@ -42,6 +43,7 @@ const App = () => (
             <Route path="/therapy-bot" element={<TherapyBot />} />
             <Route path="/wellness-dashboard" element={<WellnessDashboard />} />
             <Route path="/global-features" element={<GlobalFeatures />} />
+            <Route path="/personalized-dashboard" element={<PersonalizedDashboard />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

@@ -9,12 +9,12 @@ import {
   DropdownMenuSeparator,
   DropdownMenuLabel
 } from '@/components/ui/dropdown-menu';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Users, Settings, ChevronDown, Star, UserCircle, Eye } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Users, Settings, ChevronDown, Star, UserCircle, Eye, ExternalLink } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { UserProfile } from '../../types/UserSegmentation';
 import { USER_GROUPS } from '../../data/userGroups';
 import UserGroupSelection from '../onboarding/UserGroupSelection';
-import PersonalizedDashboard from './PersonalizedDashboard';
 
 interface PersonalizationDropdownProps {
   userProfile?: UserProfile;
@@ -26,11 +26,19 @@ const PersonalizationDropdown: React.FC<PersonalizationDropdownProps> = ({
   onGroupSelectionComplete 
 }) => {
   const [showGroupSelection, setShowGroupSelection] = useState(false);
-  const [showPersonalizedDashboard, setShowPersonalizedDashboard] = useState(false);
+  const navigate = useNavigate();
 
   const handleGroupSelection = (selectedGroups: string[], primaryGroup: string) => {
     onGroupSelectionComplete(selectedGroups, primaryGroup);
     setShowGroupSelection(false);
+  };
+
+  const handleViewDashboard = () => {
+    navigate('/wellness-dashboard');
+  };
+
+  const handleViewPersonalizedContent = () => {
+    navigate('/personalized-dashboard');
   };
 
   const primaryGroup = userProfile ? USER_GROUPS.find(g => g.id === userProfile.primaryGroup) : null;
@@ -79,10 +87,20 @@ const PersonalizationDropdown: React.FC<PersonalizationDropdownProps> = ({
               
               <DropdownMenuItem 
                 className="flex items-center gap-2 cursor-pointer hover:bg-blue-50"
-                onClick={() => setShowPersonalizedDashboard(true)}
+                onClick={handleViewDashboard}
               >
                 <Eye className="w-4 h-4 text-blue-500" />
-                View My Dashboard
+                View Wellness Dashboard
+                <ExternalLink className="w-3 h-3 ml-auto text-gray-400" />
+              </DropdownMenuItem>
+              
+              <DropdownMenuItem 
+                className="flex items-center gap-2 cursor-pointer hover:bg-purple-50"
+                onClick={handleViewPersonalizedContent}
+              >
+                <UserCircle className="w-4 h-4 text-purple-500" />
+                My Personalized Content
+                <ExternalLink className="w-3 h-3 ml-auto text-gray-400" />
               </DropdownMenuItem>
               
               <DropdownMenuItem 
@@ -137,17 +155,6 @@ const PersonalizationDropdown: React.FC<PersonalizationDropdownProps> = ({
           </div>
         </DialogContent>
       </Dialog>
-
-      {/* Personalized Dashboard Dialog */}
-      {userProfile && (
-        <Dialog open={showPersonalizedDashboard} onOpenChange={setShowPersonalizedDashboard}>
-          <DialogContent className="max-w-7xl max-h-[95vh] overflow-hidden p-0">
-            <div className="overflow-y-auto max-h-[95vh]">
-              <PersonalizedDashboard userProfile={userProfile} />
-            </div>
-          </DialogContent>
-        </Dialog>
-      )}
     </>
   );
 };
