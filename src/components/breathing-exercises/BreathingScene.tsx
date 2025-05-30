@@ -30,7 +30,7 @@ interface BreathingSceneProps {
 
 export default function BreathingScene({ phase }: BreathingSceneProps) {
   return (
-    <Canvas style={{ width: "100%", height: 300 }}>
+    <Canvas style={{ width: "100%", height: "100%" }}>
       <ambientLight />
       <pointLight position={[10, 10, 10]} />
       <BreathingCoach phase={phase} />

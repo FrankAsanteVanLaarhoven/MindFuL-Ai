@@ -134,40 +134,38 @@ export default function CameraMoodSentiment({ userId }: CameraMoodSentimentProps
 
   return (
     <Card className="bg-white/90 backdrop-blur-sm border-purple-200">
-      <CardHeader>
-        <CardTitle className="text-lg text-purple-800">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-lg text-purple-800 flex items-center gap-2">
           🎭 Mood & Sentiment Analysis
         </CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="space-y-3">
         <div role="region" aria-label="Camera and mic mood/sentiment detection">
-          <div style={{ position: "relative", width: 320, height: 240 }} className="mx-auto mb-4">
+          <div style={{ position: "relative", width: "100%", height: 400 }} className="mx-auto mb-3 bg-black rounded-lg overflow-hidden">
             <video
               ref={videoRef}
               autoPlay
               muted
               playsInline
-              width={320}
-              height={240}
+              style={{ width: "100%", height: "100%", objectFit: "cover" }}
               aria-label="Live camera feed"
               className="rounded-lg"
             />
             <canvas
               ref={canvasRef}
-              width={320}
-              height={240}
-              style={{ position: "absolute", top: 0, left: 0 }}
+              style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%" }}
               aria-hidden="true"
               className="rounded-lg"
             />
           </div>
           
-          <div className="flex gap-2 mb-4">
+          <div className="flex gap-2 mb-3 justify-center">
             <Button
               onClick={() => setFacingMode(facingMode === "user" ? "environment" : "user")}
               aria-label="Switch camera"
               variant="outline"
               size="sm"
+              className="text-xs px-3 py-1 h-7"
             >
               Switch Camera
             </Button>
@@ -177,20 +175,21 @@ export default function CameraMoodSentiment({ userId }: CameraMoodSentimentProps
               aria-label={listening ? "Stop listening" : "Start listening"}
               variant={listening ? "destructive" : "default"}
               size="sm"
+              className="text-xs px-3 py-1 h-7"
             >
               {listening ? "Stop Mic" : "Start Mic"}
             </Button>
           </div>
           
-          <div className="space-y-2">
-            <div role="status" aria-live="polite">
+          <div className="space-y-2 text-sm">
+            <div role="status" aria-live="polite" className="p-2 bg-gray-50 rounded">
               <strong>Face verdict:</strong> {verdict}
             </div>
-            <div aria-live="polite">
+            <div aria-live="polite" className="p-2 bg-gray-50 rounded">
               <strong>Speech transcript:</strong> {transcript}
             </div>
             {speechSentiment && (
-              <div aria-live="polite">
+              <div aria-live="polite" className="p-2 bg-gray-50 rounded">
                 <strong>Speech sentiment:</strong> {speechSentiment.sentiment} ({Math.round(speechSentiment.confidence * 100)}%)
               </div>
             )}
